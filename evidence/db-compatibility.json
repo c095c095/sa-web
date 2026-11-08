@@ -1,0 +1,1199 @@
+{
+  "started_at": "2026-11-08T11:03:52.643Z",
+  "scope": "Real MariaDB DB/driver compatibility integration only; not browser E2E and not full application acceptance",
+  "database": "sa_web_test_p1",
+  "historical_replays": [
+    {
+      "id": "TC-00",
+      "uc": "SCR-00",
+      "status": "PASS",
+      "steps": [
+        {
+          "query": "Q00.1",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q00.1",
+          "status": "PASS",
+          "actual_row_count": 0
+        }
+      ]
+    },
+    {
+      "id": "TC-01",
+      "uc": "UC-01",
+      "status": "PASS",
+      "steps": [
+        {
+          "query": "Q01.1",
+          "status": "PASS",
+          "actual_row_count": 0
+        },
+        {
+          "query": "Q01.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q01.1",
+          "status": "PASS",
+          "actual_row_count": 1
+        }
+      ]
+    },
+    {
+      "id": "TC-02",
+      "uc": "UC-02",
+      "status": "PASS",
+      "steps": [
+        {
+          "query": "Q02.1",
+          "status": "PASS",
+          "actual_row_count": 2
+        },
+        {
+          "query": "Q02.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q02.5",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q02.6",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q02.4",
+          "status": "PASS",
+          "actual_row_count": 6
+        },
+        {
+          "query": "Q02.10",
+          "status": "PASS",
+          "actual_row_count": 1
+        }
+      ]
+    },
+    {
+      "id": "TC-03",
+      "uc": "UC-03",
+      "status": "PASS",
+      "steps": [
+        {
+          "query": "Q03.1",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q03.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q03.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q03.3",
+          "status": "PASS",
+          "actual_row_count": 0
+        }
+      ]
+    },
+    {
+      "id": "TC-04",
+      "uc": "UC-04",
+      "status": "PASS",
+      "steps": [
+        {
+          "query": "Q04.1",
+          "status": "PASS",
+          "actual_row_count": 2
+        },
+        {
+          "query": "Q04.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.4",
+          "status": "PASS",
+          "actual_row_count": 1
+        }
+      ]
+    },
+    {
+      "id": "TC-05",
+      "uc": "UC-05",
+      "status": "PASS",
+      "steps": [
+        {
+          "query": "Q05.1",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q05.2",
+          "status": "PASS",
+          "actual_row_count": 2
+        },
+        {
+          "query": "Q05.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q05.4",
+          "status": "PASS",
+          "actual_row_count": 0
+        }
+      ]
+    },
+    {
+      "id": "TC-06",
+      "uc": "UC-06",
+      "status": "PASS",
+      "steps": [
+        {
+          "query": "Q06.1",
+          "status": "PASS",
+          "actual_row_count": 0
+        },
+        {
+          "query": "Q01.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q02.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q06.1",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q06.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q06.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q07.1",
+          "status": "PASS",
+          "actual_row_count": 1
+        }
+      ]
+    },
+    {
+      "id": "TC-07",
+      "uc": "UC-07",
+      "status": "PASS",
+      "steps": [
+        {
+          "query": "Q06.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q07.1",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q07.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q07.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q07.3",
+          "status": "PASS",
+          "actual_row_count": 0
+        }
+      ]
+    },
+    {
+      "id": "TC-08",
+      "uc": "UC-08",
+      "status": "PASS",
+      "steps": [
+        {
+          "query": "Q06.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q07.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q08.1",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q08.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q08.2",
+          "status": "PASS",
+          "actual_row_count": 0
+        }
+      ]
+    },
+    {
+      "id": "TC-09",
+      "uc": "UC-09",
+      "status": "PASS",
+      "steps": [
+        {
+          "query": "Q09.1",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q09.2",
+          "status": "PASS",
+          "actual_row_count": 0
+        },
+        {
+          "query": "Q09.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q09.4",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q09.5",
+          "status": "PASS",
+          "actual_row_count": 1
+        }
+      ]
+    },
+    {
+      "id": "TC-10",
+      "uc": "UC-10",
+      "status": "PASS",
+      "steps": [
+        {
+          "query": "Q10.1",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q10.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        }
+      ]
+    },
+    {
+      "id": "TC-11",
+      "uc": "UC-11",
+      "status": "PASS",
+      "steps": [
+        {
+          "query": "Q11.1",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q11.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q11.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        }
+      ]
+    },
+    {
+      "id": "TC-12",
+      "uc": "UC-12",
+      "status": "PASS",
+      "steps": [
+        {
+          "query": "Q12.1",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q12.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q12.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q12.1",
+          "status": "PASS",
+          "actual_row_count": 0
+        }
+      ]
+    },
+    {
+      "id": "TC-13",
+      "uc": "UC-13",
+      "status": "PASS",
+      "steps": [
+        {
+          "query": "Q13.1",
+          "status": "PASS",
+          "actual_row_count": 2
+        },
+        {
+          "query": "Q13.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q13.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q13.4",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q13.5",
+          "status": "PASS",
+          "actual_row_count": 1
+        }
+      ]
+    },
+    {
+      "id": "TC-14",
+      "uc": "UC-14",
+      "status": "PASS",
+      "steps": [
+        {
+          "query": "Q14.1",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q14.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q14.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        }
+      ]
+    },
+    {
+      "id": "TC-15",
+      "uc": "UC-15",
+      "status": "PASS",
+      "steps": [
+        {
+          "query": "Q15.1",
+          "status": "PASS",
+          "actual_row_count": 2
+        },
+        {
+          "query": "Q15.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q15.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q15.3",
+          "status": "PASS",
+          "actual_row_count": 0
+        }
+      ]
+    },
+    {
+      "id": "TC-16",
+      "uc": "UC-16",
+      "status": "PASS",
+      "steps": [
+        {
+          "query": "Q16.1",
+          "status": "PASS",
+          "actual_row_count": 0
+        },
+        {
+          "query": "Q15.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q15.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q03.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q03.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q03.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.4",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.4",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.4",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.4",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q16.1",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q16.2",
+          "status": "PASS",
+          "actual_row_count": 10
+        },
+        {
+          "query": "Q16.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q16.4",
+          "status": "PASS",
+          "actual_row_count": 1
+        }
+      ]
+    },
+    {
+      "id": "TC-17",
+      "uc": "UC-17",
+      "status": "PASS",
+      "steps": [
+        {
+          "query": "Q17.1",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q17.2",
+          "status": "PASS",
+          "actual_row_count": 5
+        },
+        {
+          "query": "Q17.5",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q15.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q15.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q03.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q03.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q03.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.4",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.4",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.4",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q04.4",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q17.5",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q17.6",
+          "status": "PASS",
+          "actual_row_count": 5
+        },
+        {
+          "query": "Q17.7",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q17.8",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q17.9",
+          "status": "PASS",
+          "actual_row_count": 1
+        }
+      ]
+    },
+    {
+      "id": "TC-18",
+      "uc": "UC-18",
+      "status": "PASS",
+      "steps": [
+        {
+          "query": "Q18.1",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q18.2",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q18.3",
+          "status": "PASS",
+          "actual_row_count": 1
+        }
+      ]
+    },
+    {
+      "id": "TC-19",
+      "uc": "UC-17",
+      "status": "PASS",
+      "steps": [
+        {
+          "query": "Q17.10",
+          "status": "PASS",
+          "actual_row_count": 1
+        },
+        {
+          "query": "Q17.11",
+          "status": "PASS",
+          "actual_row_count": 1
+        }
+      ]
+    },
+    {
+      "id": "TC-20",
+      "uc": "UC-10",
+      "status": "PASS",
+      "steps": [
+        {
+          "query": "Q10.1",
+          "status": "PASS",
+          "actual_row_count": 0
+        }
+      ]
+    }
+  ],
+  "query_compile": [
+    {
+      "id": "Q01.1",
+      "status": "PASS"
+    },
+    {
+      "id": "Q01.2",
+      "status": "PASS"
+    },
+    {
+      "id": "Q02.1",
+      "status": "PASS"
+    },
+    {
+      "id": "Q02.2",
+      "status": "PASS"
+    },
+    {
+      "id": "Q02.3",
+      "status": "PASS"
+    },
+    {
+      "id": "Q02.4",
+      "status": "PASS"
+    },
+    {
+      "id": "Q02.5",
+      "status": "PASS"
+    },
+    {
+      "id": "Q02.6",
+      "status": "PASS"
+    },
+    {
+      "id": "Q02.7",
+      "status": "PASS"
+    },
+    {
+      "id": "Q02.8",
+      "status": "PASS"
+    },
+    {
+      "id": "Q02.9",
+      "status": "PASS"
+    },
+    {
+      "id": "Q02.10",
+      "status": "PASS"
+    },
+    {
+      "id": "Q03.1",
+      "status": "PASS"
+    },
+    {
+      "id": "Q03.2",
+      "status": "PASS"
+    },
+    {
+      "id": "Q03.3",
+      "status": "PASS"
+    },
+    {
+      "id": "Q04.1",
+      "status": "PASS"
+    },
+    {
+      "id": "Q04.2",
+      "status": "PASS"
+    },
+    {
+      "id": "Q04.3",
+      "status": "PASS"
+    },
+    {
+      "id": "Q04.4",
+      "status": "PASS"
+    },
+    {
+      "id": "Q05.1",
+      "status": "PASS"
+    },
+    {
+      "id": "Q05.2",
+      "status": "PASS"
+    },
+    {
+      "id": "Q05.3",
+      "status": "PASS"
+    },
+    {
+      "id": "Q05.4",
+      "status": "PASS"
+    },
+    {
+      "id": "Q06.1",
+      "status": "PASS"
+    },
+    {
+      "id": "Q06.2",
+      "status": "PASS"
+    },
+    {
+      "id": "Q06.3",
+      "status": "PASS"
+    },
+    {
+      "id": "Q06.4",
+      "status": "PASS"
+    },
+    {
+      "id": "Q06.5",
+      "status": "PASS"
+    },
+    {
+      "id": "Q06.6",
+      "status": "PASS"
+    },
+    {
+      "id": "Q07.1",
+      "status": "PASS"
+    },
+    {
+      "id": "Q07.2",
+      "status": "PASS"
+    },
+    {
+      "id": "Q07.3",
+      "status": "PASS"
+    },
+    {
+      "id": "Q08.1",
+      "status": "PASS"
+    },
+    {
+      "id": "Q08.2",
+      "status": "PASS"
+    },
+    {
+      "id": "Q09.1",
+      "status": "PASS"
+    },
+    {
+      "id": "Q09.2",
+      "status": "PASS"
+    },
+    {
+      "id": "Q09.3",
+      "status": "PASS"
+    },
+    {
+      "id": "Q09.4",
+      "status": "PASS"
+    },
+    {
+      "id": "Q09.5",
+      "status": "PASS"
+    },
+    {
+      "id": "Q10.1",
+      "status": "PASS"
+    },
+    {
+      "id": "Q10.2",
+      "status": "PASS"
+    },
+    {
+      "id": "Q11.1",
+      "status": "PASS"
+    },
+    {
+      "id": "Q11.2",
+      "status": "PASS"
+    },
+    {
+      "id": "Q11.3",
+      "status": "PASS"
+    },
+    {
+      "id": "Q12.1",
+      "status": "PASS"
+    },
+    {
+      "id": "Q12.2",
+      "status": "PASS"
+    },
+    {
+      "id": "Q12.3",
+      "status": "PASS"
+    },
+    {
+      "id": "Q13.1",
+      "status": "PASS"
+    },
+    {
+      "id": "Q13.2",
+      "status": "PASS"
+    },
+    {
+      "id": "Q13.3",
+      "status": "PASS"
+    },
+    {
+      "id": "Q13.4",
+      "status": "PASS"
+    },
+    {
+      "id": "Q13.5",
+      "status": "PASS"
+    },
+    {
+      "id": "Q14.1",
+      "status": "PASS"
+    },
+    {
+      "id": "Q14.2",
+      "status": "PASS"
+    },
+    {
+      "id": "Q14.3",
+      "status": "PASS"
+    },
+    {
+      "id": "Q15.1",
+      "status": "PASS"
+    },
+    {
+      "id": "Q15.2",
+      "status": "PASS"
+    },
+    {
+      "id": "Q15.3",
+      "status": "PASS"
+    },
+    {
+      "id": "Q16.1",
+      "status": "PASS"
+    },
+    {
+      "id": "Q16.2",
+      "status": "PASS"
+    },
+    {
+      "id": "Q16.3",
+      "status": "PASS"
+    },
+    {
+      "id": "Q16.4",
+      "status": "PASS"
+    },
+    {
+      "id": "Q17.1",
+      "status": "PASS"
+    },
+    {
+      "id": "Q17.2",
+      "status": "PASS"
+    },
+    {
+      "id": "Q17.3",
+      "status": "PASS"
+    },
+    {
+      "id": "Q17.4",
+      "status": "PASS"
+    },
+    {
+      "id": "Q17.5",
+      "status": "PASS"
+    },
+    {
+      "id": "Q17.6",
+      "status": "PASS"
+    },
+    {
+      "id": "Q17.7",
+      "status": "PASS"
+    },
+    {
+      "id": "Q17.8",
+      "status": "PASS"
+    },
+    {
+      "id": "Q17.9",
+      "status": "PASS"
+    },
+    {
+      "id": "Q17.10",
+      "status": "PASS"
+    },
+    {
+      "id": "Q17.11",
+      "status": "PASS"
+    },
+    {
+      "id": "Q18.1",
+      "status": "PASS"
+    },
+    {
+      "id": "Q18.2",
+      "status": "PASS"
+    },
+    {
+      "id": "Q18.3",
+      "status": "PASS"
+    },
+    {
+      "id": "Q00.1",
+      "status": "PASS"
+    }
+  ],
+  "constraints": [
+    {
+      "name": "Q02 edit/delete alternatives and cascading files",
+      "status": "PASS"
+    },
+    {
+      "name": "Q06 new defect after recheck and return to OPEN",
+      "status": "PASS"
+    },
+    {
+      "name": "Q17 evidence read and latest report ordering",
+      "status": "PASS"
+    },
+    {
+      "name": "Foreign key actually enforced",
+      "status": "PASS"
+    },
+    {
+      "name": "Unique project and house",
+      "status": "PASS"
+    },
+    {
+      "name": "One active round per unit and type",
+      "status": "PASS"
+    },
+    {
+      "name": "Multiple closed rounds allowed",
+      "status": "PASS"
+    },
+    {
+      "name": "One signature per home",
+      "status": "PASS"
+    },
+    {
+      "name": "Other files may share a defect",
+      "status": "PASS"
+    },
+    {
+      "name": "File exactly one owner",
+      "status": "PASS"
+    },
+    {
+      "name": "File usage must match owner",
+      "status": "PASS"
+    },
+    {
+      "name": "Technician needs a craft",
+      "status": "PASS"
+    },
+    {
+      "name": "Co-inspector must differ",
+      "status": "PASS"
+    },
+    {
+      "name": "Closed QC needs XOR certification",
+      "status": "PASS"
+    },
+    {
+      "name": "Closed QC rejects NULL recheck result (AM-06)",
+      "status": "PASS"
+    },
+    {
+      "name": "Completed request rejects NULL acceptance (AM-06)",
+      "status": "PASS"
+    },
+    {
+      "name": "Handover timestamp matches state",
+      "status": "PASS"
+    },
+    {
+      "name": "Invalid enum rejected in strict mode",
+      "status": "PASS"
+    },
+    {
+      "name": "Token is case-sensitive",
+      "status": "PASS"
+    },
+    {
+      "name": "Parameterized injection is data",
+      "status": "PASS"
+    },
+    {
+      "name": "Unicode Thai round trip",
+      "status": "PASS"
+    },
+    {
+      "name": "Finish marker persists and blocks post-finish edits (AM-01)",
+      "status": "PASS"
+    },
+    {
+      "name": "Craft guard blocks direct cross-category claim (AM-02)",
+      "status": "PASS"
+    },
+    {
+      "name": "Customer link cannot address another home defect (AM-03)",
+      "status": "PASS"
+    },
+    {
+      "name": "Sequence stops instead of truncating ID width",
+      "status": "PASS"
+    }
+  ],
+  "concurrency": [
+    {
+      "name": "Two simultaneous claims, one succeeds",
+      "status": "PASS"
+    },
+    {
+      "name": "30 concurrent sequence values remain unique",
+      "status": "PASS"
+    }
+  ],
+  "version": "10.11.16-MariaDB",
+  "historical_replay_coverage": {
+    "executed": 69,
+    "not_in_historical_replays": [
+      "Q02.7",
+      "Q02.8",
+      "Q02.9",
+      "Q06.4",
+      "Q06.5",
+      "Q06.6",
+      "Q17.3",
+      "Q17.4"
+    ]
+  },
+  "finished_at": "2026-11-08T11:04:01.116Z",
+  "query_runtime_coverage": {
+    "executed": 77,
+    "total": 77,
+    "not_executed": []
+  },
+  "passed": 125,
+  "failed": 0,
+  "status": "PASS"
+}

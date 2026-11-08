@@ -1,0 +1,393 @@
+{
+  "status": "P1 candidate, pending G1",
+  "target": "MariaDB 10.11.16",
+  "source_sha256": "3c17f8bbc1bf42c8d55489aad2a3e9c0644cf86b92215103e057077dc17eb2c7",
+  "note": "77 original IDs/parameters preserved. Q02.8 DELETE USING becomes MariaDB joined DELETE. INSERT RETURNING is checked on this MariaDB target, not claimed portable to Oracle MySQL.",
+  "rows": [
+    {
+      "query_id": "Q01.1",
+      "uc_id": "UC-01",
+      "sql": "SELECT unit_id\nFROM property_unit\nWHERE project_name = :project_name\n  AND house_no = :house_no;"
+    },
+    {
+      "query_id": "Q01.2",
+      "uc_id": "UC-01",
+      "sql": "INSERT INTO property_unit (project_name, house_no, unit_type, registered_by)\nVALUES (:project_name, :house_no, :unit_type, :sales_id)\nRETURNING unit_id, status;"
+    },
+    {
+      "query_id": "Q02.1",
+      "uc_id": "UC-02",
+      "sql": "SELECT unit_id, project_name, house_no, unit_type\nFROM property_unit\nWHERE status = 'IN_QC'\nORDER BY created_at;"
+    },
+    {
+      "query_id": "Q02.2",
+      "uc_id": "UC-02",
+      "sql": "SELECT round_id, status\nFROM inspection_round\nWHERE unit_id = :unit_id\n  AND round_type = 'QC_INTERNAL'\n  AND status <> 'CLOSED';"
+    },
+    {
+      "query_id": "Q02.3",
+      "uc_id": "UC-02",
+      "sql": "INSERT INTO inspection_round (unit_id, round_type, inspector_id)\nVALUES (:unit_id, 'QC_INTERNAL', :inspector_id)\nRETURNING round_id, status;"
+    },
+    {
+      "query_id": "Q02.4",
+      "uc_id": "UC-02",
+      "sql": "SELECT defect_id, category, location_pin, description, status\nFROM defect\nWHERE round_id = :round_id\nORDER BY created_at;"
+    },
+    {
+      "query_id": "Q02.5",
+      "uc_id": "UC-02",
+      "sql": "INSERT INTO defect (round_id, category, location_pin, description,\n                    status, reported_by_type, reported_by_employee)\nVALUES (:round_id, :category, :location_pin, :description,\n        'WAITING_ASSIGN', 'INSPECTOR', :inspector_id)\nRETURNING defect_id;"
+    },
+    {
+      "query_id": "Q02.6",
+      "uc_id": "UC-02",
+      "sql": "INSERT INTO file (defect_id, file_url, file_usage)\nVALUES (:defect_id, :file_url, 'BEFORE_FIX')\nRETURNING file_id;"
+    },
+    {
+      "query_id": "Q02.7",
+      "uc_id": "UC-02",
+      "sql": "UPDATE defect\nSET category = :category,\n    location_pin = :location_pin,\n    description = :description\nWHERE defect_id = :defect_id\n  AND status = 'WAITING_ASSIGN';"
+    },
+    {
+      "query_id": "Q02.8",
+      "uc_id": "UC-02",
+      "sql": "DELETE f FROM file f JOIN defect d ON f.defect_id = d.defect_id\nWHERE f.defect_id = d.defect_id\n  AND f.file_id = :file_id\n  AND f.file_usage = 'BEFORE_FIX'\n  AND d.status = 'WAITING_ASSIGN';"
+    },
+    {
+      "query_id": "Q02.9",
+      "uc_id": "UC-02",
+      "sql": "DELETE FROM defect\nWHERE defect_id = :defect_id\n  AND status = 'WAITING_ASSIGN';"
+    },
+    {
+      "query_id": "Q02.10",
+      "uc_id": "UC-02",
+      "sql": "SELECT count(*) AS defect_count\nFROM defect\nWHERE round_id = :round_id;"
+    },
+    {
+      "query_id": "Q03.1",
+      "uc_id": "UC-03",
+      "sql": "SELECT d.defect_id, u.project_name, u.house_no, d.category,\n       d.location_pin, d.description, d.target_date\nFROM defect d\nJOIN inspection_round r ON r.round_id = d.round_id\nJOIN property_unit u ON u.unit_id = r.unit_id\nJOIN employee e ON e.employee_id = :technician_id\nWHERE d.status = 'WAITING_ASSIGN'\n  AND (e.craft_category IS NULL OR d.category = e.craft_category)\nORDER BY d.created_at;"
+    },
+    {
+      "query_id": "Q03.2",
+      "uc_id": "UC-03",
+      "sql": "SELECT file_id, file_url\nFROM file\nWHERE defect_id = :defect_id\n  AND file_usage = 'BEFORE_FIX';"
+    },
+    {
+      "query_id": "Q03.3",
+      "uc_id": "UC-03",
+      "sql": "UPDATE defect\nSET technician_id = :technician_id,\n    status = 'ASSIGNED',\n    assigned_date = now()\nWHERE defect_id = :defect_id\n  AND status = 'WAITING_ASSIGN';"
+    },
+    {
+      "query_id": "Q04.1",
+      "uc_id": "UC-04",
+      "sql": "SELECT defect_id, category, location_pin, description,\n       status, rework_count, target_date\nFROM defect\nWHERE technician_id = :technician_id\n  AND status IN ('ASSIGNED', 'REWORK')\nORDER BY assigned_date;"
+    },
+    {
+      "query_id": "Q04.2",
+      "uc_id": "UC-04",
+      "sql": "INSERT INTO file (defect_id, file_url, file_usage)\nVALUES (:defect_id, :file_url, 'AFTER_FIX')\nRETURNING file_id;"
+    },
+    {
+      "query_id": "Q04.3",
+      "uc_id": "UC-04",
+      "sql": "SELECT count(*) AS after_photo_count\nFROM file f\nJOIN defect d ON d.defect_id = f.defect_id\nWHERE f.defect_id = :defect_id\n  AND f.file_usage = 'AFTER_FIX'\n  AND f.uploaded_at > COALESCE(d.completed_date, '-infinity');"
+    },
+    {
+      "query_id": "Q04.4",
+      "uc_id": "UC-04",
+      "sql": "UPDATE defect\nSET status = 'FIXED',\n    completed_date = now()\nWHERE defect_id = :defect_id\n  AND technician_id = :technician_id\n  AND status IN ('ASSIGNED', 'REWORK');"
+    },
+    {
+      "query_id": "Q05.1",
+      "uc_id": "UC-05",
+      "sql": "SELECT d.defect_id, r.unit_id, d.category, d.location_pin,\n       d.description, d.rework_count, d.completed_date\nFROM defect d\nJOIN inspection_round r ON r.round_id = d.round_id\nWHERE r.round_type = 'QC_INTERNAL'\n  AND r.status = 'OPEN'\n  AND d.status = 'FIXED'\nORDER BY d.completed_date;"
+    },
+    {
+      "query_id": "Q05.2",
+      "uc_id": "UC-05",
+      "sql": "SELECT file_id, file_usage, file_url\nFROM file\nWHERE defect_id = :defect_id\n  AND file_usage IN ('BEFORE_FIX', 'AFTER_FIX')\nORDER BY file_usage, uploaded_at;"
+    },
+    {
+      "query_id": "Q05.3",
+      "uc_id": "UC-05",
+      "sql": "UPDATE defect\nSET status = 'VERIFIED',\n    verified_by = :inspector_id,\n    verified_at = now()\nWHERE defect_id = :defect_id\n  AND status = 'FIXED';"
+    },
+    {
+      "query_id": "Q05.4",
+      "uc_id": "UC-05",
+      "sql": "UPDATE defect\nSET status = 'REWORK',\n    rework_count = rework_count + 1\nWHERE defect_id = :defect_id\n  AND status = 'FIXED';"
+    },
+    {
+      "query_id": "Q06.1",
+      "uc_id": "UC-06",
+      "sql": "SELECT r.round_id, r.unit_id, r.started_at\nFROM inspection_round r\nWHERE r.round_type = 'QC_INTERNAL'\n  AND r.status = 'OPEN'\n  AND NOT EXISTS (SELECT 1 FROM defect d\n                  WHERE d.round_id = r.round_id\n                    AND d.status <> 'VERIFIED');"
+    },
+    {
+      "query_id": "Q06.2",
+      "uc_id": "UC-06",
+      "sql": "UPDATE inspection_round\nSET recheck_date = :recheck_date,\n    recheck_result = NULL,\n    status = 'RECHECK_SCHEDULED'\nWHERE round_id = :round_id\n  AND status = 'OPEN'\n  AND NOT EXISTS (SELECT 1 FROM defect\n                  WHERE round_id = :round_id\n                    AND status <> 'VERIFIED');"
+    },
+    {
+      "query_id": "Q06.3",
+      "uc_id": "UC-06",
+      "sql": "UPDATE inspection_round\nSET recheck_result = :recheck_result\nWHERE round_id = :round_id\n  AND status = 'RECHECK_SCHEDULED';"
+    },
+    {
+      "query_id": "Q06.4",
+      "uc_id": "UC-06",
+      "sql": "INSERT INTO defect (round_id, category, location_pin, description,\n                    status, reported_by_type, reported_by_employee)\nVALUES (:round_id, :category, :location_pin, :description,\n        'WAITING_ASSIGN', 'INSPECTOR', :inspector_id)\nRETURNING defect_id;"
+    },
+    {
+      "query_id": "Q06.5",
+      "uc_id": "UC-06",
+      "sql": "INSERT INTO file (defect_id, file_url, file_usage)\nVALUES (:defect_id, :file_url, 'BEFORE_FIX')\nRETURNING file_id;"
+    },
+    {
+      "query_id": "Q06.6",
+      "uc_id": "UC-06",
+      "sql": "UPDATE inspection_round\nSET status = 'OPEN',\n    recheck_result = NULL,\n    recheck_date = NULL\nWHERE round_id = :round_id\n  AND status = 'RECHECK_SCHEDULED'\n  AND recheck_result = 'DEFECT_FOUND';"
+    },
+    {
+      "query_id": "Q07.1",
+      "uc_id": "UC-07",
+      "sql": "SELECT r.round_id, r.unit_id, r.inspector_id, r.recheck_date\nFROM inspection_round r\nWHERE r.round_type = 'QC_INTERNAL'\n  AND r.status = 'RECHECK_SCHEDULED'\n  AND r.recheck_result = 'NO_DEFECT'\n  AND NOT EXISTS (SELECT 1 FROM defect d\n                  WHERE d.round_id = r.round_id\n                    AND d.status <> 'VERIFIED');"
+    },
+    {
+      "query_id": "Q07.2",
+      "uc_id": "UC-07",
+      "sql": "SELECT employee_id, full_name\nFROM employee\nWHERE role = 'INSPECTOR'\n  AND is_active = TRUE\n  AND employee_id <> :inspector_id\nORDER BY full_name;"
+    },
+    {
+      "query_id": "Q07.3",
+      "uc_id": "UC-07",
+      "sql": "UPDATE inspection_round\nSET status = 'CLOSED',\n    co_inspector_id = :co_inspector_id,\n    is_single_certify = :is_single_certify,\n    closed_at = now()\nWHERE round_id = :round_id\n  AND status = 'RECHECK_SCHEDULED'\n  AND recheck_result = 'NO_DEFECT';"
+    },
+    {
+      "query_id": "Q08.1",
+      "uc_id": "UC-08",
+      "sql": "SELECT u.unit_id, u.project_name, u.house_no, r.round_id, r.closed_at\nFROM property_unit u\nJOIN inspection_round r ON r.unit_id = u.unit_id\nWHERE u.status = 'IN_QC'\n  AND r.round_type = 'QC_INTERNAL'\n  AND r.status = 'CLOSED'\nORDER BY r.closed_at;"
+    },
+    {
+      "query_id": "Q08.2",
+      "uc_id": "UC-08",
+      "sql": "UPDATE property_unit\nSET status = 'READY_TO_SELL'\nWHERE unit_id = :unit_id\n  AND status = 'IN_QC'\n  AND EXISTS (SELECT 1 FROM inspection_round r\n              WHERE r.unit_id = :unit_id\n                AND r.round_type = 'QC_INTERNAL'\n                AND r.status = 'CLOSED');"
+    },
+    {
+      "query_id": "Q09.1",
+      "uc_id": "UC-09",
+      "sql": "SELECT unit_id, project_name, house_no, unit_type\nFROM property_unit\nWHERE status = 'READY_TO_SELL'\nORDER BY project_name, house_no;"
+    },
+    {
+      "query_id": "Q09.2",
+      "uc_id": "UC-09",
+      "sql": "SELECT customer_id, full_name, phone_number, email\nFROM customer\nWHERE id_card_no = :id_card_no;"
+    },
+    {
+      "query_id": "Q09.3",
+      "uc_id": "UC-09",
+      "sql": "INSERT INTO customer (id_card_no, full_name, phone_number, email)\nVALUES (:id_card_no, :full_name, :phone_number, :email)\nRETURNING customer_id;"
+    },
+    {
+      "query_id": "Q09.4",
+      "uc_id": "UC-09",
+      "sql": "UPDATE property_unit\nSET customer_id = :customer_id,\n    status = 'CONTRACTED'\nWHERE unit_id = :unit_id\n  AND status = 'READY_TO_SELL';"
+    },
+    {
+      "query_id": "Q09.5",
+      "uc_id": "UC-09",
+      "sql": "INSERT INTO access_link (unit_id, customer_id, token, expires_at, created_by)\nVALUES (:unit_id, :customer_id, :token, :expires_at, :sales_id)\nRETURNING link_id, token, expires_at;"
+    },
+    {
+      "query_id": "Q10.1",
+      "uc_id": "UC-10",
+      "sql": "SELECT l.link_id, l.unit_id, l.customer_id,\n       u.project_name, u.house_no, u.status\nFROM access_link l\nJOIN property_unit u ON u.unit_id = l.unit_id\nWHERE l.token = :token\n  AND l.expires_at > now();"
+    },
+    {
+      "query_id": "Q10.2",
+      "uc_id": "UC-10",
+      "sql": "UPDATE property_unit\nSET status = 'READY_HANDOVER'\nWHERE unit_id = :unit_id\n  AND status = 'CONTRACTED';"
+    },
+    {
+      "query_id": "Q11.1",
+      "uc_id": "UC-11",
+      "sql": "SELECT l.unit_id, l.customer_id,\n       u.project_name, u.house_no, u.status\nFROM access_link l\nJOIN property_unit u ON u.unit_id = l.unit_id\nWHERE l.token = :token\n  AND l.expires_at > now()\n  AND u.status = 'CONTRACTED';"
+    },
+    {
+      "query_id": "Q11.2",
+      "uc_id": "UC-11",
+      "sql": "INSERT INTO inspection_request (unit_id, customer_id, preferred_date)\nVALUES (:unit_id, :customer_id, :preferred_date)\nRETURNING request_id, status;"
+    },
+    {
+      "query_id": "Q11.3",
+      "uc_id": "UC-11",
+      "sql": "UPDATE property_unit\nSET status = 'WAITING_INSPECTION'\nWHERE unit_id = :unit_id\n  AND status = 'CONTRACTED';"
+    },
+    {
+      "query_id": "Q12.1",
+      "uc_id": "UC-12",
+      "sql": "SELECT u.unit_id, u.project_name, u.house_no,\n       c.customer_id, c.full_name, c.phone_number\nFROM property_unit u\nJOIN customer c ON c.customer_id = u.customer_id\nWHERE c.id_card_no = :id_card_no\n  AND u.status = 'CONTRACTED';"
+    },
+    {
+      "query_id": "Q12.2",
+      "uc_id": "UC-12",
+      "sql": "INSERT INTO inspection_request (unit_id, customer_id, requested_by, preferred_date)\nVALUES (:unit_id, :customer_id, :employee_id, :preferred_date)\nRETURNING request_id, status;"
+    },
+    {
+      "query_id": "Q12.3",
+      "uc_id": "UC-12",
+      "sql": "UPDATE property_unit\nSET status = 'WAITING_INSPECTION'\nWHERE unit_id = :unit_id\n  AND status = 'CONTRACTED';"
+    },
+    {
+      "query_id": "Q13.1",
+      "uc_id": "UC-13",
+      "sql": "SELECT request_id, unit_id, customer_id, preferred_date, appointment\nFROM inspection_request\nWHERE status = 'SUBMITTED'\nORDER BY preferred_date;"
+    },
+    {
+      "query_id": "Q13.2",
+      "uc_id": "UC-13",
+      "sql": "UPDATE inspection_request\nSET appointment = :appointment\nWHERE request_id = :request_id\n  AND status = 'SUBMITTED';"
+    },
+    {
+      "query_id": "Q13.3",
+      "uc_id": "UC-13",
+      "sql": "UPDATE inspection_request\nSET arrival = now(),\n    status = 'IN_PROGRESS'\nWHERE request_id = :request_id\n  AND status = 'SUBMITTED';"
+    },
+    {
+      "query_id": "Q13.4",
+      "uc_id": "UC-13",
+      "sql": "INSERT INTO inspection_round (unit_id, round_type, request_id)\nVALUES (:unit_id, 'CUSTOMER_HANDOVER', :request_id)\nRETURNING round_id, status;"
+    },
+    {
+      "query_id": "Q13.5",
+      "uc_id": "UC-13",
+      "sql": "UPDATE property_unit\nSET status = 'IN_INSPECTION'\nWHERE unit_id = :unit_id\n  AND status = 'WAITING_INSPECTION';"
+    },
+    {
+      "query_id": "Q14.1",
+      "uc_id": "UC-14",
+      "sql": "SELECT r.round_id, l.unit_id\nFROM access_link l\nJOIN inspection_round r ON r.unit_id = l.unit_id\nWHERE l.token = :token\n  AND l.expires_at > now()\n  AND r.round_type = 'CUSTOMER_HANDOVER'\n  AND r.status = 'OPEN';"
+    },
+    {
+      "query_id": "Q14.2",
+      "uc_id": "UC-14",
+      "sql": "INSERT INTO defect (round_id, location_pin, description, status, reported_by_type)\nVALUES (:round_id, :location_pin, :description, 'NEW', :reported_by_type)\nRETURNING defect_id, status;"
+    },
+    {
+      "query_id": "Q14.3",
+      "uc_id": "UC-14",
+      "sql": "INSERT INTO file (defect_id, file_url, file_usage)\nVALUES (:defect_id, :file_url, 'BEFORE_FIX')\nRETURNING file_id;"
+    },
+    {
+      "query_id": "Q15.1",
+      "uc_id": "UC-15",
+      "sql": "SELECT defect_id, round_id, location_pin, description, reported_by_type, created_at\nFROM defect\nWHERE status = 'NEW'\nORDER BY created_at;"
+    },
+    {
+      "query_id": "Q15.2",
+      "uc_id": "UC-15",
+      "sql": "SELECT file_id, file_url\nFROM file\nWHERE defect_id = :defect_id\n  AND file_usage = 'BEFORE_FIX';"
+    },
+    {
+      "query_id": "Q15.3",
+      "uc_id": "UC-15",
+      "sql": "UPDATE defect\nSET category = :category,\n    target_date = :target_date,\n    assigned_by = :employee_id,\n    status = 'WAITING_ASSIGN'\nWHERE defect_id = :defect_id\n  AND status = 'NEW';"
+    },
+    {
+      "query_id": "Q16.1",
+      "uc_id": "UC-16",
+      "sql": "SELECT r.round_id, r.unit_id\nFROM inspection_round r\nWHERE r.round_type = 'CUSTOMER_HANDOVER'\n  AND r.status = 'OPEN'\n  AND EXISTS (SELECT 1 FROM defect d WHERE d.round_id = r.round_id)\n  AND NOT EXISTS (SELECT 1 FROM defect d\n                  WHERE d.round_id = r.round_id\n                    AND d.status NOT IN ('FIXED', 'VERIFIED'));"
+    },
+    {
+      "query_id": "Q16.2",
+      "uc_id": "UC-16",
+      "sql": "SELECT d.defect_id, d.category, d.location_pin, d.description, d.status,\n       f.file_usage, f.file_url\nFROM defect d\nLEFT JOIN file f ON f.defect_id = d.defect_id\nWHERE d.round_id = :round_id\nORDER BY d.defect_id, f.file_usage;"
+    },
+    {
+      "query_id": "Q16.3",
+      "uc_id": "UC-16",
+      "sql": "INSERT INTO repair_report (round_id, created_by, title)\nVALUES (:round_id, :employee_id, :title)\nRETURNING report_id;"
+    },
+    {
+      "query_id": "Q16.4",
+      "uc_id": "UC-16",
+      "sql": "INSERT INTO file (report_id, file_url, file_usage)\nVALUES (:report_id, :file_url, 'SUMMARY_PDF')\nRETURNING file_id;"
+    },
+    {
+      "query_id": "Q17.1",
+      "uc_id": "UC-17",
+      "sql": "SELECT unit_id, customer_id\nFROM access_link\nWHERE token = :token\n  AND expires_at > now();"
+    },
+    {
+      "query_id": "Q17.2",
+      "uc_id": "UC-17",
+      "sql": "SELECT r.round_id, r.request_id,\n       d.defect_id, d.location_pin, d.category, d.status,\n       d.target_date, d.completed_date\nFROM defect d\nJOIN inspection_round r ON r.round_id = d.round_id\nWHERE r.unit_id = :unit_id\n  AND r.round_type = 'CUSTOMER_HANDOVER'\nORDER BY d.defect_id;"
+    },
+    {
+      "query_id": "Q17.3",
+      "uc_id": "UC-17",
+      "sql": "SELECT file_usage, file_url\nFROM file\nWHERE defect_id = :defect_id\n  AND file_usage IN ('BEFORE_FIX', 'AFTER_FIX')\nORDER BY file_usage, uploaded_at;"
+    },
+    {
+      "query_id": "Q17.4",
+      "uc_id": "UC-17",
+      "sql": "SELECT rp.report_id, rp.title, rp.created_at, f.file_url\nFROM repair_report rp\nJOIN file f ON f.report_id = rp.report_id\nWHERE rp.round_id = :round_id\n  AND f.file_usage = 'SUMMARY_PDF'\nORDER BY rp.created_at DESC, rp.report_id DESC\nLIMIT 1;"
+    },
+    {
+      "query_id": "Q17.5",
+      "uc_id": "UC-17",
+      "sql": "SELECT count(*) AS not_ready\nFROM defect\nWHERE round_id = :round_id\n  AND status NOT IN ('FIXED', 'VERIFIED');"
+    },
+    {
+      "query_id": "Q17.6",
+      "uc_id": "UC-17",
+      "sql": "UPDATE defect\nSET status = 'VERIFIED',\n    verified_at = now()\nWHERE round_id = :round_id\n  AND status = 'FIXED';"
+    },
+    {
+      "query_id": "Q17.7",
+      "uc_id": "UC-17",
+      "sql": "UPDATE inspection_request\nSET accept_result = 'ACCEPTED',\n    status = 'COMPLETED',\n    accepted_at = now()\nWHERE request_id = :request_id\n  AND status = 'IN_PROGRESS';"
+    },
+    {
+      "query_id": "Q17.8",
+      "uc_id": "UC-17",
+      "sql": "UPDATE inspection_round\nSET status = 'CLOSED',\n    closed_at = now()\nWHERE round_id = :round_id\n  AND status = 'OPEN';"
+    },
+    {
+      "query_id": "Q17.9",
+      "uc_id": "UC-17",
+      "sql": "UPDATE property_unit\nSET status = 'READY_HANDOVER'\nWHERE unit_id = :unit_id\n  AND status = 'IN_INSPECTION';"
+    },
+    {
+      "query_id": "Q17.10",
+      "uc_id": "UC-17",
+      "sql": "UPDATE inspection_request\nSET accept_result = 'REJECTED',\n    accept_reason = :accept_reason\nWHERE request_id = :request_id\n  AND status = 'IN_PROGRESS';"
+    },
+    {
+      "query_id": "Q17.11",
+      "uc_id": "UC-17",
+      "sql": "UPDATE defect\nSET status = 'REWORK',\n    rework_count = rework_count + 1\nWHERE defect_id = :defect_id\n  AND round_id = :round_id\n  AND status = 'FIXED';"
+    },
+    {
+      "query_id": "Q18.1",
+      "uc_id": "UC-18",
+      "sql": "SELECT l.unit_id, l.customer_id, u.project_name, u.house_no, u.status\nFROM access_link l\nJOIN property_unit u ON u.unit_id = l.unit_id\nWHERE l.token = :token\n  AND l.expires_at > now()\n  AND u.status = 'READY_HANDOVER';"
+    },
+    {
+      "query_id": "Q18.2",
+      "uc_id": "UC-18",
+      "sql": "INSERT INTO file (unit_id, file_url, file_usage)\nVALUES (:unit_id, :file_url, 'SIGNATURE')\nRETURNING file_id;"
+    },
+    {
+      "query_id": "Q18.3",
+      "uc_id": "UC-18",
+      "sql": "UPDATE property_unit\nSET status = 'HANDED_OVER',\n    handed_over_at = now()\nWHERE unit_id = :unit_id\n  AND status = 'READY_HANDOVER';"
+    },
+    {
+      "query_id": "Q00.1",
+      "uc_id": "SCR-00",
+      "sql": "SELECT employee_id, full_name, role, craft_category, password_hash\nFROM employee\nWHERE employee_id = :employee_id\n  AND is_active = TRUE;"
+    }
+  ]
+}

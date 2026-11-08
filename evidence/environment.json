@@ -1,0 +1,87 @@
+{
+  "recorded_at": "2026-11-08T10:40:11.435Z",
+  "database_version": "10.11.16-MariaDB",
+  "port": 3306,
+  "charset": "utf8mb4",
+  "collation": "utf8mb4_unicode_ci",
+  "node": "v24.18.0",
+  "databases": [
+    "sa_web_dev_p1",
+    "sa_web_test_p1"
+  ],
+  "tables": [
+    {
+      "TABLE_NAME": "access_link",
+      "TABLE_TYPE": "BASE TABLE"
+    },
+    {
+      "TABLE_NAME": "customer",
+      "TABLE_TYPE": "BASE TABLE"
+    },
+    {
+      "TABLE_NAME": "defect",
+      "TABLE_TYPE": "BASE TABLE"
+    },
+    {
+      "TABLE_NAME": "employee",
+      "TABLE_TYPE": "BASE TABLE"
+    },
+    {
+      "TABLE_NAME": "file",
+      "TABLE_TYPE": "BASE TABLE"
+    },
+    {
+      "TABLE_NAME": "inspection_request",
+      "TABLE_TYPE": "BASE TABLE"
+    },
+    {
+      "TABLE_NAME": "inspection_round",
+      "TABLE_TYPE": "BASE TABLE"
+    },
+    {
+      "TABLE_NAME": "property_unit",
+      "TABLE_TYPE": "BASE TABLE"
+    },
+    {
+      "TABLE_NAME": "repair_report",
+      "TABLE_TYPE": "BASE TABLE"
+    },
+    {
+      "TABLE_NAME": "seq_customer",
+      "TABLE_TYPE": "SEQUENCE"
+    },
+    {
+      "TABLE_NAME": "seq_defect",
+      "TABLE_TYPE": "SEQUENCE"
+    },
+    {
+      "TABLE_NAME": "seq_employee",
+      "TABLE_TYPE": "SEQUENCE"
+    },
+    {
+      "TABLE_NAME": "seq_file",
+      "TABLE_TYPE": "SEQUENCE"
+    },
+    {
+      "TABLE_NAME": "seq_link",
+      "TABLE_TYPE": "SEQUENCE"
+    },
+    {
+      "TABLE_NAME": "seq_report",
+      "TABLE_TYPE": "SEQUENCE"
+    },
+    {
+      "TABLE_NAME": "seq_request",
+      "TABLE_TYPE": "SEQUENCE"
+    },
+    {
+      "TABLE_NAME": "seq_round",
+      "TABLE_TYPE": "SEQUENCE"
+    },
+    {
+      "TABLE_NAME": "seq_unit",
+      "TABLE_TYPE": "SEQUENCE"
+    }
+  ],
+  "scope": "P1 scratch candidate, not production; no original databases changed"
+}

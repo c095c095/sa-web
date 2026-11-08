@@ -1,0 +1,301 @@
+{
+  "started_at": "2026-11-08T11:02:52.008Z",
+  "scope": "P1 read-only pilot browser tests, not full application E2E",
+  "routes": [
+    {
+      "route": "technician",
+      "width": 320,
+      "status": "PASS",
+      "scroll": 320,
+      "client": 320,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "report",
+      "width": 320,
+      "status": "PASS",
+      "scroll": 320,
+      "client": 320,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "status",
+      "width": 320,
+      "status": "PASS",
+      "scroll": 320,
+      "client": 320,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "technician",
+      "width": 375,
+      "status": "PASS",
+      "scroll": 375,
+      "client": 375,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "report",
+      "width": 375,
+      "status": "PASS",
+      "scroll": 375,
+      "client": 375,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "status",
+      "width": 375,
+      "status": "PASS",
+      "scroll": 375,
+      "client": 375,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "technician",
+      "width": 390,
+      "status": "PASS",
+      "scroll": 390,
+      "client": 390,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "report",
+      "width": 390,
+      "status": "PASS",
+      "scroll": 390,
+      "client": 390,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "status",
+      "width": 390,
+      "status": "PASS",
+      "scroll": 390,
+      "client": 390,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "technician",
+      "width": 768,
+      "status": "PASS",
+      "scroll": 768,
+      "client": 768,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "report",
+      "width": 768,
+      "status": "PASS",
+      "scroll": 768,
+      "client": 768,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "status",
+      "width": 768,
+      "status": "PASS",
+      "scroll": 768,
+      "client": 768,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "technician",
+      "width": 1024,
+      "status": "PASS",
+      "scroll": 1024,
+      "client": 1024,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "report",
+      "width": 1024,
+      "status": "PASS",
+      "scroll": 1024,
+      "client": 1024,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "status",
+      "width": 1024,
+      "status": "PASS",
+      "scroll": 1024,
+      "client": 1024,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "technician",
+      "width": 1280,
+      "status": "PASS",
+      "scroll": 1280,
+      "client": 1280,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "report",
+      "width": 1280,
+      "status": "PASS",
+      "scroll": 1280,
+      "client": 1280,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "status",
+      "width": 1280,
+      "status": "PASS",
+      "scroll": 1280,
+      "client": 1280,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "technician",
+      "width": 1440,
+      "status": "PASS",
+      "scroll": 1440,
+      "client": 1440,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "report",
+      "width": 1440,
+      "status": "PASS",
+      "scroll": 1440,
+      "client": 1440,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "status",
+      "width": 1440,
+      "status": "PASS",
+      "scroll": 1440,
+      "client": 1440,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "technician",
+      "width": 1920,
+      "status": "PASS",
+      "scroll": 1920,
+      "client": 1920,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "report",
+      "width": 1920,
+      "status": "PASS",
+      "scroll": 1920,
+      "client": 1920,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    },
+    {
+      "route": "status",
+      "width": 1920,
+      "status": "PASS",
+      "scroll": 1920,
+      "client": 1920,
+      "font": "\"IBM Plex Sans Thai\", sans-serif",
+      "language": "th"
+    }
+  ],
+  "interaction": [
+    {
+      "name": "Queue filter updates URL and survives reload",
+      "status": "PASS"
+    },
+    {
+      "name": "Queue empty search, then clear filters",
+      "status": "PASS"
+    },
+    {
+      "name": "Selection reviews only and never claims a job",
+      "status": "PASS"
+    },
+    {
+      "name": "Explicit loading, empty and error states render",
+      "status": "PASS"
+    },
+    {
+      "name": "Form validation focuses first invalid field",
+      "status": "PASS"
+    },
+    {
+      "name": "Valid local photo and optional description produce preview, no POST",
+      "status": "PASS"
+    },
+    {
+      "name": "Oversized image rejected locally",
+      "status": "PASS"
+    },
+    {
+      "name": "Only FIXED defects selectable on SCR-17",
+      "status": "PASS"
+    },
+    {
+      "name": "Keyboard skip link and visible focus",
+      "status": "PASS"
+    },
+    {
+      "name": "SSR content visible without JavaScript",
+      "status": "PASS"
+    }
+  ],
+  "console_errors": [],
+  "accessibility": [
+    {
+      "route": "technician",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "route": "report",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "route": "status",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "route": "technician",
+      "width": 1280,
+      "violations": []
+    },
+    {
+      "route": "report",
+      "width": 1280,
+      "violations": []
+    },
+    {
+      "route": "status",
+      "width": 1280,
+      "violations": []
+    }
+  ],
+  "finished_at": "2026-11-08T11:03:14.543Z",
+  "violations": 0,
+  "failed": 0,
+  "status": "PASS"
+}

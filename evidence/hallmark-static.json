@@ -1,0 +1,25 @@
+{
+  "summary": {
+    "fails": 0,
+    "reflex": 0,
+    "warns": 1,
+    "waived": 0,
+    "rejected": 0,
+    "answered": 0,
+    "dismissed": 0,
+    "notes": 0,
+    "files": 10,
+    "render": "off"
+  },
+  "findings": [
+    {
+      "gate": "F3",
+      "grade": "WARN",
+      "tier": "finish",
+      "file": "src\\app\\globals.css",
+      "line": 53,
+      "evidence": "no text-wrap: balance on any display head (1 head rule(s), e.g. h1, h2, h3)",
+      "fix": "Add text-wrap: balance to h1/h2-level heads"
+    }
+  ]
+}

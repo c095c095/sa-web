@@ -1,0 +1,15 @@
+[
+ {
+  "mode": "build",
+  "scope": "app",
+  "theme": "furrow",
+  "axes": "light/grotesk-sans/warm",
+  "signature": "Home defect register with queue and contextual detail",
+  "prompt": "Thai home inspection and handover operational app; P1 SCR-03 queue, SCR-14 report form, SCR-17 repair-state review, approved Furrow with daisyUI",
+  "nav": "Grouped desktop navigation and native mobile disclosure",
+  "imagery": "No invented evidence or stock photos; only fictional seed text, and user-chosen local test file names",
+  "waived": [],
+  "verification": "sloplint static+render: 0 Floor failures, 0 Reflex, 0 Warn; Playwright 24 layouts and 10 interactions; axe 0 violations in six checked route/viewport combinations; visual review in-thread; pending human G1",
+  "date": "2026-11-08"
+ }
+]

@@ -1,0 +1,15 @@
+{
+  "recorded_at": "2026-11-08T11:06:38.791Z",
+  "scope": "Read-only preservation check; no Word/PDF/Figma writes by P1",
+  "original_sources": {
+    "unchanged": 179,
+    "total": 179,
+    "changed": []
+  },
+  "info": {
+    "unchanged": 4,
+    "total": 4,
+    "changed": []
+  },
+  "status": "PASS"
+}

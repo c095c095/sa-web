@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import {app,root,evidence} from './db-common.mjs';
+const hash=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+const source=JSON.parse(fs.readFileSync(path.join(root,'sa-report-work/source-audit/source-baseline.json'),'utf8'));
+const info=JSON.parse(fs.readFileSync(path.join(root,'sa-report-work/with-info/info-audit.json'),'utf8')).info_sha256;
+const sources=source.map(x=>({path:x.path,unchanged:hash(path.join(root,x.path))===x.sha256}));
+const infoFiles=Object.entries(info).map(([p,h])=>({path:'info/'+p,unchanged:hash(path.join(root,'info',p))===h}));
+const result={recorded_at:new Date().toISOString(),scope:'Read-only preservation check; no Word/PDF/Figma writes by P1',original_sources:{unchanged:sources.filter(x=>x.unchanged).length,total:sources.length,changed:sources.filter(x=>!x.unchanged)},info:{unchanged:infoFiles.filter(x=>x.unchanged).length,total:infoFiles.length,changed:infoFiles.filter(x=>!x.unchanged)}};
+result.status=result.original_sources.unchanged===179&&result.info.unchanged===4?'PASS':'REVIEW';
+fs.writeFileSync(path.join(evidence,'source-integrity.json'),JSON.stringify(result,null,2)+'\n');
+const pkg=JSON.parse(fs.readFileSync(path.join(app,'package.json'),'utf8'));
+fs.writeFileSync(path.join(evidence,'versions.json'),JSON.stringify({recorded_at:new Date().toISOString(),node:process.version,dependencies:pkg.dependencies,devDependencies:pkg.devDependencies,package_lock_sha256:hash(path.join(app,'package-lock.json'))},null,2)+'\n');
+console.log(JSON.stringify(result,null,2));if(result.status!=='PASS')process.exitCode=1;

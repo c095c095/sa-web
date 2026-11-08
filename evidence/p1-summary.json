@@ -1,0 +1,175 @@
+{
+  "recorded_at": "2026-11-08T11:09:18.948Z",
+  "gate": "G1",
+  "status": "READY FOR USER REVIEW, not yet accepted",
+  "phase": "P1 only",
+  "theme": "Furrow",
+  "db": {
+    "status": "PASS",
+    "checks": 125,
+    "query_coverage": {
+      "executed": 77,
+      "total": 77,
+      "not_executed": []
+    }
+  },
+  "browser": {
+    "status": "PASS",
+    "layouts": 24,
+    "interactions": 10,
+    "axe_violations": 0
+  },
+  "hallmark": {
+    "fails": 0,
+    "reflex": 0,
+    "warns": 0,
+    "waived": 0,
+    "rejected": 0,
+    "answered": 0,
+    "dismissed": 0,
+    "notes": 0,
+    "files": 10,
+    "render": "ran"
+  },
+  "dependency_audit": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "source_files": [
+    {
+      "path": "src/app/globals.css",
+      "sha256": "4ffa761e40c24269e0b199853bfbc1ba9157e2af63f26bede0190d764a4f11c7"
+    },
+    {
+      "path": "src/app/icon.svg",
+      "sha256": "e8b8c6bde32c02b7062c7cdd1b31826acdfaa22b41be7a6066889ab2553debc7"
+    },
+    {
+      "path": "src/app/layout.tsx",
+      "sha256": "8efff90fd5986d99bd6deeff974515a03736113dd7d16fbf7b18a5f6021ffb20"
+    },
+    {
+      "path": "src/app/page.tsx",
+      "sha256": "db3f1a128010b9aab4abea5f25de899da6fed4c146de655bba8288b0f52887b0"
+    },
+    {
+      "path": "src/app/pilot/report/page.tsx",
+      "sha256": "59a53c62a00898fe6f2ed05142463a35cb34db15bc11bc7f79e64aa917480f6d"
+    },
+    {
+      "path": "src/app/pilot/status/page.tsx",
+      "sha256": "7f7b6fe2070ceba54e4d21df115b3ae425d8fac393e2e39e38f8ca1c8dc93c1d"
+    },
+    {
+      "path": "src/app/pilot/technician/page.tsx",
+      "sha256": "31166b5050cce79efd4e2ae73b4482a563846d5b7ff814b34a39e4c7b97f4d0a"
+    },
+    {
+      "path": "src/components/pilot-shell.tsx",
+      "sha256": "f33c6e19a6ecac4cb94be52dbd324da719e2ce14b109d9e071389bbf59eed1ef"
+    },
+    {
+      "path": "src/components/queue-pilot.tsx",
+      "sha256": "042f92db7256055b162a3b42120a20eceffb743329da405983630f0b4da0d17b"
+    },
+    {
+      "path": "src/components/report-pilot.tsx",
+      "sha256": "dd2f42461848f2a66209836d7aad8f73c5e8a001a922e5727f4ecef35a3482e3"
+    },
+    {
+      "path": "src/components/status-pilot.tsx",
+      "sha256": "fc8156f00d6a7f5a2f0625f0ee3824e3706fac622dae6db896fe8bc921aafeaf"
+    },
+    {
+      "path": "src/lib/domain.ts",
+      "sha256": "ec1603e55a9f1e1d5020762b3701b4c5997053fda0764c15d050e079ccb963b8"
+    },
+    {
+      "path": "src/lib/pilot-data.ts",
+      "sha256": "1a3e023a54118b5220ba3a0384138a3529a8234961bfbd16fe675f2fa07b4208"
+    },
+    {
+      "path": "db/001-p1-candidate.sql",
+      "sha256": "e481b3e7e862034fc0dd8e49877f38e94e6c62e48b4d749c4ceaf1e3e8d3cfac"
+    },
+    {
+      "path": "db/query-catalog.mariadb.json",
+      "sha256": "3ee28a9b9b4f9166a95ba647c3d42dd7125ded99f6ac6ba00737ab6b9a5ca85e"
+    },
+    {
+      "path": "db/seed-p1.sql",
+      "sha256": "889bedec3f983371de167331517e695bfbdb588060d70fcccaaddaa601069634"
+    },
+    {
+      "path": "scripts/check-integrity.mjs",
+      "sha256": "5219818497fd8d796b328612a3b5ebbbb614d81447d44584a90a9ff2c32d42f4"
+    },
+    {
+      "path": "scripts/db-common.mjs",
+      "sha256": "4df48aadad0c308d7fa50555ca49def5e2b1ba44e6198034238cf4f1ef766ca3"
+    },
+    {
+      "path": "scripts/generate-db.mjs",
+      "sha256": "9f98304d33046cb4b375144f865ea44def3e5d37984c50d789d9e01702cc7406"
+    },
+    {
+      "path": "scripts/setup-db.mjs",
+      "sha256": "8d11b0522993ffac05cd9dd56a2578658aa41131cc1bbd48fea4bce8743bfd1b"
+    },
+    {
+      "path": "scripts/test-db.mjs",
+      "sha256": "315493fa9ec21c6261f872ede0c208aa414c1aff0541e5c7f750e4e18cf8152b"
+    },
+    {
+      "path": "scripts/test-pilot.mjs",
+      "sha256": "6e16fc9adb53483880ff97aecd230fa36b122097349b80598cd7c20fa514f1ab"
+    },
+    {
+      "path": "docs/BUILD-NOTE.md",
+      "sha256": "f8e7acdd21b84d9454cb181e211e4787eea2008ba0ce6f6336ea478395362a29"
+    },
+    {
+      "path": "docs/P1-REVIEW.md",
+      "sha256": "7356f5194759a64a8e211706c5071a7b11915037e5932f017c0ce4ea681a966f"
+    },
+    {
+      "path": "docs/PERMISSIONS-API.md",
+      "sha256": "75b820ecffa80143fadc15e3baa16b6a5c49317c93361ffeb682ecc493accff2"
+    },
+    {
+      "path": "docs/TECHNICAL-AMENDMENTS.md",
+      "sha256": "74558644a04c657fa63b6ea2610be9bae8ba9ac8aeb5574f00abe4ec688256ca"
+    },
+    {
+      "path": "package.json",
+      "sha256": "f7a40ed30e601df4656486b23c7d8b9edbbcceffc7f59f3732b7396dde065872"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "a0da01bb193e324fcb7afb311efb819b92289b23f180f0c88e5cf5f45666c1a7"
+    },
+    {
+      "path": "next.config.ts",
+      "sha256": "00d31e1312abb53746adb2fc212f822167cb3d4dbf48801169512d8208f94cb0"
+    },
+    {
+      "path": "postcss.config.mjs",
+      "sha256": "b783348d5618047d0f37e12acd15c5a2c5f02809d8711e0764c9cea52750346c"
+    },
+    {
+      "path": "design.md",
+      "sha256": "17df0dc25f163e79c6935fa8184a1d37b3ee1233fcbc065ea341df7e2e6ef06e"
+    }
+  ],
+  "not_implemented": [
+    "login/session/token exchange",
+    "HTTP mutations",
+    "real uploads/PDF/signature",
+    "full 18-UC E2E",
+    "backup and restore"
+  ]
+}
