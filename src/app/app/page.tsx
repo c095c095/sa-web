@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export default async function AppPage({
   searchParams,
 }: {
-  searchParams: Promise<{ screen?: string; unit?: string; defect?: string }>;
+  searchParams: Promise<{ screen?: string; unit?: string; defect?: string; q?: string | string[] }>;
 }) {
   const id = await currentIdentity();
   if (!id) redirect("/login");
@@ -51,6 +51,7 @@ export default async function AppPage({
       initial={w}
       screen={screen}
       selectedDefect={p.defect}
+      listQuery={typeof p.q === "string" ? p.q : ""}
     />
   );
 }

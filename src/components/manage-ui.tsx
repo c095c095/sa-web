@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { useRouter } from "next/navigation";
 import { landingKind, landingPath } from "@/lib/task-landing";
 import {
@@ -82,6 +82,11 @@ const screenIcons: Record<string, React.ReactNode> = {
   "SCR-18": <CheckSquare size={16} aria-hidden="true" />,
 };
 
+export function LinkPending() {
+  const { pending } = useLinkStatus();
+  return pending ? <span className="loading loading-spinner loading-xs" role="status" aria-label="กำลังเปิดข้อมูล" /> : null;
+}
+
 function SidebarNav({
   items,
   active,
@@ -112,6 +117,7 @@ function SidebarNav({
                     <ClipboardCheck size={16} aria-hidden="true" />
                   ))}
               <span className="min-w-0 truncate">{x.label}</span>
+              <LinkPending />
             </Link>
           </li>
         ))}
@@ -121,20 +127,18 @@ function SidebarNav({
 }
 
 // Phase 1C (F2): the one place that builds the employee/customer menu, so
-// /home, /app and /account show the same items. "งานของฉัน" is always first.
-// `unit` keeps the house that is already open when moving between steps.
-export function buildNav(identity: SessionView, unit?: string) {
+// The same menu opens the overview and task indexes from every work screen.
+export function buildNav(identity: SessionView) {
   const role = identity.kind === "CUSTOMER" ? "CUSTOMER" : identity.role;
-  const withUnit = unit ? "&unit=" + encodeURIComponent(unit) : "";
   return [
-    { key: "home", href: "/home", label: "งานของฉัน" },
+    { key: "home", href: "/home", label: "ภาพรวม" },
     ...(screenRoles[role] ?? []).map((key) => ({
       key,
       label: screens[key],
       // Phase 2A: a menu item with a landing page opens it and carries no house.
-      href: landingKind(role, key)
+      href: role === "CUSTOMER" || landingKind(role, key)
         ? landingPath(key)
-        : "/app?screen=" + key + withUnit,
+        : "/app?screen=" + key,
     })),
   ];
 }
@@ -145,14 +149,12 @@ export function AppFrame({
   active = "home",
   title,
   nav,
-  unit,
 }: {
   identity: SessionView;
   children: ReactNode;
   active?: string;
   title?: string;
   nav?: { href: string; label: string; key: string }[];
-  unit?: string;
 }) {
   const router = useRouter();
   const [error, setError] = useState("");
@@ -200,7 +202,7 @@ export function AppFrame({
           label,
           href: "/admin?section=" + key,
         }))
-      : buildNav(identity, unit));
+      : buildNav(identity));
   const initial = identity.fullName.trim().slice(0, 2) || "ผ";
   const roleName =
     identity.kind === "CUSTOMER"
@@ -653,7 +655,7 @@ export function Dialog({
 }
 export function Back({
   href = "/home",
-  children = "กลับไปงานของฉัน",
+  children = "กลับไปภาพรวม",
 }: {
   href?: string;
   children?: ReactNode;

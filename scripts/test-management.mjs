@@ -484,17 +484,11 @@ try {
       await p.goto(base + "/home");
       await p.getByLabel("ค้นหาบ้าน", { exact: true }).fill("MG-" + suffix);
       await p
-        .locator("li")
-        .filter({
-          has: p.getByRole("heading", {
-            name: "บ้านเลขที่ MG-" + suffix,
-            exact: true,
-          }),
-        })
-        .getByRole("link", { name: "เปิดบ้าน", exact: true })
+        .getByRole("table", { name: "ทะเบียนบ้าน" })
+        .getByRole("link", { name: "เปิดบ้าน MG-" + suffix, exact: true })
         .click();
-      await p.waitForURL(new RegExp("/home\\?unit=" + unit + "$"));
-      assert(p.url().includes("unit=" + unit));
+      await p.waitForURL((url) => url.pathname === "/home" && url.searchParams.get("unit") === unit);
+      assert.equal(new URL(p.url()).searchParams.get("q"), "MG-" + suffix);
       await p.getByRole("link", { name: "เริ่มทำงานนี้", exact: true }).click();
       await p
         .getByLabel("ประเภทงาน", { exact: true })
@@ -531,16 +525,18 @@ try {
       await tech1page.getByRole("button", { name: /งานที่รับได้/ }).click();
       await tech1page.getByLabel("ค้นหางาน", { exact: true }).fill(suffix);
       await tech1page
-        .locator("li")
+        .getByRole("table", { name: "คิวงานซ่อม" })
+        .getByRole("row")
         .filter({ hasText: "จุดทดสอบนำทาง " + suffix })
-        .getByRole("link", { name: "ดูงานและรับงาน", exact: true })
+        .getByRole("link", { name: /^ดูงานและรับงาน/ })
         .click();
       await tech1page.waitForURL(
-        new RegExp(
-          "/app\\?screen=SCR-03&unit=" + unit + "&defect=" + defect + "$",
-        ),
+        (url) => url.pathname === "/app" &&
+          url.searchParams.get("screen") === "SCR-03" &&
+          url.searchParams.get("unit") === unit &&
+          url.searchParams.get("defect") === defect,
       );
-      assert(tech1page.url().includes("unit=" + unit));
+      assert.equal(new URL(tech1page.url()).searchParams.get("q"), suffix);
       const pick = tech1page.locator('input[name="defect_ids"]');
       if (await pick.count()) assert(await pick.isChecked());
       await tech1page

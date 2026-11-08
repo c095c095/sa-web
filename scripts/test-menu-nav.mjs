@@ -15,7 +15,7 @@ const fixture = JSON.parse(
 const base = fixture.base;
 assert.equal(base, testBase);
 const NAV = 'nav[aria-label="เมนูหลัก"]';
-const MY_WORK = "งานของฉัน";
+const MY_WORK = "ภาพรวม";
 const ROLES = ["SALES", "INSPECTOR", "TECHNICIAN", "HEAD_TECHNICIAN"];
 
 const db = await connect("sa_web_test_p1");

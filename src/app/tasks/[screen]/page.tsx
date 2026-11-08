@@ -13,22 +13,38 @@ export const dynamic = "force-dynamic";
 // on every request: login, password change, role, and the role's allowed screens.
 export default async function TasksPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ screen: string }>;
+  searchParams: Promise<{ q?: string | string[] }>;
 }) {
   const id = await currentIdentity();
   if (!id) redirect("/login");
   if (id.kind === "EMPLOYEE" && id.mustChangePassword) redirect("/account");
   if (id.kind === "EMPLOYEE" && id.role === "ADMIN") redirect("/admin");
-  // Customers keep their existing pages (Q12).
-  if (id.kind === "CUSTOMER") redirect("/home");
   const { screen } = await params;
-  if (!(screenRoles[id.role] ?? []).includes(screen)) redirect("/home");
+  const role = id.kind === "CUSTOMER" ? "CUSTOMER" : id.role;
+  if (!(screenRoles[role] ?? []).includes(screen)) redirect("/home");
+  const { q } = await searchParams;
+  const query = typeof q === "string" ? q : "";
+  if (id.kind === "CUSTOMER") {
+    const { unit } = await workspace(id);
+    return (
+      <TaskLanding
+        identity={publicIdentity(id)}
+        screen={screen}
+        query={query}
+        items={unit ? [{ unit, task: { screen, title: "เปิดรายละเอียด", hint: "" }, primary: true }] : []}
+      />
+    );
+  }
   const kind = landingKind(id.role, screen);
   // A screen without a landing page keeps the Phase 1A behavior.
   if (!kind) redirect("/app?screen=" + encodeURIComponent(screen));
-  if (kind === "register")
-    return <RegisterLanding identity={publicIdentity(id)} screen={screen} />;
+  if (kind === "register") {
+    const { units } = await workspace(id);
+    return <RegisterLanding identity={publicIdentity(id)} screen={screen} units={units} />;
+  }
   if (kind === "jobs") {
     const w = {
       identity: publicIdentity(id),
@@ -48,6 +64,7 @@ export default async function TasksPage({
       identity={publicIdentity(id)}
       screen={screen}
       items={await taskLanding(id, screen)}
+      query={query}
     />
   );
 }

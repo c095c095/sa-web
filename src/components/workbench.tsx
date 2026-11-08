@@ -19,7 +19,9 @@ import {
 } from "@/lib/runtime-contracts";
 import { categories, defectStatuses } from "@/lib/domain";
 import { AppFrame, Back } from "./manage-ui";
+import { RecordsTable } from "./records-table";
 import { journey, taskUrl } from "@/lib/journey";
+import { landingPath } from "@/lib/task-landing";
 const PickedDefect = createContext("");
 type Payload = Record<string, unknown>;
 const str = (v: unknown) => String(v ?? "");
@@ -462,6 +464,31 @@ function DefectStatusBadge({ status }: { status: unknown }) {
     </span>
   );
 }
+
+function RepairDocuments({ reports, files }: Pick<Workspace, "reports" | "files">) {
+  return (
+    <Panel title="เอกสารสรุปการซ่อม">
+      <RecordsTable
+        label="เอกสารสรุปการซ่อม"
+        columns={["เอกสาร", "วันที่สร้าง", "ไฟล์"]}
+        empty="ยังไม่มีเอกสารสรุปการซ่อมสำหรับบ้านหลังนี้"
+        rows={reports.map((report) => {
+          const pdf = files.find((file) => file.file_usage === "SUMMARY_PDF" && file.report_id === report.report_id);
+          return {
+            key: str(report.report_id),
+            cells: [
+              report.title,
+              when(report.created_at),
+              pdf ? <a key="pdf" className="btn" href={str(pdf.path)} target="_blank" rel="noreferrer">
+                เปิดเอกสารสรุป PDF<span className="sr-only"> {report.title}</span>
+              </a> : "ไม่มีไฟล์แนบ",
+            ],
+          };
+        })}
+      />
+    </Panel>
+  );
+}
 function Defects({
   items,
   select = false,
@@ -533,10 +560,12 @@ export function Workbench({
   initial,
   screen,
   selectedDefect = "",
+  listQuery = "",
 }: {
   initial: Workspace;
   screen: string;
   selectedDefect?: string;
+  listQuery?: string;
 }) {
   const [w, setW] = useState(initial),
     [message, setMessage] = useState(""),
@@ -1306,7 +1335,9 @@ export function Workbench({
       break;
     case "SCR-16":
       content = (
-        <Panel title="เอกสารสรุปการซ่อม">
+        <>
+        <RepairDocuments reports={w.reports} files={w.files} />
+        <Panel title="สร้างเอกสารสรุปการซ่อม">
           <Action
             {...actionBase}
             uc="UC-16"
@@ -1331,19 +1362,43 @@ export function Workbench({
               value="เอกสารสรุปการซ่อมก่อนรับมอบ"
             />
           </Action>
-          <Files files={w.files} />
         </Panel>
+        </>
       );
       break;
     case "SCR-17":
       content = (
         <>
-          <Panel title="รายงานติดตามสถานะการซ่อม">
+          <Panel title="ภาพรวมการซ่อมรอบตรวจก่อนรับมอบ">
+            {hand ? <>
+              <p className="mb-3">เริ่มรอบตรวจ {when(hand.started_at)} · {handoverDefs.length} จุด</p>
+              <dl className="flex flex-wrap gap-x-6 gap-y-3">
+                {Object.entries(defectStatuses).map(([status, title]) => (
+                  <div key={status}>
+                    <dt className="text-sm text-muted">{title}</dt>
+                    <dd className="text-xl font-semibold tabular-nums">
+                      {handoverDefs.filter((defect) => defect.status === status).length}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </> : <Empty>ยังไม่มีรอบตรวจก่อนรับมอบสำหรับบ้านหลังนี้</Empty>}
+          </Panel>
+          <Panel title="รายการจุดและหลักฐานการซ่อม">
+            <Defects files={w.files} items={handoverDefs} />
+            {w.rounds.filter((round) => round.round_type === "CUSTOMER_HANDOVER" && round.round_id !== hand?.round_id).map((round) => (
+              <details key={str(round.round_id)} className="mt-4 border-t border-base-300 pt-4">
+                <summary className="cursor-pointer">รอบก่อนหน้า เริ่ม {when(round.started_at)}</summary>
+                <Defects files={w.files} items={w.defects.filter((defect) => defect.round_id === round.round_id)} />
+              </details>
+            ))}
+          </Panel>
+          <RepairDocuments reports={w.reports} files={w.files} />
+          {canCustomer && <Panel title="เลือกจุดที่ต้องการให้แก้ไขอีกครั้ง">
             <p className="mb-3 text-muted">
               ตรวจสถานะและรูปก่อนและหลังซ่อมด้านล่าง
               เลือกเฉพาะจุดซ่อมเสร็จที่ต้องการให้แก้อีกครั้ง
             </p>
-            {canCustomer ? (
               <Action
                 {...actionBase}
                 uc="UC-17"
@@ -1358,20 +1413,7 @@ export function Workbench({
                   max={10000}
                 />
               </Action>
-            ) : (
-              <Defects
-                files={w.files}
-                items={w.defects.filter((d) =>
-                  w.rounds.some(
-                    (r) =>
-                      r.round_id === d.round_id &&
-                      r.round_type === "CUSTOMER_HANDOVER",
-                  ),
-                )}
-              />
-            )}
-            <Files files={w.files} />
-          </Panel>
+          </Panel>}
           {canCustomer && (
             <Panel title="ยอมรับสภาพบ้าน">
               <Action
@@ -1447,13 +1489,15 @@ export function Workbench({
       <AppFrame
         identity={identity}
         active={screen}
-        unit={unitId}
       >
-        <Back href={unitId ? "/home?unit=" + unitId : "/home"}>
-          {unit
-            ? "กลับไปภาพรวมบ้านเลขที่ " + unit.house_no
-            : "กลับไปทะเบียนบ้าน"}
-        </Back>
+        <div className="flex flex-wrap gap-x-5">
+          <Back href={landingPath(screen) + (listQuery ? "?q=" + encodeURIComponent(listQuery) : "")}>
+            กลับไปรายการงาน
+          </Back>
+          {unit && <Link className="inline-flex min-h-11 items-center link" href={"/home?unit=" + encodeURIComponent(unitId)}>
+            ภาพรวมบ้านเลขที่ {unit.house_no}
+          </Link>}
+        </div>
         <div className="flex items-start gap-4">
           <h1 className="page-heading flex-1">{screens[screen]}</h1>
           <button

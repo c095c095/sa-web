@@ -134,7 +134,7 @@ async function loginForm(employeeId) {
 // does not mean a house was selected.
 async function showsNewestHouse() {
   const text = await page.locator("main#main-content").innerText();
-  const picker = await page.getByRole("link", { name: "เปิดบ้าน", exact: true }).count();
+  const picker = await page.getByRole("table", { name: "ทะเบียนบ้าน" }).count();
   return text.includes("บ้านเลขที่ " + newest.house_no) && picker === 0;
 }
 
@@ -229,7 +229,7 @@ await check("T-09", "Invalid next values are ignored; no external or unit-carryi
     await page.goto(base + "/home?next=" + encodeURIComponent(value));
     await page.waitForLoadState("load");
     const banner = await page.getByText("เลือกบ้านก่อน แล้วจึงจะส่งลิงก์ได้", { exact: false }).count();
-    const hrefs = await page.getByRole("link", { name: "เปิดบ้าน", exact: true }).evaluateAll((els) => els.map((e) => e.getAttribute("href")));
+    const hrefs = await page.getByRole("table", { name: "ทะเบียนบ้าน" }).getByRole("link").evaluateAll((els) => els.map((e) => e.getAttribute("href")));
     assert.equal(banner, 0, "banner shown for invalid next: " + value);
     for (const h of hrefs) assert(h.startsWith("/home?unit="), "house link changed for invalid next: " + h);
     results.push(value);
@@ -242,7 +242,7 @@ await check("T-10", "Valid next shows the picker banner and carries the target i
   await page.waitForLoadState("load");
   const banner = await page.getByText("เลือกบ้านก่อน แล้วจึงจะส่งลิงก์ได้", { exact: false }).count();
   assert(banner >= 1, "banner missing");
-  const href = await page.getByRole("link", { name: "เปิดบ้าน", exact: true }).first().getAttribute("href");
+  const href = await page.getByRole("table", { name: "ทะเบียนบ้าน" }).getByRole("link").first().getAttribute("href");
   assert(href.startsWith("/app?screen=SCR-09&unit="), "house link does not keep the target: " + href);
   assert(href.endsWith("&defect=12"), "defect not kept: " + href);
   return { sample_link_shape: "/app?screen=…&unit=…&defect=…" };

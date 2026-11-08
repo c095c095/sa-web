@@ -110,7 +110,7 @@ async function landingState(page) {
       h1: main.querySelector("h1")?.textContent.trim() ?? null,
       hrefs,
       empty: main.innerText.includes(EMPTY_TEXT),
-      mutating: main.querySelectorAll('form, textarea, select, input:not([type="search"]), button[type="submit"]').length,
+      mutating: [...main.querySelectorAll("form")].filter((form) => form.method !== "get").length,
     };
   }, EMPTY);
 }
@@ -129,7 +129,7 @@ async function clickMenu(page, label) {
 }
 
 // ---- T-LAND-01: menu click opens the landing page, not the action page --------
-await check("T-LAND-01", "Menu click opens /tasks/SCR-XX with the menu name as heading, no form, no house chosen", async () => {
+await check("T-LAND-01", "Menu opens /tasks/SCR-XX without mutation controls or a selected house", async () => {
   const seen = [];
   for (const [role, list] of Object.entries(HOUSE_LANDING)) {
     for (const screen of list) {
@@ -208,6 +208,22 @@ await check("T-LAND-04", "Choosing a row opens the action page for that house on
   return { opened: detail };
 });
 
+await check("T-LAND-FILTER", "The task list keeps its search when returning from a house", async () => {
+  const p = sessions.SALES.page;
+  const row = expectedRows("SALES", "SCR-09")[0];
+  assert(row, "fixture has no house for the link workflow");
+  const query = encodeURIComponent(row.house);
+  await p.goto(base + "/tasks/SCR-09?q=" + query);
+  const target = p.locator(`main tbody a[href="${row.href}&q=${query}"]`);
+  await clickAndWait(p, target);
+  assert.equal(new URL(p.url()).searchParams.get("unit"), row.unit);
+  await clickAndWait(p, p.getByRole("link", { name: "กลับไปรายการงาน" }));
+  assert.equal(new URL(p.url()).searchParams.get("q"), row.house);
+  assert.equal(await target.count(), 1);
+  await p.goto(base + "/tasks/SCR-09?q=__no_match__");
+  assert.equal(await p.locator("main tbody tr").count(), 0);
+});
+
 await check("T-LAND-05", "Empty landing states why and gives a way back (at least one empty screen in the fixture)", async () => {
   for (const [role, list] of Object.entries(HOUSE_LANDING)) {
     for (const screen of list) {
@@ -274,7 +290,7 @@ await check("T-LAND-07", "Deep links: no access without permission; INSPECTOR ca
   return { checked: detail.length + 4 };
 });
 
-await check("T-LAND-08", "Customer: no landing, behavior unchanged (Q12); menu links stay on /app", async () => {
+await check("T-LAND-08", "Customer sees a landing for their own house before opening a task", async () => {
   let cookie = null;
   for (const link of fixture.links) {
     const r = await fetch(base + "/api/auth/access", { method: "POST", headers: { "content-type": "application/json", origin: base }, body: JSON.stringify({ token: link.token }) });
@@ -290,7 +306,13 @@ await check("T-LAND-08", "Customer: no landing, behavior unchanged (Q12); menu l
   await page.goto(base + "/home");
   await page.waitForLoadState("networkidle");
   const hrefs = await page.locator(NAV + ":visible").first().locator("a").evaluateAll((els) => els.map((e) => e.getAttribute("href")));
-  for (const h of hrefs.slice(1)) assert(h.startsWith("/app?screen="), "customer menu link changed: " + h);
+  assert.deepEqual(hrefs.slice(1), screenRoles.CUSTOMER.map((screen) => "/tasks/" + screen));
+  await page.goto(base + "/tasks/SCR-17");
+  const actions = page.locator('main tbody a[href^="/app?screen=SCR-17&unit="]');
+  assert.equal(await actions.count(), 1, "customer must see only their own house");
+  await clickAndWait(page, actions.first());
+  assert.equal(new URL(page.url()).searchParams.get("screen"), "SCR-17");
+  assert.equal(await page.getByRole("heading", { name: "ภาพรวมการซ่อมรอบตรวจก่อนรับมอบ" }).count(), 1);
   await context.close();
   return { customer_links: hrefs.length - 1 };
 });
@@ -337,7 +359,7 @@ async function chain(cookie, p) {
   return { hops, status: -1, final: "LOOP" };
 }
 
-await check("T-LAND-11", "SCR-01 landing: CTA to the existing registration flow, no house list, no form, sales only", async () => {
+await check("T-LAND-11", "SCR-01 shows the register and a separate CTA for the creation form", async () => {
   const p = sessions.SALES.page;
   const url = await clickMenu(p, screens["SCR-01"]);
   assert.equal(url.pathname, "/tasks/SCR-01", "menu landed on " + url.pathname);
@@ -349,16 +371,14 @@ await check("T-LAND-11", "SCR-01 landing: CTA to the existing registration flow,
       h1: main.querySelector("h1")?.textContent.trim(),
       cta: cta.map((a) => a.getAttribute("href")),
       appLinks: [...main.querySelectorAll('a[href^="/app?screen="]')].length,
-      listItems: main.querySelectorAll("li").length,
-      houseText: main.innerText.includes("บ้านเลขที่"),
+      houses: main.querySelectorAll("tbody tr").length,
       mutating: main.querySelectorAll('form, textarea, select, input, button[type="submit"]').length,
     };
   });
   assert.equal(info.h1, screens["SCR-01"]);
   assert.deepEqual(info.cta, ["/app?screen=SCR-01"], "primary CTA");
   assert.equal(info.appLinks, 1, "only the CTA may link into /app");
-  assert.equal(info.listItems, 0, "no house list");
-  assert.equal(info.houseText, false, "no house content");
+  assert.equal(info.houses, allUnits.length, "house register must be visible before creation");
   assert.equal(info.mutating, 0, "landing must not hold a form");
   await clickAndWait(p, p.getByRole("link", { name: "ลงทะเบียนบ้านใหม่", exact: true }));
   const u = new URL(p.url());
@@ -468,11 +488,11 @@ await check("T-LAND-15", "SCR-09: primary rows use journey.ts titles, the other 
   await p.goto(base + "/tasks/SCR-09");
   await p.waitForLoadState("networkidle");
   const info = await p.evaluate(() => {
-    const rows = (g) => [...document.querySelectorAll(`main [data-group="${g}"] li`)].map((li) => ({
-      link: li.querySelector("a")?.textContent.replace(/\s+/g, " ").trim(),
-      cls: li.querySelector("a")?.className,
+    const rows = (g) => [...document.querySelectorAll(`main [data-group="${g}"] tbody tr`)].map((row) => ({
+      link: row.querySelector("a")?.textContent.replace(/\s+/g, " ").trim(),
+      unit: new URL(row.querySelector("a").href).searchParams.get("unit"),
     }));
-    return { primary: rows("primary"), secondary: rows("secondary"), body: document.querySelector("main").innerText };
+    return { primary: rows("primary"), secondary: rows("secondary") };
   });
   const expected = expectedRows("SALES", LINK_SCREEN);
   const exPrimary = expected.filter((r) => r.primary);
@@ -480,14 +500,12 @@ await check("T-LAND-15", "SCR-09: primary rows use journey.ts titles, the other 
   assert.equal(info.primary.length, exPrimary.length, "primary count");
   assert.equal(info.secondary.length, exSecondary.length, "secondary count");
   for (const r of exPrimary) assert(info.primary.some((x) => x.link.startsWith(r.title)), "primary title missing: " + r.title);
-  for (const x of info.primary) assert(x.cls.includes("btn-primary"), "primary row is not a primary button");
   for (const x of info.secondary) {
     assert(x.link.startsWith(REISSUE), "secondary wording: " + x.link);
-    assert(!x.cls.includes("btn-primary"), "secondary row must not be a primary button");
   }
   const hidden = allUnits.filter((u) => !(u.status === "READY_TO_SELL" || (u.customer_id && u.status !== "HANDED_OVER")));
   assert(hidden.length > 0, "fixture has no hidden house to check");
-  for (const u of hidden) assert(!info.body.includes("บ้านเลขที่ " + u.house_no + "\n"), "closed or unbound house listed: " + u.house_no + " (" + u.status + ")");
+  for (const u of hidden) assert(![...info.primary, ...info.secondary].some((row) => row.unit === String(u.unit_id)), "closed or unbound house listed: " + u.house_no);
   return { primary: info.primary.length, secondary: info.secondary.length, hidden_checked: hidden.length };
 });
 

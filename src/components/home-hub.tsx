@@ -1,12 +1,13 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Fragment, useTransition } from "react";
 import Link from "next/link";
-import { type Workspace, unitStates } from "@/lib/runtime-contracts";
+import { roleLabels, type Workspace, unitStates } from "@/lib/runtime-contracts";
 import { categories, defectStatuses } from "@/lib/domain";
 import { journey, taskUrl } from "@/lib/journey";
 import { buildAppPath, type DeepLink } from "@/lib/deep-link";
-import { AppFrame, Panel, Back, string, thaiTime } from "./manage-ui";
+import { AppFrame, Panel, Back, LinkPending, buildNav, string, thaiTime } from "./manage-ui";
+import { RecordsTable } from "./records-table";
 import { Search, ArrowRight } from "lucide-react";
 const statusBadgeMap: Record<string, string> = {
   NEW: "badge-status-new",
@@ -34,33 +35,42 @@ export function HomeHub({
   initialTab?: string;
 }) {
   const router = useRouter();
-  const [q, setQ] = useState(""),
-    [tab, setTab] = useState(
-      initialTab ??
-        (initial.identity.kind === "EMPLOYEE" &&
-        initial.identity.role === "HEAD_TECHNICIAN" &&
-        initial.newDefects.length
-          ? "new"
-          : initial.myJobs.length
-            ? "mine"
-            : "queue"),
-    );
+  const [refreshing, startRefresh] = useTransition();
+  const search = useSearchParams();
+  const q = search.get("q") ?? "";
+  const needle = q.trim().toLocaleLowerCase("th");
+  function setQuery(value: string) {
+    const url = new URL(window.location.href);
+    if (value) url.searchParams.set("q", value);
+    else url.searchParams.delete("q");
+    window.history.replaceState(null, "", url);
+  }
+  const isHead = initial.identity.kind === "EMPLOYEE" && initial.identity.role === "HEAD_TECHNICIAN";
+  const requestedTab = search.get("tab");
+  const validTab = requestedTab === "mine" || requestedTab === "queue" || (isHead && requestedTab === "new");
+  const defaultTab = isHead && initial.newDefects.length ? "new" : initial.myJobs.length ? "mine" : "queue";
+  const tab = (validTab ? requestedTab : null) ?? initialTab ?? defaultTab;
+  function setTab(value: string) {
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", value);
+    window.history.replaceState(null, "", url);
+  }
   const w = initial,
     role = w.identity.kind === "CUSTOMER" ? "CUSTOMER" : w.identity.role,
     tech = role === "TECHNICIAN" || role === "HEAD_TECHNICIAN",
     flow = journey(w),
     unit = w.unit;
+  const overview = !active && !deepLink && !search.has("unit");
   const filtered = w.units.filter((u) =>
-    (string(u.house_no) + string(u.project_name) + string(u.customer_name))
-      .toLocaleLowerCase()
-      .includes(q.toLocaleLowerCase()),
+    [u.house_no, u.project_name, u.customer_name, unitStates[string(u.status)]]
+      .join(" ").toLocaleLowerCase("th").includes(needle),
   );
   const jobs = (
     tab === "mine" ? w.myJobs : tab === "new" ? w.newDefects : w.queue
   ).filter((d) =>
-    (string(d.house_no) + string(d.location_pin) + string(d.project_name))
-      .toLocaleLowerCase()
-      .includes(q.toLocaleLowerCase()),
+    [d.house_no, d.location_pin, d.project_name, categories[d.category as keyof typeof categories],
+      defectStatuses[d.status as keyof typeof defectStatuses]]
+      .join(" ").toLocaleLowerCase("th").includes(needle),
   );
   return (
     <AppFrame
@@ -68,25 +78,54 @@ export function HomeHub({
       active={active}
       title={
         title ??
-        (selected && unit
+        (overview ? "ภาพรวม" : selected && unit
           ? "บ้านเลขที่ " + unit.house_no
           : tech
             ? "งานของฉัน"
             : "ทะเบียนบ้านและงานที่ต้องทำ")
       }
     >
+      {overview && (
+        <section className="panel-surface space-y-4 p-5 sm:p-7" aria-labelledby="overview-title">
+          <div>
+            <h2 id="overview-title" className="text-xl font-semibold">
+              {w.identity.kind === "EMPLOYEE" ? roleLabels[w.identity.role] : "บ้านของคุณ"}
+            </h2>
+            <p className="mt-1 text-muted">
+              {tech
+                ? `งานที่รับไว้ ${w.myJobs.length} รายการ และงานที่รับได้ ${w.queue.length} รายการ`
+                : w.identity.kind === "CUSTOMER"
+                  ? flow.waiting
+                  : `มีบ้านในทะเบียนที่คุณเข้าถึงได้ ${w.units.length} หลัง`}
+            </p>
+          </div>
+          {w.identity.kind === "EMPLOYEE" && (
+            <ul className="grid gap-x-6 border-b border-base-300 sm:grid-cols-2">
+              {buildNav(w.identity).filter((item) => item.key !== "home").map((item) => (
+                <li key={item.key} className="border-t border-base-300">
+                  <Link className="flex min-h-11 items-center justify-between gap-3 py-2 hover:underline" href={item.href}>
+                    {item.label}
+                    <ArrowRight size={16} aria-hidden="true" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
       <div className="flex justify-end">
         <button
           type="button"
           className="btn btn-ghost"
-          onClick={() => router.refresh()}
+          onClick={() => startRefresh(() => router.refresh())}
+          disabled={refreshing}
         >
-          อัปเดตสถานะ
+          {refreshing ? "กำลังอัปเดตสถานะ…" : "อัปเดตสถานะ"}
         </button>
       </div>
       {selected && unit ? (
         <>
-          <Back />
+          {w.identity.kind === "EMPLOYEE" && <Back href={q ? "/home?q=" + encodeURIComponent(q) : "/home"} />}
           <div className="border-y border-base-300 py-5">
             <p className="text-lg">{string(unit.project_name)}</p>
             <p className="mt-1 font-medium">
@@ -207,7 +246,7 @@ export function HomeHub({
                 id="hub-search"
                 className="min-w-0 grow"
                 value={q}
-                onChange={(e) => setQ(e.target.value)}
+                onChange={(e) => setQuery(e.target.value)}
                 type="search"
                 placeholder="เลขบ้าน ชื่อโครงการ หรือตำแหน่งงาน"
               />
@@ -238,60 +277,30 @@ export function HomeHub({
                   </button>
                 ))}
               </div>
-              <ul className="divide-y divide-base-300 rounded-box border border-base-300 bg-base-100 px-5">
-                {jobs.map((d) => (
-                  <li
-                    key={string(d.defect_id)}
-                    className="flex flex-wrap items-center justify-between gap-4 py-5"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h2 className="text-lg font-semibold">{string(d.location_pin)}</h2>
-                        <span className={`badge badge-sm ${statusBadgeMap[string(d.status)] ?? "badge-outline"}`}>
-                          {defectStatuses[d.status as keyof typeof defectStatuses]}
-                        </span>
-                      </div>
-                      <p className="text-sm">
-                        บ้าน {string(d.house_no)} · {string(d.project_name)}
-                      </p>
-                      <p className="text-xs text-muted">
-                        หมวดหมู่: {categories[d.category as keyof typeof categories] ?? "ยังไม่แยกประเภท"}
-                      </p>
-                    </div>
-                    <Link
-                      className="btn"
-                      href={taskUrl(
-                        {
-                          screen:
-                            tab === "mine"
-                              ? "SCR-04"
-                              : tab === "new"
-                                ? "SCR-15"
-                                : "SCR-03",
-                          title: "",
-                          hint: "",
-                          defect: string(d.defect_id),
-                        },
-                        string(d.unit_id),
-                      )}
-                    >
-                      {tab === "mine"
-                        ? "เปิดงานซ่อม"
-                        : tab === "new"
-                          ? "แยกประเภท"
-                          : "ดูงานและรับงาน"}
-                    </Link>
-                  </li>
-                ))}
-                {!jobs.length && (
-                  <li className="py-8 text-muted">
-                    ไม่มีงานในรายการนี้
-                    {tab === "mine" &&
-                      w.queue.length > 0 &&
-                      " เลือกงานที่รับได้เพื่อเริ่มงานใหม่"}
-                  </li>
-                )}
-              </ul>
+              <RecordsTable
+                label="คิวงานซ่อม"
+                columns={["ตำแหน่ง", "บ้านและโครงการ", "หมวดหมู่", "สถานะ", "ดำเนินการ"]}
+                empty={q ? "ไม่พบงานที่ตรงกับการค้นหา" : "ไม่มีงานในรายการนี้"}
+                rows={jobs.map((d) => ({
+                  key: string(d.defect_id),
+                  cells: [
+                    d.location_pin,
+                    <Fragment key="house"><span className="block">บ้าน {d.house_no}</span>{d.project_name}</Fragment>,
+                    categories[d.category as keyof typeof categories] ?? "ยังไม่แยกประเภท",
+                    <span key="status" className={"badge " + (statusBadgeMap[string(d.status)] ?? "badge-outline")}>
+                      {defectStatuses[d.status as keyof typeof defectStatuses]}
+                    </span>,
+                    <Link key="action" className="btn" href={buildAppPath({
+                      screen: tab === "mine" ? "SCR-04" : tab === "new" ? "SCR-15" : "SCR-03",
+                      defect: string(d.defect_id),
+                    }, string(d.unit_id)) + (q ? "&q=" + encodeURIComponent(q) : "")}>
+                      {tab === "mine" ? "เปิดงานซ่อม" : tab === "new" ? "แยกประเภท" : "ดูงานและรับงาน"}
+                      <span className="sr-only"> {d.location_pin} บ้าน {d.house_no}</span>
+                      <LinkPending />
+                    </Link>,
+                  ],
+                }))}
+              />
             </>
           ) : (
             <>
@@ -300,37 +309,26 @@ export function HomeHub({
                 เลือกบ้านก่อน แล้วจึงจะส่งลิงก์ได้
               </p>
             )}
-            <ul className="divide-y divide-base-300 rounded-box border border-base-300 bg-base-100 px-5">
-              {filtered.map((u) => (
-                <li
-                  key={string(u.unit_id)}
-                  className="flex flex-wrap items-center justify-between gap-4 py-5"
-                >
-                  <div className="min-w-0 flex-1">
-                    <h2 className="text-lg">บ้านเลขที่ {string(u.house_no)}</h2>
-                    <p>{string(u.project_name)}</p>
-                    <p className="text-sm text-muted">
-                      {unitStates[string(u.status)]}
-                      {u.customer_name ? " · " + u.customer_name : ""}
-                    </p>
-                  </div>
-                  <Link
-                    href={
-                      deepLink && !selected
-                        ? buildAppPath(deepLink, string(u.unit_id))
-                        : "/home?unit=" + u.unit_id
-                    }
-                    className="btn"
-                  >
-                    เปิดบ้าน
-                    <ArrowRight size={17} aria-hidden="true" />
-                  </Link>
-                </li>
-              ))}
-              {!filtered.length && (
-                <li className="py-8 text-muted">ไม่พบบ้านที่ตรงกับการค้นหา</li>
-              )}
-            </ul>
+            <RecordsTable
+              label="ทะเบียนบ้าน"
+              columns={["บ้านเลขที่", "โครงการ", "ลูกค้า", "สถานะ", "ดำเนินการ"]}
+              empty={q ? "ไม่พบบ้านที่ตรงกับการค้นหา" : "ยังไม่มีบ้านในทะเบียนที่คุณเข้าถึงได้"}
+              rows={filtered.map((u) => ({
+                key: string(u.unit_id),
+                cells: [
+                  u.house_no,
+                  u.project_name,
+                  u.customer_name ?? "ยังไม่ระบุ",
+                  unitStates[string(u.status)] ?? u.status,
+                  <Link key="action" className="btn" href={deepLink
+                    ? buildAppPath(deepLink, string(u.unit_id))
+                    : "/home?" + new URLSearchParams({ unit: string(u.unit_id), ...(q ? { q } : {}) }).toString()}>
+                    เปิดบ้าน<span className="sr-only"> {u.house_no}</span>
+                    <LinkPending />
+                  </Link>,
+                ],
+              }))}
+            />
             </>
           )}
         </>

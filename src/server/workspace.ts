@@ -85,18 +85,18 @@ export async function workspace(id: Identity, requestedUnit?: string) {
     const condition = e.craft ? " AND d.category=?" : "";
     queue = await rows(
       pool,
-      `SELECT d.*,r.unit_id,u.project_name,u.house_no FROM defect d JOIN inspection_round r ON r.round_id=d.round_id JOIN property_unit u ON u.unit_id=r.unit_id WHERE d.status='WAITING_ASSIGN'${condition} ORDER BY d.created_at`,
+      `SELECT d.*,r.unit_id,u.project_name,u.house_no FROM defect d JOIN inspection_round r ON r.round_id=d.round_id JOIN property_unit u ON u.unit_id=r.unit_id WHERE u.archived_at IS NULL AND d.status='WAITING_ASSIGN'${condition} ORDER BY d.created_at,d.defect_id`,
       e.craft ? [e.craft] : [],
     );
     myJobs = await rows(
       pool,
-      "SELECT d.*,r.unit_id,u.project_name,u.house_no FROM defect d JOIN inspection_round r ON r.round_id=d.round_id JOIN property_unit u ON u.unit_id=r.unit_id WHERE d.technician_id=? AND d.status IN ('ASSIGNED','REWORK') ORDER BY d.assigned_date",
+      "SELECT d.*,r.unit_id,u.project_name,u.house_no FROM defect d JOIN inspection_round r ON r.round_id=d.round_id JOIN property_unit u ON u.unit_id=r.unit_id WHERE u.archived_at IS NULL AND d.technician_id=? AND d.status IN ('ASSIGNED','REWORK') ORDER BY d.assigned_date,d.defect_id",
       [e.employeeId],
     );
     if (e.role === "HEAD_TECHNICIAN")
       newDefects = await rows(
         pool,
-        "SELECT d.*,r.unit_id,u.house_no,u.project_name FROM defect d JOIN inspection_round r ON r.round_id=d.round_id JOIN property_unit u ON u.unit_id=r.unit_id WHERE d.status='NEW' ORDER BY d.created_at",
+        "SELECT d.*,r.unit_id,u.house_no,u.project_name FROM defect d JOIN inspection_round r ON r.round_id=d.round_id JOIN property_unit u ON u.unit_id=r.unit_id WHERE u.archived_at IS NULL AND d.status='NEW' ORDER BY d.created_at,d.defect_id",
       );
     const relevant = [
       ...new Set(
