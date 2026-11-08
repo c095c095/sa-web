@@ -3,7 +3,7 @@
 ผู้ใช้อนุมัติ 8 พฤศจิกายน 2569: Hallmark Furrow แบบ app screen พื้นสว่างและสีเฉพาะ action/status ตาม website-plan/approval-g0.json
 
 - Thai-first: IBM Plex Sans Thai 400/500/600 จากแพ็กเกจ local ไม่ดาวน์โหลด font ระหว่าง build
-- daisyUI custom theme `sa-furrow` เป็นแหล่งค่าสีเดียว: warm white/manila base, near-black ink, tangerine primary, restrained semantic states
+- daisyUI custom theme `sa-furrow` เป็นแหล่งค่าสีเดียว: warm white/manila base, near-black ink, restrained semantic states; ตามการตรวจรับล่าสุดใช้ปุ่มหลักและ checkbox ที่เลือกเป็นสีเข้มกับตัวอักษร/เครื่องหมายสีขาว
 - ใช้ Tailwind CSS 4 จัด layout และ daisyUI 5 สำหรับ controls; ไม่เพิ่ม component library คู่ขนาน
 - เนื้อหา 16px ขึ้นไป labels ลดได้ตามบริบท; หัวข้อภาษาไทย line-height 1.5 ไม่ใช้ display typography ภาษาอังกฤษ
 - หน้าทำงานเริ่มจาก ruled list/table พร้อม detail pane ไม่เพิ่ม hero, marketing page, สถิติที่ไม่วัด, stock evidence, แผนที่ตกแต่ง หรือการ์ดซ้อนการ์ด

@@ -1,5 +1,5 @@
 {
-  "recorded_at": "2026-11-08T11:39:06.765Z",
+  "recorded_at": "2026-11-08T11:46:34.681Z",
   "gate": "G1",
   "status": "READY FOR USER REVIEW, not yet accepted",
   "phase": "P1 only",
@@ -42,7 +42,7 @@
   "source_files": [
     {
       "path": "src/app/globals.css",
-      "sha256": "db0dc0ceb5ee9948a039db8f814b884ffa5a806c6bd639eef4f779c9141020e7"
+      "sha256": "f6d5e6efd7be971f386c11213c4412a9ff001591cc1ee19f418de6774b160b1b"
     },
     {
       "path": "src/app/icon.svg",
@@ -74,7 +74,7 @@
     },
     {
       "path": "src/components/queue-pilot.tsx",
-      "sha256": "042f92db7256055b162a3b42120a20eceffb743329da405983630f0b4da0d17b"
+      "sha256": "6e1c918a3c65ab9494fedcef27188dfaf5816a07a45354f8d476886b179eae32"
     },
     {
       "path": "src/components/report-pilot.tsx",
@@ -82,7 +82,7 @@
     },
     {
       "path": "src/components/status-pilot.tsx",
-      "sha256": "fc8156f00d6a7f5a2f0625f0ee3824e3706fac622dae6db896fe8bc921aafeaf"
+      "sha256": "ebf9eaa2122d682a252bcb174aa747e1893ad90e76e96f7616e2b2327e60592e"
     },
     {
       "path": "src/lib/domain.ts",
@@ -134,7 +134,7 @@
     },
     {
       "path": "docs/P1-REVIEW.md",
-      "sha256": "adf5ae8df56effd4371c7858eafed31d79ffc0990c280ed85e85b4e0b92f3c01"
+      "sha256": "b23aa02b6f714c2f4c0e5bce9b13e7ba403726b1089147417adf065e3cddc668"
     },
     {
       "path": "docs/PERMISSIONS-API.md",
@@ -162,11 +162,11 @@
     },
     {
       "path": "design.md",
-      "sha256": "31e40cb5242bb2e52b4cd4c1edd1df5064c419967414a798a56b565b9d0a30f6"
+      "sha256": "18836a4c21597073ac6d699f61f89db865d609e9dd9b3a612ac3ce7d4f1a54c8"
     },
     {
       "path": "docs/UI-REVIEW-CHANGES.md",
-      "sha256": "8d8bc40964dac06a68c4f37181db212c3b537c11f46dfd2ae68545c4038e6ea4"
+      "sha256": "cd05cfd5b486b9b3b63e9842d5ea39d82baeb2cb617e7402d00d692e8b129a25"
     }
   ],
   "not_implemented": [
@@ -248,6 +248,168 @@
             "height": 23.09375
           }
         ]
+      }
+    ]
+  },
+  "latest_control_color_review": {
+    "status": "PASS",
+    "scope": "Settled default/hover/checked/disabled colors and axe checks; animations finished for measurement",
+    "checks": [
+      {
+        "width": 390,
+        "route": "technician",
+        "disabled_button": {
+          "background": "lab(86.1311 0.389814 4.96876)",
+          "foreground": "lab(35.0156 2.07084 4.02747)",
+          "contrast": 5.42357219203937,
+          "opacity": "1",
+          "disabled": true
+        },
+        "checked_checkbox": {
+          "background": "lab(16.4636 1.38307 2.6868)",
+          "foreground": "rgb(255, 255, 255)",
+          "contrast": 14.61046853044202,
+          "opacity": "1",
+          "disabled": false
+        },
+        "button": {
+          "background": "lab(16.4636 1.38307 2.6868)",
+          "foreground": "rgb(255, 255, 255)",
+          "contrast": 14.61046853044202,
+          "opacity": "1",
+          "disabled": false
+        },
+        "hover": {
+          "background": "oklab(0.2604 0.00371719 0.006449)",
+          "foreground": "rgb(255, 255, 255)",
+          "contrast": 15.571233276310776,
+          "opacity": "1",
+          "disabled": false
+        },
+        "violations": []
+      },
+      {
+        "width": 390,
+        "route": "report",
+        "button": {
+          "background": "lab(16.4636 1.38307 2.6868)",
+          "foreground": "rgb(255, 255, 255)",
+          "contrast": 14.61046853044202,
+          "opacity": "1",
+          "disabled": false
+        },
+        "hover": {
+          "background": "oklab(0.2604 0.00371719 0.006449)",
+          "foreground": "rgb(255, 255, 255)",
+          "contrast": 15.571233276310776,
+          "opacity": "1",
+          "disabled": false
+        },
+        "violations": []
+      },
+      {
+        "width": 390,
+        "route": "status",
+        "checked_checkbox": {
+          "background": "lab(16.4636 1.38307 2.6868)",
+          "foreground": "rgb(255, 255, 255)",
+          "contrast": 14.61046853044202,
+          "opacity": "1",
+          "disabled": false
+        },
+        "button": {
+          "background": "lab(16.4636 1.38307 2.6868)",
+          "foreground": "rgb(255, 255, 255)",
+          "contrast": 14.61046853044202,
+          "opacity": "1",
+          "disabled": false
+        },
+        "hover": {
+          "background": "oklab(0.2604 0.00371719 0.006449)",
+          "foreground": "rgb(255, 255, 255)",
+          "contrast": 15.571233276310776,
+          "opacity": "1",
+          "disabled": false
+        },
+        "violations": []
+      },
+      {
+        "width": 1280,
+        "route": "technician",
+        "disabled_button": {
+          "background": "lab(86.1311 0.389814 4.96876)",
+          "foreground": "lab(35.0156 2.07084 4.02747)",
+          "contrast": 5.42357219203937,
+          "opacity": "1",
+          "disabled": true
+        },
+        "checked_checkbox": {
+          "background": "lab(16.4636 1.38307 2.6868)",
+          "foreground": "rgb(255, 255, 255)",
+          "contrast": 14.61046853044202,
+          "opacity": "1",
+          "disabled": false
+        },
+        "button": {
+          "background": "lab(16.4636 1.38307 2.6868)",
+          "foreground": "rgb(255, 255, 255)",
+          "contrast": 14.61046853044202,
+          "opacity": "1",
+          "disabled": false
+        },
+        "hover": {
+          "background": "oklab(0.2604 0.00371719 0.006449)",
+          "foreground": "rgb(255, 255, 255)",
+          "contrast": 15.571233276310776,
+          "opacity": "1",
+          "disabled": false
+        },
+        "violations": []
+      },
+      {
+        "width": 1280,
+        "route": "report",
+        "button": {
+          "background": "lab(16.4636 1.38307 2.6868)",
+          "foreground": "rgb(255, 255, 255)",
+          "contrast": 14.61046853044202,
+          "opacity": "1",
+          "disabled": false
+        },
+        "hover": {
+          "background": "oklab(0.2604 0.00371719 0.006449)",
+          "foreground": "rgb(255, 255, 255)",
+          "contrast": 15.571233276310776,
+          "opacity": "1",
+          "disabled": false
+        },
+        "violations": []
+      },
+      {
+        "width": 1280,
+        "route": "status",
+        "checked_checkbox": {
+          "background": "lab(16.4636 1.38307 2.6868)",
+          "foreground": "rgb(255, 255, 255)",
+          "contrast": 14.61046853044202,
+          "opacity": "1",
+          "disabled": false
+        },
+        "button": {
+          "background": "lab(16.4636 1.38307 2.6868)",
+          "foreground": "rgb(255, 255, 255)",
+          "contrast": 14.61046853044202,
+          "opacity": "1",
+          "disabled": false
+        },
+        "hover": {
+          "background": "oklab(0.2604 0.00371719 0.006449)",
+          "foreground": "rgb(255, 255, 255)",
+          "contrast": 15.571233276310776,
+          "opacity": "1",
+          "disabled": false
+        },
+        "violations": []
       }
     ]
   }

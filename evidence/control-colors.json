@@ -1,0 +1,162 @@
+{
+  "status": "PASS",
+  "scope": "Settled default/hover/checked/disabled colors and axe checks; animations finished for measurement",
+  "checks": [
+    {
+      "width": 390,
+      "route": "technician",
+      "disabled_button": {
+        "background": "lab(86.1311 0.389814 4.96876)",
+        "foreground": "lab(35.0156 2.07084 4.02747)",
+        "contrast": 5.42357219203937,
+        "opacity": "1",
+        "disabled": true
+      },
+      "checked_checkbox": {
+        "background": "lab(16.4636 1.38307 2.6868)",
+        "foreground": "rgb(255, 255, 255)",
+        "contrast": 14.61046853044202,
+        "opacity": "1",
+        "disabled": false
+      },
+      "button": {
+        "background": "lab(16.4636 1.38307 2.6868)",
+        "foreground": "rgb(255, 255, 255)",
+        "contrast": 14.61046853044202,
+        "opacity": "1",
+        "disabled": false
+      },
+      "hover": {
+        "background": "oklab(0.2604 0.00371719 0.006449)",
+        "foreground": "rgb(255, 255, 255)",
+        "contrast": 15.571233276310776,
+        "opacity": "1",
+        "disabled": false
+      },
+      "violations": []
+    },
+    {
+      "width": 390,
+      "route": "report",
+      "button": {
+        "background": "lab(16.4636 1.38307 2.6868)",
+        "foreground": "rgb(255, 255, 255)",
+        "contrast": 14.61046853044202,
+        "opacity": "1",
+        "disabled": false
+      },
+      "hover": {
+        "background": "oklab(0.2604 0.00371719 0.006449)",
+        "foreground": "rgb(255, 255, 255)",
+        "contrast": 15.571233276310776,
+        "opacity": "1",
+        "disabled": false
+      },
+      "violations": []
+    },
+    {
+      "width": 390,
+      "route": "status",
+      "checked_checkbox": {
+        "background": "lab(16.4636 1.38307 2.6868)",
+        "foreground": "rgb(255, 255, 255)",
+        "contrast": 14.61046853044202,
+        "opacity": "1",
+        "disabled": false
+      },
+      "button": {
+        "background": "lab(16.4636 1.38307 2.6868)",
+        "foreground": "rgb(255, 255, 255)",
+        "contrast": 14.61046853044202,
+        "opacity": "1",
+        "disabled": false
+      },
+      "hover": {
+        "background": "oklab(0.2604 0.00371719 0.006449)",
+        "foreground": "rgb(255, 255, 255)",
+        "contrast": 15.571233276310776,
+        "opacity": "1",
+        "disabled": false
+      },
+      "violations": []
+    },
+    {
+      "width": 1280,
+      "route": "technician",
+      "disabled_button": {
+        "background": "lab(86.1311 0.389814 4.96876)",
+        "foreground": "lab(35.0156 2.07084 4.02747)",
+        "contrast": 5.42357219203937,
+        "opacity": "1",
+        "disabled": true
+      },
+      "checked_checkbox": {
+        "background": "lab(16.4636 1.38307 2.6868)",
+        "foreground": "rgb(255, 255, 255)",
+        "contrast": 14.61046853044202,
+        "opacity": "1",
+        "disabled": false
+      },
+      "button": {
+        "background": "lab(16.4636 1.38307 2.6868)",
+        "foreground": "rgb(255, 255, 255)",
+        "contrast": 14.61046853044202,
+        "opacity": "1",
+        "disabled": false
+      },
+      "hover": {
+        "background": "oklab(0.2604 0.00371719 0.006449)",
+        "foreground": "rgb(255, 255, 255)",
+        "contrast": 15.571233276310776,
+        "opacity": "1",
+        "disabled": false
+      },
+      "violations": []
+    },
+    {
+      "width": 1280,
+      "route": "report",
+      "button": {
+        "background": "lab(16.4636 1.38307 2.6868)",
+        "foreground": "rgb(255, 255, 255)",
+        "contrast": 14.61046853044202,
+        "opacity": "1",
+        "disabled": false
+      },
+      "hover": {
+        "background": "oklab(0.2604 0.00371719 0.006449)",
+        "foreground": "rgb(255, 255, 255)",
+        "contrast": 15.571233276310776,
+        "opacity": "1",
+        "disabled": false
+      },
+      "violations": []
+    },
+    {
+      "width": 1280,
+      "route": "status",
+      "checked_checkbox": {
+        "background": "lab(16.4636 1.38307 2.6868)",
+        "foreground": "rgb(255, 255, 255)",
+        "contrast": 14.61046853044202,
+        "opacity": "1",
+        "disabled": false
+      },
+      "button": {
+        "background": "lab(16.4636 1.38307 2.6868)",
+        "foreground": "rgb(255, 255, 255)",
+        "contrast": 14.61046853044202,
+        "opacity": "1",
+        "disabled": false
+      },
+      "hover": {
+        "background": "oklab(0.2604 0.00371719 0.006449)",
+        "foreground": "rgb(255, 255, 255)",
+        "contrast": 15.571233276310776,
+        "opacity": "1",
+        "disabled": false
+      },
+      "violations": []
+    }
+  ]
+}

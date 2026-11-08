@@ -9,7 +9,7 @@ export function QueuePilot({items,initialCategory="",initialSearch="",state="ful
   const detail=items.find(x=>x.defect_id===focused);
   function filter(c:string,q:string){setCategory(c);setSearch(q);const p=new URLSearchParams();if(c)p.set("category",c);if(q)p.set("q",q);window.history.replaceState(null,"",`/pilot/technician${p.size?`?${p}`:""}`);}
   function toggle(id:string){setSelected(v=>v.includes(id)?v.filter(x=>x!==id):[...v,id]);setReview(false);}
-  const selector=(x:QueueItem)=><label className="flex min-h-11 min-w-11 items-center justify-center"><input className="checkbox checkbox-sm" type="checkbox" aria-label={`เลือกงาน ${x.defect_id}`} checked={selected.includes(x.defect_id)} onChange={()=>toggle(x.defect_id)}/></label>;
+  const selector=(x:QueueItem)=><label className="flex min-h-11 min-w-11 items-center justify-center"><input className="checkbox checkbox-primary checkbox-sm" type="checkbox" aria-label={`เลือกงาน ${x.defect_id}`} checked={selected.includes(x.defect_id)} onChange={()=>toggle(x.defect_id)}/></label>;
   return <>
     <div className="mb-8 flex flex-wrap items-end justify-between gap-4"><div><h1 className="page-heading">งานที่รอช่างรับ</h1><p className="mt-2 text-muted">เลือกงานตามประเภทช่าง แล้วดูรายละเอียดก่อนรับงาน</p></div><p className="text-sm text-muted">มุมมองหัวหน้าช่าง <span className="ml-1 badge badge-ghost">ทุกประเภทงาน</span></p></div>
     <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,1fr)_22rem]">
