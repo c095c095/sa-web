@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { adminPath, workflowPaths } from "@/lib/routes";
 import {
   House,
+  ChevronDown,
   LogOut,
   Menu,
   ArrowLeft,
@@ -159,6 +160,8 @@ export function AppFrame({
   const [prevActive, setPrevActive] = useState(active);
   const drawerId = useId();
   const menuId = useId();
+  const accountMenuId = useId();
+  const accountMenu = useRef<HTMLDivElement>(null);
   const menuButton = useRef<HTMLButtonElement>(null);
   const menuPanel = useRef<HTMLDivElement>(null);
   const wasOpen = useRef(false);
@@ -237,51 +240,50 @@ export function AppFrame({
             <span className="sm:hidden">ตรวจบ้าน</span>
           </Link>
 
-          {/* User menu */}
-          <details className="dropdown dropdown-end ml-auto">
-            <summary
-              className="btn btn-ghost list-none gap-2 pl-2 pr-1"
-              aria-label="เมนูบัญชี"
-            >
-              <div className="avatar avatar-placeholder">
-                <div className="size-9 rounded-full bg-neutral text-sm text-neutral-content">
-                  <span>{initial}</span>
-                </div>
-              </div>
-              <span className="hidden flex-col text-left sm:flex">
-                <span className="text-sm font-medium leading-tight">
-                  {identity.fullName}
-                </span>
-                <span className="text-xs text-muted">{roleName}</span>
+          <button
+            type="button"
+            popoverTarget={accountMenuId}
+            style={{ anchorName: "--topbar-account" }}
+            className="btn btn-ghost ml-auto gap-2 px-2"
+            aria-label="เมนูบัญชี"
+          >
+            <span className="avatar avatar-placeholder" aria-hidden="true">
+              <span className="grid size-9 place-items-center rounded-full bg-neutral text-sm text-neutral-content">
+                {initial}
               </span>
-            </summary>
-            <ul className="menu dropdown-content z-50 mt-2 w-64 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg">
-              {/* Identity block */}
-              <li className="pointer-events-none mb-1">
-                <div className="flex items-center gap-3 rounded-field bg-base-200 px-3 py-2.5">
-                  <div className="avatar avatar-placeholder shrink-0">
-                    <div className="size-9 rounded-full bg-neutral text-sm text-neutral-content">
-                      <span>{initial}</span>
-                    </div>
-                  </div>
-                  <div className="min-w-0">
-                    <p className="truncate font-medium text-base-content">
-                      {identity.fullName}
-                    </p>
-                    <p className="text-xs text-muted">{roleName}</p>
-                  </div>
-                </div>
-              </li>
-              <li>
-                <Link href="/account">
-                  <UserRound size={16} aria-hidden="true" />
-                  บัญชีของฉัน
-                </Link>
-              </li>
-              <li className="mt-1 border-t border-base-300 pt-1">
+            </span>
+            <span className="hidden flex-col text-left sm:flex">
+              <span className="max-w-40 truncate text-sm font-medium leading-tight">
+                {identity.fullName}
+              </span>
+              <span className="text-xs text-muted">{roleName}</span>
+            </span>
+            <ChevronDown size={16} aria-hidden="true" />
+          </button>
+          <div
+            ref={accountMenu}
+            id={accountMenuId}
+            popover="auto"
+            style={{ positionAnchor: "--topbar-account" }}
+            className="dropdown dropdown-end w-64 max-w-[calc(100%-2rem)]"
+          >
+            <div className="mt-2 space-y-2 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg">
+              <div className="rounded-field bg-base-200 px-3 py-2.5">
+                <p className="wrap-break-word font-medium">{identity.fullName}</p>
+                <p className="text-xs text-muted">{roleName}</p>
+              </div>
+              <Link
+                href="/account"
+                className="btn btn-ghost btn-block justify-start"
+                onClick={() => accountMenu.current?.hidePopover()}
+              >
+                <UserRound size={16} aria-hidden="true" />
+                บัญชีของฉัน
+              </Link>
+              <div className="border-t border-base-300 pt-2">
                 <button
                   type="button"
-                  className="bg-error! text-error-content! hover:bg-error/80!"
+                  className="btn btn-error btn-block justify-start"
                   onClick={async () => {
                     try {
                       const r = await fetch("/api/auth/logout", {
@@ -291,6 +293,7 @@ export function AppFrame({
                       router.replace("/login");
                       router.refresh();
                     } catch {
+                      accountMenu.current?.hidePopover();
                       setError("ออกจากระบบไม่ได้ กรุณาลองใหม่");
                     }
                   }}
@@ -298,9 +301,9 @@ export function AppFrame({
                   <LogOut size={16} aria-hidden="true" />
                   ออกจากระบบ
                 </button>
-              </li>
-            </ul>
-          </details>
+              </div>
+            </div>
+          </div>
         </div>
       </header>
 

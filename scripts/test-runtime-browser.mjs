@@ -417,7 +417,7 @@ try {
     },
   );
   await check("Logout UI revokes access", async () => {
-    await sales.locator('summary[aria-label="เมนูบัญชี"]').click();
+    await sales.getByRole("button", { name: "เมนูบัญชี", exact: true }).click();
     await sales
       .getByRole("button", { name: "ออกจากระบบ", exact: true })
       .click();
