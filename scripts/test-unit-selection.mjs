@@ -1,3 +1,4 @@
+import { housePath } from "../src/lib/routes.ts";
 // Phase 1A regression tests for F12 (silent unit selection) and Q7/Q8.
 // Scenario IDs follow docs/UX-PHASE-PLAN.md §3.4 and §12.
 // Harness only; no app logic. Synthetic test DB only; never prints credentials.
@@ -32,7 +33,7 @@ await db.end();
 const out = {
   started_at: new Date().toISOString(),
   base,
-  scope: "Phase 1A F12 + Q7 (deep link via /home?next) + Q8 (customer); synthetic test DB only",
+  scope: "House selection, direct routes and scope; synthetic test DB only",
   preconditions: { non_archived_units: Number(countUnits.n), newest_house: newest.house_no },
   cases: [],
 };
@@ -126,7 +127,7 @@ async function loginForm(employeeId) {
   await page.getByLabel("รหัสพนักงาน", { exact: true }).fill(employeeId);
   await page.getByLabel("รหัสผ่าน", { exact: true }).fill(fixture.password);
   await page.getByRole("button", { name: "เข้าสู่ระบบ", exact: true }).click();
-  await page.waitForURL(/\/(home|app)(\?|$)/, { timeout: 30000 });
+  await page.waitForURL(base + "/", { timeout: 30000 });
 }
 
 // True when a house is selected for the newest house: its name shows and the
@@ -138,114 +139,46 @@ async function showsNewestHouse() {
   return text.includes("บ้านเลขที่ " + newest.house_no) && picker === 0;
 }
 
-function assertDeferredToHome(url, expectedNext = "/app?screen=SCR-09") {
-  assert.equal(url.pathname, "/home", "must land on the house picker");
-  assert.equal(url.searchParams.get("unit"), null, "URL must not gain a unit");
-  assert.equal(url.searchParams.get("next"), expectedNext, "target screen must be kept");
-}
-
 await loginForm(sales.employee_id);
 
-await check("T-01", "Deep link to a house screen without unit goes to the picker and keeps the target", async () => {
-  // Changed with Decision 1 (SCR-09 landing): a bare /app?screen=SCR-09 now goes to /tasks/SCR-09
-  // (covered by test-task-landing). A link that carries a defect keeps the picker, which this case needs.
-  await page.goto(base + "/app?screen=SCR-09&defect=12");
-  await page.waitForLoadState("load");
-  const url = new URL(page.url());
-  assertDeferredToHome(url, "/app?screen=SCR-09&defect=12");
-  assert.equal(await showsNewestHouse(), false, "house " + newest.house_no + " was selected silently");
-  return { final_path: url.pathname + url.search };
-});
-
-await check("T-02", "Sidebar link from /home (no house chosen) does not select a house", async () => {
-  await page.goto(base + "/home");
-  await page.waitForLoadState("load");
-  // The sidebar is rendered twice on desktop (F1); the first match is enough here.
-  await page
-    .getByRole("link", { name: "ส่งลิงก์เข้าสู่ระบบให้ลูกค้า", exact: true })
-    .first()
-    .click();
-  // client-side navigation: wait for the URL, not for a page load event.
-  // Changed with Decision 1 (SCR-09 landing): the menu item opens /tasks/SCR-09, which lists
-  // houses and chooses none. The invariant is the same: no house in the URL, none selected.
-  await page.waitForURL(/\/tasks\/SCR-09/, { timeout: 30000 });
-  const url = new URL(page.url());
-  assert.equal(url.pathname, "/tasks/SCR-09");
-  assert.equal(url.searchParams.get("unit"), null, "URL must not gain a unit");
-  const heading = await page.locator("main#main-content h1").first().innerText();
-  assert(!heading.includes("บ้านเลขที่"), "a house heading was shown: " + heading);
-  return { final_path: url.pathname + url.search };
-});
-
-await check("T-04", "Refresh from a unit-less house-free screen does not introduce a house", async () => {
-  // Precondition changed in Phase 1A: house-scoped screens now redirect (T-01),
-  // so the unit-less workbench is only reachable on SCR-01 (house-free).
-  await page.goto(base + "/app?screen=SCR-01");
-  await page.waitForLoadState("load");
-  const before = await showsNewestHouse();
-  assert.equal(before, false, "house shown before any refresh");
-  await page.getByRole("button", { name: "โหลดข้อมูลล่าสุด", exact: true }).click();
-  await page.waitForLoadState("load");
-  const after = await showsNewestHouse();
-  assert.equal(after, false, "refresh introduced house " + newest.house_no);
-  assert(!new URL(page.url()).searchParams.get("unit"), "URL gained a unit");
-  return { before, after };
-});
-
-await check("T-05", "Choosing a house on the picker returns to the requested screen for that house (Q7)", async () => {
-  await page.goto(base + "/home?next=" + encodeURIComponent("/app?screen=SCR-09"));
-  await page.waitForLoadState("load");
-  await page.locator('a[href^="/app?screen=SCR-09&unit="]').first().click();
-  await page.waitForURL(/\/app\?.*unit=/, { timeout: 30000 });
-  await page.waitForLoadState("load");
-  const url = new URL(page.url());
-  assert.equal(url.pathname, "/app");
-  assert.equal(url.searchParams.get("screen"), "SCR-09");
-  assert.equal(url.searchParams.get("unit"), String(newest.unit_id), "chosen house must be the one clicked");
-  assert.equal(await showsNewestHouse(), true, "chosen house header not shown");
-  return { final_path: url.pathname + url.search };
-});
-
-await check("T-08", "House-free screen SCR-01 opens without a house (no redirect)", async () => {
-  await page.goto(base + "/app?screen=SCR-01");
-  await page.waitForLoadState("load");
-  const url = new URL(page.url());
-  assert.equal(url.pathname, "/app");
-  assert.equal(url.searchParams.get("screen"), "SCR-01");
-  const text = await page.locator("main#main-content").innerText();
-  assert(text.includes("ข้อมูลบ้านใหม่"), "registration form not shown");
-  return { final_path: url.pathname + url.search };
-});
-
-await check("T-09", "Invalid next values are ignored; no external or unit-carrying target is used", async () => {
-  const invalid = [
-    "https://evil.example/app?screen=SCR-09",
-    "//evil.example/app?screen=SCR-09",
-    "/app/../admin?screen=SCR-09",
-    "/app?screen=SCR-09&unit=" + encodeURIComponent(String(newest.unit_id)),
-  ];
-  const results = [];
-  for (const value of invalid) {
-    await page.goto(base + "/home?next=" + encodeURIComponent(value));
-    await page.waitForLoadState("load");
-    const banner = await page.getByText("เลือกบ้านก่อน แล้วจึงจะส่งลิงก์ได้", { exact: false }).count();
-    const hrefs = await page.getByRole("table", { name: "ทะเบียนบ้าน" }).getByRole("link").evaluateAll((els) => els.map((e) => e.getAttribute("href")));
-    assert.equal(banner, 0, "banner shown for invalid next: " + value);
-    for (const h of hrefs) assert(h.startsWith("/home?unit="), "house link changed for invalid next: " + h);
-    results.push(value);
+await check("T-01", "The root and customer-access list do not silently select a house", async () => {
+  for (const route of ["/", "/customer-access"]) {
+    const response = await page.goto(base + route);
+    assert.equal(response.status(), 200);
+    assert.equal(await showsNewestHouse(), false);
+    assert.equal(new URL(page.url()).pathname, route);
   }
-  return { rejected: results.length };
 });
 
-await check("T-10", "Valid next shows the picker banner and carries the target into house links", async () => {
-  await page.goto(base + "/home?next=" + encodeURIComponent("/app?screen=SCR-09&defect=12"));
-  await page.waitForLoadState("load");
-  const banner = await page.getByText("เลือกบ้านก่อน แล้วจึงจะส่งลิงก์ได้", { exact: false }).count();
-  assert(banner >= 1, "banner missing");
-  const href = await page.getByRole("table", { name: "ทะเบียนบ้าน" }).getByRole("link").first().getAttribute("href");
-  assert(href.startsWith("/app?screen=SCR-09&unit="), "house link does not keep the target: " + href);
-  assert(href.endsWith("&defect=12"), "defect not kept: " + href);
-  return { sample_link_shape: "/app?screen=…&unit=…&defect=…" };
+await check("T-02", "The sidebar opens the customer-access list", async () => {
+  await page.goto(base + "/");
+  const menu = page.getByRole("navigation", { name: "เมนูหลัก" });
+  await menu.locator('a[href="/customer-access"]').click();
+  await page.waitForURL(base + "/customer-access");
+  assert.equal(await page.locator('main form[method="post"]').count(), 0);
+});
+
+await check("T-04", "Choosing a house makes the URL and reloaded record agree", async () => {
+  await page.goto(base + "/");
+  const link = page.getByRole("table", { name: "ทะเบียนบ้าน" }).locator('a[href="' + housePath(String(newest.unit_id)) + '"]');
+  await link.click();
+  await page.waitForURL(base + housePath(String(newest.unit_id)));
+  await page.reload();
+  assert.equal(await showsNewestHouse(), true);
+});
+
+await check("T-08", "Register form opens without a house", async () => {
+  await page.goto(base + "/houses/new");
+  assert.equal(new URL(page.url()).pathname, "/houses/new");
+  assert.equal(await page.locator("#unit-picker").count(), 0);
+  assert.equal(await page.locator("input[name=house_no]").count(), 1);
+});
+
+await check("T-09", "Unknown and retired browser routes return 404", async () => {
+  for (const path of ["/home", "/tasks/SCR-09", "/app?screen=SCR-09", "/houses/nonexistent-unit"]) {
+    const response = await page.goto(base + path);
+    assert.equal(response.status(), 404, path);
+  }
 });
 
 await browser.close();

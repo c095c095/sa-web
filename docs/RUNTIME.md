@@ -15,7 +15,7 @@
 
 - Next server เป็น backend เชื่อม MariaDB 10.11.16 ด้วยบัญชีจำกัดสิทธิ์ ไม่ได้เพิ่ม PHP API
 - 9 ตารางธุรกิจเดิม, `app_session` ตาม AM-04 และ migration 003 เพิ่ม `project`, `app_control`, `audit_event` ตามแผนส่วนจัดการที่อนุมัติ
-- `/login` เป็น SCR-00; `/app?screen=SCR-01` ถึง `SCR-18` ใช้เมนูตาม role ทั้ง 4 actor; HEAD_TECHNICIAN อยู่ภายใต้ actor ช่าง
+- `/login` เป็นหน้าเข้าสู่ระบบ และ `/` แสดงภาพรวมตามบทบาท เมนูงานเปิดหน้ารายการตามตารางด้านล่าง
 - ทุก mutation ผ่าน `POST /api/actions/UC-01` ถึง `UC-18` โดยแยก mode สำหรับ add/edit/delete/finish และขั้นตอนย่อย
 - `GET /api/workspace` เป็น read model ตามสิทธิ์; `/api/files/<opaque-key>` ตรวจสิทธิ์ทุกครั้ง; ไม่มีไฟล์แนบใน public directory
 - `/api/auth/login`, `/api/auth/access`, `/api/auth/logout` และ `GET /api/auth/session` จัดการ session
@@ -23,6 +23,31 @@
 - คำสั่ง SQL และค่าที่รับเข้าแยกกัน ส่งผ่าน mysql2 placeholder escaping ไม่มีการต่อข้อความที่ผู้ใช้กรอกเข้ากับ SQL
 - รูป JPEG/PNG/WebP ไม่เกิน 5 MB/รูป สูงสุด 10 รูปและรวมคำขอไม่เกิน 25 MB ตรวจเนื้อไฟล์แล้วแปลง WebP; ลายเซ็นต้องมีรอยเขียน; PDF เกิดจากข้อมูลและรูปที่มีจริงใน storage
 - RPT-01 เป็น PDF ภาษาไทย A4 แนวตั้ง ส่วน RPT-02 ใน SCR-17 สรุปสถานะของรอบตรวจก่อนรับมอบล่าสุด พร้อมประวัติรอบก่อนหน้า รูปประกอบ และไฟล์ PDF ของบ้าน
+
+## URL ตามงาน
+
+| รหัสภายใน | หน้ารายการ | หน้าดำเนินการ |
+| --- | --- | --- |
+| SCR-01 | `/houses` | `/houses/new` |
+| SCR-02 | `/qc-inspections` | `/qc-inspections/[unitId]` |
+| SCR-03 | `/repairs` | `/repairs/[unitId]/[defectId]` |
+| SCR-04 | `/assigned-repairs` | `/assigned-repairs/[unitId]/[defectId]` |
+| SCR-05 | `/repair-reviews` | `/repair-reviews/[unitId]/[defectId]` |
+| SCR-06 | `/qc-rechecks` | `/qc-rechecks/[unitId]` |
+| SCR-07 | `/qc-closures` | `/qc-closures/[unitId]` |
+| SCR-08 | `/sales-readiness` | `/sales-readiness/[unitId]` |
+| SCR-09 | `/customer-access` | `/customer-access/[unitId]` |
+| SCR-10 | `/inspection-preferences` | `/inspection-preferences/[unitId]` |
+| SCR-11 | `/inspection-requests` | `/inspection-requests/[unitId]` |
+| SCR-12 | `/assisted-inspection-requests` | `/assisted-inspection-requests/[unitId]` |
+| SCR-13 | `/inspection-appointments` | `/inspection-appointments/[unitId]` |
+| SCR-14 | `/handover-defects` | `/handover-defects/[unitId]` |
+| SCR-15 | `/repair-triage` | `/repair-triage/[unitId]/[defectId]` |
+| SCR-16 | `/repair-reports` | `/repair-reports/[unitId]` |
+| SCR-17 | `/repair-status` | `/repair-status/[unitId]` |
+| SCR-18 | `/handover-signatures` | `/handover-signatures/[unitId]` |
+
+รายละเอียดบ้านอยู่ที่ `/houses/[unitId]` และส่วนจัดการอยู่ที่ `/admin/[section]` ลิงก์แชร์ใช้ `/access#token=…` ค้นหาด้วย `?q=…` แล้วใช้ลิงก์กลับเพื่อคืนตัวกรองเดิม
 
 ## ทดสอบแยก
 
@@ -40,11 +65,15 @@ npm run dev -- --hostname 127.0.0.1 --port 3001
 ในอีก terminal รันตามลำดับ:
 
 ```powershell
+node scripts/test-routes.mjs
+node scripts/test-menu-nav.mjs
+node scripts/test-unit-selection.mjs
 node scripts/test-runtime.mjs
 node scripts/test-runtime-browser.mjs
 node scripts/test-runtime-visual.mjs
 node scripts/test-management.mjs
 node scripts/test-stale-task.mjs
+node scripts/test-task-landing.mjs
 ```
 
 Browser test ใช้ Microsoft Edge ที่ติดตั้งอยู่ PDF ใช้ Chrome หรือ Edge ในเครื่อง สามารถระบุ `CHROME_PATH` ได้ ชุดทดสอบเขียนข้อมูลสมมติและรูปเส้นทดสอบจริง ไม่ใช่หลักฐานผลตรวจบ้านจริง

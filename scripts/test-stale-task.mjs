@@ -21,8 +21,8 @@ try {
   });
   assert.equal(auth.status(), 200);
   const p = await c.newPage();
-  await p.goto(f.base + "/app?screen=SCR-03&unit=H0001&defect=ZZZZZZ");
-  await p.locator("main h1").waitFor();
+  const response = await p.goto(f.base + "/repairs/H0001/ZZZZZZ");
+  assert.equal(response.status(), 404);
   result.claim_buttons = await p
     .getByRole("button", { name: /^รับงาน(นี้|ที่เลือก)$/ })
     .count();

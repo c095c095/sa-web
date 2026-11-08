@@ -1,3 +1,4 @@
+import { workflowPath, housePath, adminPath } from "../src/lib/routes.ts";
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
@@ -231,7 +232,7 @@ try {
           .getByLabel("ยืนยันรหัสผ่าน", { exact: true })
           .fill(saved.password);
         await submit(adminPage, "สร้างบัญชีแอดมิน", "/api/setup");
-        await adminPage.waitForURL("**/admin");
+        await adminPage.waitForURL(base + "/");
         out.bootstrap = "Created through browser form in this fixture";
       } else {
         await adminPage.goto(base + "/login");
@@ -244,7 +245,7 @@ try {
         await adminPage
           .getByRole("button", { name: "เข้าสู่ระบบ", exact: true })
           .click();
-        await adminPage.waitForURL("**/admin");
+        await adminPage.waitForURL(base + "/");
         out.bootstrap =
           "Existing fixture owner login; bootstrap already exercised in earlier run";
       }
@@ -297,7 +298,7 @@ try {
     },
   );
   await check("ADM-03 create project through UI", async () => {
-    await adminPage.goto(base + "/admin?section=projects");
+    await adminPage.goto(base + adminPath("projects"));
     await adminPage
       .getByRole("button", { name: "เพิ่มโครงการ", exact: true })
       .click();
@@ -317,7 +318,7 @@ try {
   await check(
     "ADM-04 create and edit house through UI with stale-write guard",
     async () => {
-      await adminPage.goto(base + "/admin?section=units");
+      await adminPage.goto(base + adminPath("units"));
       await adminPage
         .getByRole("button", { name: "เพิ่มบ้าน", exact: true })
         .click();
@@ -369,7 +370,7 @@ try {
   await check(
     "ADM-05 create technician through UI and mandatory password change",
     async () => {
-      await adminPage.goto(base + "/admin?section=employees");
+      await adminPage.goto(base + adminPath("employees"));
       await adminPage
         .getByRole("button", { name: "เพิ่มพนักงาน", exact: true })
         .click();
@@ -416,7 +417,7 @@ try {
         .getByLabel("ยืนยันรหัสผ่านใหม่", { exact: true })
         .fill(tech1.password);
       await submit(tech1page, "บันทึกรหัสผ่านใหม่", "/api/account/password");
-      await tech1page.waitForURL("**/home");
+      await tech1page.waitForURL(base + "/");
       tech1cookie = await cookieOf(tech1page);
       assert.equal((await req("/api/account", { cookie: old })).status, 401);
     },
@@ -481,13 +482,13 @@ try {
         headers: { Origin: base },
         data: { employee_id: "EMP0003", password: fixture.password },
       });
-      await p.goto(base + "/home");
+      await p.goto(base + "/");
       await p.getByLabel("ค้นหาบ้าน", { exact: true }).fill("MG-" + suffix);
       await p
         .getByRole("table", { name: "ทะเบียนบ้าน" })
         .getByRole("link", { name: "เปิดบ้าน MG-" + suffix, exact: true })
         .click();
-      await p.waitForURL((url) => url.pathname === "/home" && url.searchParams.get("unit") === unit);
+      await p.waitForURL((url) => url.pathname === housePath(unit));
       assert.equal(new URL(p.url()).searchParams.get("q"), "MG-" + suffix);
       await p.getByRole("link", { name: "เริ่มทำงานนี้", exact: true }).click();
       await p
@@ -521,7 +522,7 @@ try {
   await check(
     "UX-02 open one job, accept and continue directly to repair",
     async () => {
-      await tech1page.goto(base + "/home");
+      await tech1page.goto(base + "/");
       await tech1page.getByRole("button", { name: /งานที่รับได้/ }).click();
       await tech1page.getByLabel("ค้นหางาน", { exact: true }).fill(suffix);
       await tech1page
@@ -531,10 +532,7 @@ try {
         .getByRole("link", { name: /^ดูงานและรับงาน/ })
         .click();
       await tech1page.waitForURL(
-        (url) => url.pathname === "/app" &&
-          url.searchParams.get("screen") === "SCR-03" &&
-          url.searchParams.get("unit") === unit &&
-          url.searchParams.get("defect") === defect,
+        (url) => url.pathname === workflowPath("SCR-03", unit, defect),
       );
       assert.equal(new URL(tech1page.url()).searchParams.get("q"), suffix);
       const pick = tech1page.locator('input[name="defect_ids"]');
@@ -574,14 +572,11 @@ try {
           headers: { Origin: base },
           data: { employee_id: "EMP0008", password: fixture.password },
         });
-      await p.goto(base + "/app?screen=SCR-03&unit=H0001&defect=ZZZZZZ");
-      await p.locator("main h1").waitFor();
+      const stale = await p.goto(base + workflowPath("SCR-03", "H0001", "ZZZZZZ"));
+      assert.equal(stale.status(), 404);
       assert.equal(
         await p.getByRole("button", { name: /^รับงาน(นี้|ที่เลือก)$/ }).count(),
         0,
-      );
-      assert(
-        (await p.locator("main").innerText()).includes("ไม่พบงานนี้ในคิว"),
       );
     },
   );
@@ -1050,7 +1045,7 @@ try {
       "sessions",
       "audit",
     ]) {
-      await p.goto(base + "/admin?section=" + section);
+      await p.goto(base + adminPath(section));
       await p.locator("main h1").waitFor();
       assert.equal(
         await p.evaluate(

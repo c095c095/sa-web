@@ -42,7 +42,7 @@ export function SetupForm() {
                 "/api/setup",
                 Object.fromEntries(new FormData(e.currentTarget)),
               );
-              router.replace("/admin");
+              router.replace("/");
               router.refresh();
             } catch (err) {
               setError(

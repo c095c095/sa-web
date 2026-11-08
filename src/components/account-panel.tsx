@@ -90,7 +90,7 @@ export function AccountPanel({
           <MutationForm
             endpoint="/api/account/password"
             label="บันทึกรหัสผ่านใหม่"
-            onDone={forced ? () => router.replace("/home") : undefined}
+            onDone={forced ? () => router.replace("/") : undefined}
             primary={forced}
           >
             <Field

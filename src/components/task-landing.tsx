@@ -9,43 +9,113 @@ import {
 } from "@/lib/runtime-contracts";
 import { taskUrl, type Task } from "@/lib/journey";
 import { AppFrame, LinkPending } from "./manage-ui";
+import { housePath, workflowPath, workflowPaths } from "@/lib/routes";
 import { RecordsTable } from "./records-table";
+
+export function WorkflowSearch({
+  path,
+  query,
+  repairs = false,
+}: {
+  path: string;
+  query: string;
+  repairs?: boolean;
+}) {
+  return (
+    <form action={path} className="flex flex-wrap items-end gap-3">
+      <label className="grid gap-2">
+        {repairs ? "ค้นหางาน" : "ค้นหาบ้านในรายการ"}
+        <input
+          key={query}
+          name="q"
+          type="search"
+          defaultValue={query}
+          className="input"
+          placeholder={
+            repairs
+              ? "เลขบ้าน โครงการ หรือตำแหน่งงาน"
+              : "เลขบ้าน โครงการ ลูกค้า หรือสถานะ"
+          }
+        />
+      </label>
+      <button className="btn" type="submit">
+        ค้นหา
+      </button>
+      {query && (
+        <Link href={path} className="btn btn-ghost">
+          ล้างการค้นหา
+        </Link>
+      )}
+    </form>
+  );
+}
+
+function matchesHouse(unit: DataRow, query: string) {
+  return [
+    unit.house_no,
+    unit.project_name,
+    unit.customer_name,
+    unitStates[String(unit.status)],
+  ]
+    .join(" ")
+    .toLocaleLowerCase("th")
+    .includes(query.trim().toLocaleLowerCase("th"));
+}
 
 // The register and the creation form are separate destinations.
 export function RegisterLanding({
   identity,
   screen,
   units,
+  query,
 }: {
   identity: SessionView;
   screen: string;
   units: DataRow[];
+  query: string;
 }) {
   return (
     <AppFrame identity={identity} active={screen} title={screens[screen]}>
       <section className="panel-surface p-5 sm:p-7">
         <p className="mb-5">เพิ่มบ้านหลังใหม่เข้าระบบ</p>
-        <Link href={"/app?screen=" + screen} className="btn btn-primary">
+        <Link
+          href={workflowPath(screen, undefined, undefined, query)}
+          className="btn btn-primary"
+        >
           ลงทะเบียนบ้านใหม่
           <ArrowRight size={17} aria-hidden="true" />
         </Link>
       </section>
+      <WorkflowSearch path={workflowPaths[screen]} query={query} />
       <RecordsTable
         label="ทะเบียนบ้าน"
         columns={["บ้านเลขที่", "โครงการ", "สถานะ", "รายละเอียด"]}
-        empty="ยังไม่มีบ้านในทะเบียน"
-        rows={units.map((unit) => ({
-          key: String(unit.unit_id),
-          cells: [
-            unit.house_no,
-            unit.project_name,
-            unitStates[String(unit.status)] ?? unit.status,
-            <Link key="house" className="btn" href={"/home?unit=" + encodeURIComponent(String(unit.unit_id))}>
-              เปิดบ้าน<span className="sr-only"> {unit.house_no}</span>
-              <LinkPending />
-            </Link>,
-          ],
-        }))}
+        empty={query ? "ไม่พบบ้านที่ตรงกับการค้นหา" : "ยังไม่มีบ้านในทะเบียน"}
+        rows={units
+          .filter((unit) => matchesHouse(unit, query))
+          .map((unit) => ({
+            key: String(unit.unit_id),
+            cells: [
+              unit.house_no,
+              unit.project_name,
+              unitStates[String(unit.status)] ?? unit.status,
+              <Link
+                key="house"
+                className="btn"
+                href={
+                  housePath(String(unit.unit_id)) +
+                  "?" +
+                  new URLSearchParams({
+                    from: "register",
+                    ...(query ? { q: query } : {}),
+                  })
+                }
+              >
+                เปิดบ้าน<span className="sr-only"> {unit.house_no}</span>
+                <LinkPending />
+              </Link>,
+            ],
+          }))}
       />
     </AppFrame>
   );
@@ -75,16 +145,26 @@ function Group({
           key: String(unit.unit_id) + task.screen + (task.defect ?? ""),
           cells: [
             unit.house_no,
-            <Fragment key="project">{unit.project_name}{unit.customer_name && <p className="text-muted">{unit.customer_name}</p>}</Fragment>,
+            <Fragment key="project">
+              {unit.project_name}
+              {unit.customer_name && (
+                <p className="text-muted">{unit.customer_name}</p>
+              )}
+            </Fragment>,
             unitStates[String(unit.status)] ?? unit.status,
             <Fragment key="action">
-              {task.hint && <p className="mb-2 max-w-sm text-muted">{task.hint}</p>}
+              {task.hint && (
+                <p className="mb-2 max-w-sm text-muted">{task.hint}</p>
+              )}
               <Link
-                href={taskUrl(task, String(unit.unit_id)) + (query ? "&q=" + encodeURIComponent(query) : "")}
+                href={taskUrl(task, String(unit.unit_id), query)}
                 className="btn"
               >
                 {task.title}
-                <span className="sr-only"> บ้านเลขที่ {String(unit.house_no)}</span>
+                <span className="sr-only">
+                  {" "}
+                  บ้านเลขที่ {String(unit.house_no)}
+                </span>
                 <ArrowRight size={17} aria-hidden="true" />
                 <LinkPending />
               </Link>
@@ -108,26 +188,20 @@ export function TaskLanding({
   items: Item[];
   query?: string;
 }) {
-  const matches = items.filter(({ unit }) =>
-    [unit.house_no, unit.project_name, unit.customer_name, unitStates[String(unit.status)]]
-      .join(" ").toLocaleLowerCase("th").includes(query.trim().toLocaleLowerCase("th")),
-  );
+  const matches = items.filter(({ unit }) => matchesHouse(unit, query));
   const primary = matches.filter((i) => i.primary);
   const secondary = matches.filter((i) => !i.primary);
   return (
     <AppFrame identity={identity} active={screen} title={screens[screen]}>
       {items.length > 0 ? (
         <>
-          <form action={"/tasks/" + screen} className="flex flex-wrap items-end gap-3">
-            <label className="grid gap-2">
-              ค้นหาบ้านในรายการ
-              <input name="q" type="search" defaultValue={query} className="input" placeholder="เลขบ้าน โครงการ ลูกค้า หรือสถานะ" />
-            </label>
-            <button className="btn" type="submit">ค้นหา</button>
-            {query && <Link href={"/tasks/" + screen} className="btn btn-ghost">ล้างการค้นหา</Link>}
-          </form>
-          <p className="text-muted">{matches.length} จาก {items.length} หลัง เลือกบ้านเพื่อเปิดขั้นตอน</p>
-          {!matches.length && <p className="panel-surface p-5">ไม่พบบ้านที่ตรงกับการค้นหา</p>}
+          <WorkflowSearch path={workflowPaths[screen]} query={query} />
+          <p className="text-muted">
+            {matches.length} จาก {items.length} หลัง เลือกบ้านเพื่อเปิดขั้นตอน
+          </p>
+          {!matches.length && (
+            <p className="panel-surface p-5">ไม่พบบ้านที่ตรงกับการค้นหา</p>
+          )}
           {primary.length > 0 && (
             <Group
               list={primary}
@@ -150,7 +224,7 @@ export function TaskLanding({
           <p>ตอนนี้ไม่มีบ้านที่ต้องทำขั้นตอนนี้</p>
           <p className="mt-2 text-sm text-muted">
             เมื่อบ้านถึงขั้นตอนนี้ จะแสดงที่หน้านี้ ดูบ้านทั้งหมดได้ที่{" "}
-            <Link href="/home" className="link">
+            <Link href="/" className="link">
               ภาพรวม
             </Link>
           </p>

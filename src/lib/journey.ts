@@ -1,3 +1,4 @@
+import { workflowPath } from "./routes";
 import { type Workspace } from "./runtime-contracts";
 export type Task = {
   screen: string;
@@ -5,8 +6,8 @@ export type Task = {
   hint: string;
   defect?: string;
 };
-export function taskUrl(t: Task, unit: string) {
-  return `/app?screen=${t.screen}&unit=${encodeURIComponent(unit)}${t.defect ? "&defect=" + encodeURIComponent(t.defect) : ""}`;
+export function taskUrl(t: Task, unit: string, q?: string) {
+  return workflowPath(t.screen, unit, t.defect, q);
 }
 export function journey(w: Workspace) {
   const role = w.identity.kind === "CUSTOMER" ? "CUSTOMER" : w.identity.role,

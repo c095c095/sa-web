@@ -1,6 +1,7 @@
 "use client";
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
+import { adminPath } from "@/lib/routes";
 import {
   type DataRow,
   type SessionView,
@@ -630,9 +631,8 @@ export function AdminPanel({
     }
   }
   const pageLink = (page: number) =>
-    "/admin?" +
+    adminPath(section) + "?" +
     new URLSearchParams({
-      section,
       q: query,
       status,
       sort,
@@ -773,7 +773,7 @@ export function AdminPanel({
         ...Object.entries(managementSections).map(([key, label]) => ({
           key,
           label,
-          href: "/admin?section=" + key,
+          href: adminPath(key),
         })),
       ]}
     >
@@ -805,7 +805,7 @@ export function AdminPanel({
               {(view.counts ?? []).map((r) => (
                 <Link
                   key={string(r.status)}
-                  href={"/admin?section=units&status=" + r.status}
+                  href={adminPath("units") + "?status=" + r.status}
                   className="border-b border-base-300 px-2 py-4 hover:bg-base-200"
                 >
                   <p className="text-muted">{unitStates[string(r.status)]}</p>
@@ -835,12 +835,11 @@ export function AdminPanel({
                 key={string(key)}
                 className="stat-card hover:bg-base-200 transition-colors"
                 href={
-                  "/admin?section=" +
-                  key +
+                  adminPath(String(key)) +
                   (key === "projects" || key === "employees"
-                    ? "&status=active"
+                    ? "?status=active"
                     : key === "units"
-                      ? "&status=pending-work"
+                      ? "?status=pending-work"
                       : "")
                 }
               >
@@ -896,11 +895,10 @@ export function AdminPanel({
             )}
           </div>
           <form
-            action="/admin"
+            action={adminPath(section)}
             method="get"
             className="flex flex-wrap items-end gap-3"
           >
-            <input type="hidden" name="section" value={section} />
             <div className="min-w-0 grow">
               <Field
                 key={query}
@@ -978,7 +976,7 @@ export function AdminPanel({
             <button type="submit" className="btn">
               ค้นหา
             </button>
-            <Link className="btn btn-ghost" href={"/admin?section=" + section}>
+            <Link className="btn btn-ghost" href={adminPath(section)}>
               ล้างตัวกรอง
             </Link>
           </form>

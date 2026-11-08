@@ -1,4 +1,5 @@
-// Phase 2A tests: each menu item opens its own landing page at /tasks/SCR-XX
+import { workflowPath, workflowPaths } from "../src/lib/routes.ts";
+// Each menu item opens its own landing page at a named URL
 // (docs/FINAL-VERIFICATION-REPORT.md, user decision Q10 = B). Eligible houses come
 // from src/lib/journey.ts only; this file re-derives them with its own queries.
 // Harness only. Synthetic test DB only; never prints credentials.
@@ -12,13 +13,12 @@ import { screens, screenRoles } from "../src/lib/runtime-contracts.ts";
 import os from "node:os";
 import { pathToFileURL } from "node:url";
 
-// journey.ts has an extensionless type-only import that plain Node cannot resolve.
-// Load the real source with just that one type import removed.
+// Resolve Next's extensionless imports when loading the real journey source in Node.
 const journeySource = fs.readFileSync(new URL("../src/lib/journey.ts", import.meta.url), "utf8");
 const typeImport = 'import { type Workspace } from "./runtime-contracts";';
 assert(journeySource.includes(typeImport), "journey.ts import line changed; update this loader");
 const journeyFile = path.join(os.tmpdir(), "journey-under-test-" + process.pid + ".ts");
-fs.writeFileSync(journeyFile, journeySource.replace(typeImport, ""));
+fs.writeFileSync(journeyFile, journeySource.replace(typeImport, "").replace('"./routes"', JSON.stringify(new URL("../src/lib/routes.ts", import.meta.url).href)));
 const { journey, taskUrl } = await import(pathToFileURL(journeyFile).href);
 fs.rmSync(journeyFile, { force: true });
 
@@ -39,7 +39,6 @@ const JOB_LANDING = {
   TECHNICIAN: { "SCR-03": "งานที่รับได้", "SCR-04": "งานที่รับไว้" },
   HEAD_TECHNICIAN: { "SCR-03": "งานที่รับได้", "SCR-04": "งานที่รับไว้", "SCR-15": "รอแยกประเภท" },
 };
-const REGISTER = { SALES: ["SCR-01"] };
 const LINK_SCREEN = "SCR-09";
 const REISSUE = "สร้างลิงก์ใหม่ให้ลูกค้าเดิม";
 const ROLES = ["SALES", "INSPECTOR", "TECHNICIAN", "HEAD_TECHNICIAN"];
@@ -73,7 +72,7 @@ function expectedRows(role, screen) {
     if (role === "SALES" && screen === LINK_SCREEN) {
       // Visibility is the screen rule; the primary flag is journey.ts.
       const visible = unit.status === "READY_TO_SELL" || (unit.customer_id && unit.status !== "HANDED_OVER");
-      if (visible) out.push({ unit: String(unit.unit_id), house: String(unit.house_no), status: unit.status, href: `/app?screen=${screen}&unit=${encodeURIComponent(String(unit.unit_id))}`, primary: Boolean(task), title: task?.title });
+      if (visible) out.push({ unit: String(unit.unit_id), house: String(unit.house_no), status: unit.status, href: workflowPath(screen, String(unit.unit_id), task?.defect), primary: Boolean(task), title: task?.title });
       continue;
     }
     if (task) out.push({ unit: String(unit.unit_id), house: String(unit.house_no), status: unit.status, href: taskUrl(task, String(unit.unit_id)), primary: true, title: task.title });
@@ -81,7 +80,7 @@ function expectedRows(role, screen) {
   return out;
 }
 
-const out = { started_at: new Date().toISOString(), base, scope: "Phase 2A landing pages /tasks/SCR-XX; synthetic test DB only", cases: [] };
+const out = { started_at: new Date().toISOString(), base, scope: "Named workflow indexes; synthetic test DB only", cases: [] };
 const record = (id, name, status, detail = {}) => out.cases.push({ id, name, status, ...detail });
 async function check(id, name, fn) {
   try { record(id, name, "PASS", (await fn()) ?? {}); }
@@ -96,7 +95,7 @@ async function login(role, width = 1280) {
   await page.getByLabel("รหัสพนักงาน", { exact: true }).fill(employees[role]);
   await page.getByLabel("รหัสผ่าน", { exact: true }).fill(fixture.password);
   await page.getByRole("button", { name: "เข้าสู่ระบบ", exact: true }).click();
-  await page.waitForURL(/\/(home|app)(\?|$)/, { timeout: 30000 });
+  await page.waitForURL(base + "/", { timeout: 30000 });
   return { context, page };
 }
 const sessions = {};
@@ -105,7 +104,7 @@ for (const role of ROLES) if (employees[role]) sessions[role] = await login(role
 async function landingState(page) {
   return page.evaluate((EMPTY_TEXT) => {
     const main = document.querySelector("main#main-content");
-    const hrefs = [...main.querySelectorAll('a[href^="/app?screen="]')].map((a) => a.getAttribute("href"));
+    const hrefs = [...main.querySelectorAll("tbody a")].map((a) => a.getAttribute("href"));
     return {
       h1: main.querySelector("h1")?.textContent.trim() ?? null,
       hrefs,
@@ -122,7 +121,7 @@ async function clickAndWait(page, locator) {
   await page.waitForLoadState("networkidle");
 }
 async function clickMenu(page, label) {
-  await page.goto(base + "/home");
+  await page.goto(base + "/");
   await page.waitForLoadState("networkidle");
   await clickAndWait(page, page.locator(NAV + ":visible").first().getByRole("link", { name: label, exact: true }));
   return new URL(page.url());
@@ -134,7 +133,7 @@ await check("T-LAND-01", "Menu opens /tasks/SCR-XX without mutation controls or 
   for (const [role, list] of Object.entries(HOUSE_LANDING)) {
     for (const screen of list) {
       const url = await clickMenu(sessions[role].page, screens[screen]);
-      assert.equal(url.pathname, "/tasks/" + screen, `${role} ${screen}: landed on ${url.pathname}${url.search}`);
+      assert.equal(url.pathname, workflowPaths[screen], `${role} ${screen}: landed on ${url.pathname}${url.search}`);
       assert.equal(url.searchParams.get("unit"), null, `${screen}: URL has a house`);
       const st = await landingState(sessions[role].page);
       assert.equal(st.h1, screens[screen], `${screen}: heading`);
@@ -150,7 +149,7 @@ await check("T-LAND-02", "Landing rows equal the houses journey.ts offers for th
   const detail = [];
   for (const [role, list] of Object.entries(HOUSE_LANDING)) {
     for (const screen of list) {
-      await sessions[role].page.goto(base + "/tasks/" + screen);
+      await sessions[role].page.goto(base + workflowPaths[screen]);
       await sessions[role].page.waitForLoadState("networkidle");
       const st = await landingState(sessions[role].page);
       const want = expectedRows(role, screen).map((r) => r.href).sort();
@@ -166,18 +165,18 @@ await check("T-LAND-03", "Hard status checks: SCR-12 lists exactly CONTRACTED ho
   const cases = [["SCR-12", "CONTRACTED"], ["SCR-13", "WAITING_INSPECTION"]];
   const detail = [];
   for (const [screen, status] of cases) {
-    await sessions.SALES.page.goto(base + "/tasks/" + screen);
+    await sessions.SALES.page.goto(base + workflowPaths[screen]);
     await sessions.SALES.page.waitForLoadState("networkidle");
     const st = await landingState(sessions.SALES.page);
-    const want = allUnits.filter((u) => u.status === status).map((u) => `/app?screen=${screen}&unit=${encodeURIComponent(String(u.unit_id))}`).sort();
+    const want = allUnits.filter((u) => u.status === status).map((u) => workflowPath(screen, String(u.unit_id))).sort();
     assert.deepEqual([...st.hrefs].sort(), want, `${screen}: not exactly the ${status} houses`);
     detail.push({ screen, status, rows: want.length });
   }
   // SCR-09: exactly the houses the screen rule shows; primary rows are exactly READY_TO_SELL and CONTRACTED
-  await sessions.SALES.page.goto(base + "/tasks/SCR-09");
+  await sessions.SALES.page.goto(base + "/customer-access");
   await sessions.SALES.page.waitForLoadState("networkidle");
-  const groups = await sessions.SALES.page.evaluate(() => Object.fromEntries(["primary", "secondary"].map((g) => [g, [...document.querySelectorAll(`main [data-group="${g}"] a[href^="/app?screen="]`)].map((a) => a.getAttribute("href"))])));
-  const href9 = (u) => `/app?screen=SCR-09&unit=${encodeURIComponent(String(u.unit_id))}`;
+  const groups = await sessions.SALES.page.evaluate(() => Object.fromEntries(["primary", "secondary"].map((g) => [g, [...document.querySelectorAll(`main [data-group="${g}"] tbody a`)].map((a) => a.getAttribute("href"))])));
+  const href9 = (u) => workflowPath("SCR-09", String(u.unit_id));
   const shown = allUnits.filter((u) => u.status === "READY_TO_SELL" || (u.customer_id && u.status !== "HANDED_OVER"));
   const prim = shown.filter((u) => ["READY_TO_SELL", "CONTRACTED"].includes(u.status)).map(href9).sort();
   const sec = shown.filter((u) => !["READY_TO_SELL", "CONTRACTED"].includes(u.status)).map(href9).sort();
@@ -194,13 +193,12 @@ await check("T-LAND-04", "Choosing a row opens the action page for that house on
       const rows = expectedRows(role, screen);
       if (!rows.length) continue;
       const p = sessions[role].page;
-      await p.goto(base + "/tasks/" + screen);
+      await p.goto(base + workflowPaths[screen]);
       await p.waitForLoadState("networkidle");
       await clickAndWait(p, p.locator(`main a[href="${rows[0].href}"]`).first());
       const u = new URL(p.url());
-      assert.equal(u.pathname, "/app", `${screen}: opened ${u.pathname}`);
-      assert.equal(u.searchParams.get("screen"), screen);
-      assert.equal(u.searchParams.get("unit"), rows[0].unit, `${screen}: wrong house`);
+      assert.equal(u.pathname, rows[0].href, screen + ": wrong record");
+      assert.equal(await p.locator("main h1").textContent(), screens[screen]);
       detail.push({ role, screen });
     }
   }
@@ -213,14 +211,14 @@ await check("T-LAND-FILTER", "The task list keeps its search when returning from
   const row = expectedRows("SALES", "SCR-09")[0];
   assert(row, "fixture has no house for the link workflow");
   const query = encodeURIComponent(row.house);
-  await p.goto(base + "/tasks/SCR-09?q=" + query);
-  const target = p.locator(`main tbody a[href="${row.href}&q=${query}"]`);
+  await p.goto(base + "/customer-access?q=" + query);
+  const target = p.locator(`main tbody a[href="${row.href}?q=${query}"]`);
   await clickAndWait(p, target);
-  assert.equal(new URL(p.url()).searchParams.get("unit"), row.unit);
+  assert.equal(new URL(p.url()).pathname, row.href);
   await clickAndWait(p, p.getByRole("link", { name: "กลับไปรายการงาน" }));
   assert.equal(new URL(p.url()).searchParams.get("q"), row.house);
   assert.equal(await target.count(), 1);
-  await p.goto(base + "/tasks/SCR-09?q=__no_match__");
+  await p.goto(base + "/customer-access?q=__no_match__");
   assert.equal(await p.locator("main tbody tr").count(), 0);
 });
 
@@ -229,11 +227,11 @@ await check("T-LAND-05", "Empty landing states why and gives a way back (at leas
     for (const screen of list) {
       if (expectedRows(role, screen).length) continue;
       const p = sessions[role].page;
-      await p.goto(base + "/tasks/" + screen);
+      await p.goto(base + workflowPaths[screen]);
       await p.waitForLoadState("networkidle");
       const st = await landingState(p);
       assert(st.empty, `${screen}: no empty-state text`);
-      assert.equal(await p.locator('main a[href="/home"]').count() > 0, true, `${screen}: no way back to งานของฉัน`);
+      assert.equal(await p.locator('main a[href="/"]').count() > 0, true, `${screen}: no way back to งานของฉัน`);
       return { screen, role };
     }
   }
@@ -241,15 +239,19 @@ await check("T-LAND-05", "Empty landing states why and gives a way back (at leas
 });
 
 // ---- T-LAND-06: technician landing = HomeHub tabs (Q13) -------------------------
-await check("T-LAND-06", "SCR-03/04/15 open the HomeHub job tabs with the matching tab selected", async () => {
+await check("T-LAND-06", "SCR-03/04/15 open dedicated queue pages", async () => {
   const detail = [];
   for (const [role, map] of Object.entries(JOB_LANDING)) {
     for (const [screen, tab] of Object.entries(map)) {
       const url = await clickMenu(sessions[role].page, screens[screen]);
-      assert.equal(url.pathname, "/tasks/" + screen, `${role} ${screen}: landed on ${url.pathname}`);
-      const pressed = await sessions[role].page.locator('main button[aria-pressed="true"]').allTextContents();
-      assert.equal(pressed.length, 1, `${screen}: ${pressed.length} tabs pressed`);
-      assert(pressed[0].startsWith(tab), `${screen}: tab "${pressed[0]}" selected, want "${tab}"`);
+      assert.equal(url.pathname, workflowPaths[screen], `${role} ${screen}: landed on ${url.pathname}`);
+      const table = sessions[role].page.getByRole("table", { name: "คิวงานซ่อม" });
+      if (!(await table.count())) {
+        assert.equal(await sessions[role].page.getByText("ไม่มีงานในรายการนี้", { exact: true }).count(), 1);
+      }
+      for (const href of await table.locator("a").evaluateAll((links) => links.map((a) => a.getAttribute("href")))) {
+        assert(href.startsWith(workflowPaths[screen] + "/"), href);
+      }
       detail.push({ role, screen, tab });
     }
   }
@@ -265,27 +267,26 @@ async function finalUrl(page, p) {
 await check("T-LAND-07", "Deep links: no access without permission; INSPECTOR cannot open SCR-09", async () => {
   const detail = [];
   const denied = [
-    ["SALES", "/tasks/SCR-02"], ["INSPECTOR", "/tasks/SCR-12"], ["TECHNICIAN", "/tasks/SCR-15"],
-    ["SALES", "/tasks/FOO"], ["SALES", "/tasks/SCR-99"], ["INSPECTOR", "/tasks/SCR-09"],
+    ["SALES", "/qc-inspections"], ["INSPECTOR", "/assisted-inspection-requests"],
+    ["TECHNICIAN", "/repair-triage"], ["INSPECTOR", "/customer-access"],
+    ["INSPECTOR", "/customer-access/H0001"],
   ];
-  for (const [role, p] of denied) {
-    const u = await finalUrl(sessions[role].page, p);
-    assert.equal(u.pathname, "/home", `${role} ${p}: ended at ${u.pathname}${u.search}`);
-    const st = await sessions[role].page.locator("main#main-content").innerText();
-    assert(!st.includes(EMPTY), `${role} ${p}: showed landing content`);
-    detail.push(`${role} ${p} -> /home`);
+  for (const [role, path] of denied) {
+    const response = await sessions[role].page.goto(base + path);
+    assert.equal(response.status(), 404, role + " " + path);
+    detail.push(path);
   }
-  const own9 = await finalUrl(sessions.SALES.page, "/tasks/SCR-09");
-  assert.equal(own9.pathname, "/tasks/SCR-09", "SALES must reach the SCR-09 landing");
+  const own9 = await finalUrl(sessions.SALES.page, "/customer-access");
+  assert.equal(own9.pathname, "/customer-access", "SALES must reach the SCR-09 landing");
   assert.equal(own9.searchParams.get("unit"), null, "SCR-09 landing: house chosen");
   // anonymous
-  const r = await fetch(base + "/tasks/SCR-12", { redirect: "manual" });
+  const r = await fetch(base + "/assisted-inspection-requests", { redirect: "manual" });
   assert([302, 303, 307, 308].includes(r.status), "anonymous status " + r.status);
   assert((r.headers.get("location") || "").includes("/login"), "anonymous not sent to /login");
   // direct open in a fresh browser context after login (deep link)
   const fresh = await login("SALES");
-  const u = await finalUrl(fresh.page, "/tasks/SCR-12");
-  assert.equal(u.pathname, "/tasks/SCR-12", "direct open failed");
+  const u = await finalUrl(fresh.page, "/assisted-inspection-requests");
+  assert.equal(u.pathname, "/assisted-inspection-requests", "direct open failed");
   await fresh.context.close();
   return { checked: detail.length + 4 };
 });
@@ -301,42 +302,44 @@ await check("T-LAND-08", "Customer sees a landing for their own house before ope
   const [n, ...v] = cookie.split("=");
   await context.addCookies([{ name: n, value: v.join("="), url: base }]);
   const page = await context.newPage();
-  const u = await finalUrl(page, "/tasks/SCR-12");
-  assert.equal(u.pathname, "/home", "customer reached " + u.pathname);
-  await page.goto(base + "/home");
+  const denied = await page.goto(base + "/assisted-inspection-requests");
+  assert.equal(denied.status(), 404);
+  const ws = (await (await page.request.get(base + "/api/workspace")).json()).data;
+  const other = allUnits.find((u) => u.unit_id !== ws.unit.unit_id);
+  assert(other);
+  const wrongHouse = await page.goto(base + workflowPath("SCR-17", other.unit_id));
+  assert.equal(wrongHouse.status(), 404);
+  await page.goto(base + "/");
   await page.waitForLoadState("networkidle");
   const hrefs = await page.locator(NAV + ":visible").first().locator("a").evaluateAll((els) => els.map((e) => e.getAttribute("href")));
-  assert.deepEqual(hrefs.slice(1), screenRoles.CUSTOMER.map((screen) => "/tasks/" + screen));
-  await page.goto(base + "/tasks/SCR-17");
-  const actions = page.locator('main tbody a[href^="/app?screen=SCR-17&unit="]');
+  assert.deepEqual(hrefs.slice(1), screenRoles.CUSTOMER.map((screen) => workflowPaths[screen]));
+  await page.goto(base + "/repair-status");
+  const actions = page.locator('main tbody a[href^="/repair-status/"]');
   assert.equal(await actions.count(), 1, "customer must see only their own house");
   await clickAndWait(page, actions.first());
-  assert.equal(new URL(page.url()).searchParams.get("screen"), "SCR-17");
+  assert.equal(new URL(page.url()).pathname, workflowPath("SCR-17", ws.unit.unit_id));
   assert.equal(await page.getByRole("heading", { name: "ภาพรวมการซ่อมรอบตรวจก่อนรับมอบ" }).count(), 1);
   await context.close();
   return { customer_links: hrefs.length - 1 };
 });
 
-await check("T-LAND-09", "Menu: every employee menu item with a landing (incl. SCR-01, SCR-09) goes to /tasks", async () => {
+await check("T-LAND-09", "Menu: every employee menu item with a landing (incl. SCR-01, SCR-09) opens a named index", async () => {
   const detail = [];
   for (const [role, s] of Object.entries(sessions)) {
-    await s.page.goto(base + "/home");
+    await s.page.goto(base + "/");
     await s.page.waitForLoadState("networkidle");
     const links = await s.page.locator(NAV + ":visible").first().locator("a").evaluateAll((els) => els.map((e) => [e.textContent.trim(), e.getAttribute("href")]));
     for (const key of screenRoles[role]) {
       const href = links.find(([label]) => label === screens[key])[1];
-      const landing = HOUSE_LANDING[role]?.includes(key) || REGISTER[role]?.includes(key) || key in (JOB_LANDING[role] || {});
-      if (landing) assert.equal(href, "/tasks/" + key, `${role} ${key}: ${href}`);
-      else assert(href.startsWith("/app?screen=" + key), `${role} ${key} (held): ${href}`);
-      detail.push(`${role}:${key}:${landing ? "tasks" : "app"}`);
+      assert.equal(href, workflowPaths[key], role + " " + key);
+      detail.push(role + ":" + key);
     }
   }
-  assert(detail.some((d) => d === "SALES:SCR-09:tasks"), "SCR-09 menu link not checked");
+  assert(detail.some((d) => d === "SALES:SCR-09"), "SCR-09 menu link not checked");
   return { checked: detail.length };
 });
 
 // ---- Decisions 2 and 4: SCR-01 landing and legacy redirect ---------------------------
-const SALES_SCREEN_HOUSE = ["SCR-09", "SCR-12", "SCR-13"];
 async function apiCookie(role) {
   const r = await fetch(base + "/api/auth/login", { method: "POST", headers: { "content-type": "application/json", origin: base }, body: JSON.stringify({ employee_id: employees[role], password: fixture.password }) });
   assert.equal(r.status, 200, "login " + role);
@@ -362,7 +365,7 @@ async function chain(cookie, p) {
 await check("T-LAND-11", "SCR-01 shows the register and a separate CTA for the creation form", async () => {
   const p = sessions.SALES.page;
   const url = await clickMenu(p, screens["SCR-01"]);
-  assert.equal(url.pathname, "/tasks/SCR-01", "menu landed on " + url.pathname);
+  assert.equal(url.pathname, "/houses", "menu landed on " + url.pathname);
   assert.equal(url.searchParams.get("unit"), null);
   const info = await p.evaluate(() => {
     const main = document.querySelector("main#main-content");
@@ -370,127 +373,67 @@ await check("T-LAND-11", "SCR-01 shows the register and a separate CTA for the c
     return {
       h1: main.querySelector("h1")?.textContent.trim(),
       cta: cta.map((a) => a.getAttribute("href")),
-      appLinks: [...main.querySelectorAll('a[href^="/app?screen="]')].length,
+      appLinks: [...main.querySelectorAll('a[href="/houses/new"]')].length,
       houses: main.querySelectorAll("tbody tr").length,
-      mutating: main.querySelectorAll('form, textarea, select, input, button[type="submit"]').length,
+      mutating: [...main.querySelectorAll("form")].filter((form) => form.method !== "get").length,
     };
   });
   assert.equal(info.h1, screens["SCR-01"]);
-  assert.deepEqual(info.cta, ["/app?screen=SCR-01"], "primary CTA");
-  assert.equal(info.appLinks, 1, "only the CTA may link into /app");
+  assert.deepEqual(info.cta, ["/houses/new"], "primary CTA");
+  assert.equal(info.appLinks, 1, "only the CTA links to the creation form");
   assert.equal(info.houses, allUnits.length, "house register must be visible before creation");
   assert.equal(info.mutating, 0, "landing must not hold a form");
   await clickAndWait(p, p.getByRole("link", { name: "ลงทะเบียนบ้านใหม่", exact: true }));
   const u = new URL(p.url());
-  assert.equal(u.pathname, "/app");
-  assert.equal(u.searchParams.get("screen"), "SCR-01");
+  assert.equal(u.pathname, "/houses/new");
+
   assert.equal(u.searchParams.get("unit"), null, "CTA must not carry a house");
   assert(await p.getByRole("button", { name: "ลงทะเบียนบ้าน", exact: true }).count() > 0, "registration form not shown");
   // role guard
   for (const role of ["INSPECTOR", "TECHNICIAN", "HEAD_TECHNICIAN"]) {
-    const c = await chain(await apiCookie(role), "/tasks/SCR-01");
-    assert.equal(c.final, "/home", `${role} /tasks/SCR-01 ended at ${c.final}`);
+    const c = await chain(await apiCookie(role), "/houses");
+    assert.equal(c.status, 404, role);
   }
-  const anon = await chain(null, "/tasks/SCR-01");
+  const anon = await chain(null, "/houses");
   assert.equal(anon.final, "/login", "anonymous");
-  return { cta: "/app?screen=SCR-01" };
+  return { cta: "/houses/new" };
 });
 
-await check("T-LAND-12", "Legacy deep link /app?screen=X without unit goes to /tasks/X for landing screens, in at most one hop, no loop", async () => {
-  const detail = [];
-  const lists = { SALES: SALES_SCREEN_HOUSE, ...Object.fromEntries(Object.entries(HOUSE_LANDING).filter(([r]) => r !== "SALES")) };
-  for (const [role, list] of [...Object.entries(lists), ["TECHNICIAN", Object.keys(JOB_LANDING.TECHNICIAN)], ["HEAD_TECHNICIAN", Object.keys(JOB_LANDING.HEAD_TECHNICIAN)]]) {
-    const cookie = await apiCookie(role);
-    for (const screen of list) {
-      const c = await chain(cookie, "/app?screen=" + screen);
-      assert.equal(c.final, "/tasks/" + screen, `${role} ${screen}: ended at ${c.final} via ${JSON.stringify(c.hops)}`);
-      assert.equal(c.status, 200, `${role} ${screen}: status ${c.status}`);
-      assert(c.hops.length <= 1, `${role} ${screen}: ${c.hops.length} hops`);
-      detail.push(`${role}:${screen}`);
-    }
+await check("T-LAND-12", "Retired routes return 404 without a redirect", async () => {
+  const cookie = await apiCookie("SALES");
+  for (const path of ["/home", "/tasks/SCR-09", "/app?screen=SCR-09"]) {
+    const c = await chain(cookie, path);
+    assert.equal(c.status, 404, path);
+    assert.deepEqual(c.hops, [], path);
   }
-  // empty unit parameter counts as no unit
-  const empty = await chain(await apiCookie("SALES"), "/app?screen=SCR-12&unit=");
-  assert.equal(empty.final, "/tasks/SCR-12", "empty unit: " + empty.final);
-  return { checked: detail.length };
 });
 
-await check("T-LAND-13", "Legacy redirect keeps the rules: unit, allowlist, defect, held screens, SCR-01, customer", async () => {
-  const sales = await apiCookie("SALES");
-  const insp = await apiCookie("INSPECTOR");
-  const unit = allUnits.find((u) => u.status === "CONTRACTED");
-  assert(unit, "fixture needs a CONTRACTED house");
-  // with a unit the old rules apply: the action page opens, no redirect
-  let c = await chain(sales, `/app?screen=SCR-12&unit=${encodeURIComponent(String(unit.unit_id))}`);
-  assert.deepEqual(c.hops, [], "with unit: should not redirect");
-  assert(c.final.startsWith("/app?screen=SCR-12&unit="), "with unit: " + c.final);
-  // SCR-09 now has a landing: legacy link goes there, never with a house; with a defect it keeps the picker
-  c = await chain(sales, "/app?screen=SCR-09");
-  assert.equal(c.final, "/tasks/SCR-09", "SCR-09: " + c.final);
-  c = await chain(sales, "/app?screen=SCR-09&defect=12");
-  assert(c.final.startsWith("/home?next="), "SCR-09 with defect: " + c.final);
-  assert(!c.final.includes("unit="), "SCR-09 gained a house");
-  // SCR-01 stays the form (it is the CTA target): no redirect, no loop
-  c = await chain(sales, "/app?screen=SCR-01");
-  assert.deepEqual(c.hops, [], "SCR-01 must not redirect");
-  assert.equal(c.status, 200);
-  // a screen the role may not use must not become a landing for that screen
-  c = await chain(insp, "/app?screen=SCR-12");
-  assert(!c.final.startsWith("/tasks/SCR-12"), "unauthorized screen reached landing: " + c.final);
-  assert(!c.final.includes("SCR-12&unit"), "unauthorized screen opened: " + c.final);
-  c = await chain(sales, "/app?screen=SCR-02");
-  assert(!c.final.startsWith("/tasks/SCR-02"), "unauthorized screen reached landing: " + c.final);
-  // a defect in the link is not dropped: keep the Phase 1A picker with the target
-  c = await chain(insp, "/app?screen=SCR-05&defect=12");
-  assert(c.final.startsWith("/home?next="), "defect link: " + c.final);
-  assert(decodeURIComponent(c.final).includes("defect=12"), "defect lost: " + c.final);
-  // unknown screen: never a landing
-  c = await chain(sales, "/app?screen=NOPE");
-  assert(!c.final.startsWith("/tasks/NOPE"), "unknown: " + c.final);
-  // customer flow unchanged
-  let cookie = null;
-  for (const link of fixture.links) {
-    const r = await fetch(base + "/api/auth/access", { method: "POST", headers: { "content-type": "application/json", origin: base }, body: JSON.stringify({ token: link.token }) });
-    if (r.status === 200) { cookie = (r.headers.get("set-cookie") || "").split(";")[0]; break; }
-  }
-  assert(cookie, "no customer link");
-  c = await chain(cookie, "/app?screen=SCR-12");
-  assert(c.final.startsWith("/app"), "customer left /app: " + c.final);
-  assert.deepEqual(c.hops, [], "customer redirected");
-  return { ok: true };
-});
-
-await check("T-LAND-14", "Back navigation: landing returns to the previous page and a legacy redirect does not trap Back", async () => {
+await check("T-LAND-14", "Back navigation: landing returns to the previous page", async () => {
   const p = sessions.SALES.page;
-  await p.goto(base + "/home");
+  await p.goto(base + "/");
   await p.waitForLoadState("networkidle");
   await clickAndWait(p, p.locator(NAV + ":visible").first().getByRole("link", { name: screens["SCR-12"], exact: true }));
-  assert.equal(new URL(p.url()).pathname, "/tasks/SCR-12");
+  assert.equal(new URL(p.url()).pathname, "/assisted-inspection-requests");
   const rows = expectedRows("SALES", "SCR-12");
   assert(rows.length > 0, "fixture needs a SCR-12 row");
   await clickAndWait(p, p.locator(`main a[href="${rows[0].href}"]`).first());
-  assert.equal(new URL(p.url()).pathname, "/app");
+  assert.equal(new URL(p.url()).pathname, rows[0].href);
   await p.goBack();
-  await p.waitForURL((u) => u.pathname === "/tasks/SCR-12", { timeout: 15000 });
+  await p.waitForURL((u) => u.pathname === "/assisted-inspection-requests", { timeout: 15000 });
   await p.goBack();
-  await p.waitForURL((u) => u.pathname === "/home", { timeout: 15000 });
-  // legacy URL: the redirect replaces the entry, so Back leaves it
-  await p.goto(base + "/app?screen=SCR-12");
-  await p.waitForURL((u) => u.pathname === "/tasks/SCR-12", { timeout: 15000 });
-  await p.goBack();
-  await p.waitForURL((u) => u.pathname === "/home", { timeout: 15000 });
-  return { ok: true };
+  await p.waitForURL((u) => u.pathname === "/", { timeout: 15000 });
+
 });
 
 // ---- SCR-09: grouping, wording, nothing happens on its own -----------------------------
 await check("T-LAND-15", "SCR-09: primary rows use journey.ts titles, the other statuses offer the existing re-issue wording, closed houses are absent", async () => {
   const p = sessions.SALES.page;
-  await p.goto(base + "/tasks/SCR-09");
+  await p.goto(base + "/customer-access");
   await p.waitForLoadState("networkidle");
   const info = await p.evaluate(() => {
     const rows = (g) => [...document.querySelectorAll(`main [data-group="${g}"] tbody tr`)].map((row) => ({
       link: row.querySelector("a")?.textContent.replace(/\s+/g, " ").trim(),
-      unit: new URL(row.querySelector("a").href).searchParams.get("unit"),
+      unit: decodeURIComponent(new URL(row.querySelector("a").href).pathname.split("/").at(-1)),
     }));
     return { primary: rows("primary"), secondary: rows("secondary") };
   });
@@ -517,13 +460,13 @@ async function linkCounts() {
     return { links: Number(a.n), units: Number(b.n), bound: Number(b.bound), st: b.st };
   } finally { await c.end(); }
 }
-await check("T-LAND-16", "Nothing is created or bound by opening SCR-09 (menu, landing, legacy link, picker): no link, no customer, no house", async () => {
+await check("T-LAND-16", "Nothing is created or bound by opening SCR-09 (menu, list and detail): no link, no customer, no house", async () => {
   const before = await linkCounts();
   const p = sessions.SALES.page;
   await clickMenu(p, screens[LINK_SCREEN]);
   assert.equal(new URL(p.url()).searchParams.get("unit"), null, "menu added a house");
   const cookie = await apiCookie("SALES");
-  for (const path of ["/tasks/SCR-09", "/app?screen=SCR-09", "/app?screen=SCR-09&defect=12", "/home?next=" + encodeURIComponent("/app?screen=SCR-09")]) {
+  for (const path of ["/customer-access", expectedRows("SALES", "SCR-09")[0].href]) {
     const c = await chain(cookie, path);
     assert.equal(c.status, 200, path + " -> " + c.status);
     assert(!/[?&]unit=/.test(c.final), path + " gained a house: " + c.final);
@@ -539,7 +482,7 @@ await check("T-LAND-10", "axe: no violations on landing pages at 1280 and 390", 
   for (const [role, screen, width] of [["SALES", "SCR-01", 1280], ["SALES", "SCR-01", 390], ["SALES", "SCR-09", 1280], ["SALES", "SCR-09", 390], ["SALES", "SCR-12", 1280], ["SALES", "SCR-13", 390], ["INSPECTOR", "SCR-02", 1280], ["INSPECTOR", "SCR-16", 390]]) {
     const p = sessions[role].page;
     await p.setViewportSize({ width, height: 900 });
-    await p.goto(base + "/tasks/" + screen);
+    await p.goto(base + workflowPaths[screen]);
     await p.waitForLoadState("networkidle");
     assert.equal(await p.locator("main#main-content h1").first().textContent(), screens[screen], `${role} ${screen}: landing page not shown`);
     const r = await new AxeBuilder({ page: p }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
@@ -552,13 +495,13 @@ await check("T-LAND-10", "axe: no violations on landing pages at 1280 and 390", 
 });
 
 // ---- T-LAND-18: other roles and states never reach a landing -------------------------------
-await check("T-LAND-18", "ADMIN goes to /admin and an employee who must change the password goes to /account (landing and legacy link)", async () => {
+await check("T-LAND-18", "ADMIN goes to the overview and an employee who must change the password goes to /account (index and detail)", async () => {
   // The session reads role and must_change_password from the database on every request,
   // so flipping them for a test session is enough. Always restored.
   const cookie = await apiCookie("HEAD_TECHNICIAN");
   const id = employees.HEAD_TECHNICIAN;
   const c = await connect("sa_web_test_p1");
-  const paths = ["/tasks/SCR-03", "/tasks/SCR-12", "/app?screen=SCR-03"];
+  const paths = ["/repairs", "/assisted-inspection-requests", "/repairs/H0001"];
   const seen = [];
   try {
     const [[orig]] = await c.query("SELECT role, craft_category, must_change_password FROM employee WHERE employee_id=?", [id]);
@@ -576,8 +519,8 @@ await check("T-LAND-18", "ADMIN goes to /admin and an employee who must change t
       await c.query("UPDATE employee SET role='ADMIN', craft_category=NULL WHERE employee_id=?", [id]);
       for (const p of paths) {
         const r = await chain(cookie, p);
-        assert(r.final.startsWith("/admin"), `ADMIN ${p}: ended at ${r.final}`);
-        seen.push("admin " + p + " -> /admin");
+        assert(r.final === "/", `ADMIN ${p}: ended at ${r.final}`);
+        seen.push("admin " + p + " -> /");
       }
     } finally {
       await c.query("UPDATE employee SET role=?, craft_category=? WHERE employee_id=?", [orig.role, orig.craft_category, id]);

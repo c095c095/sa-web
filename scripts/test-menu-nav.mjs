@@ -1,3 +1,4 @@
+import { workflowPath, workflowPaths } from "../src/lib/routes.ts";
 // Phase 1B/1C/1D tests: F1 (one menu, leftmost), F2 (same menu on every page,
 // "งานของฉัน" first), F7 (mobile menu keyboard + ARIA). docs/FINAL-VERIFICATION-REPORT.md §3.
 // Harness only; no app logic. Synthetic test DB only; never prints credentials.
@@ -55,7 +56,7 @@ async function employeePage(role, width = 1280) {
   await page.getByLabel("รหัสพนักงาน", { exact: true }).fill(employees[role]);
   await page.getByLabel("รหัสผ่าน", { exact: true }).fill(fixture.password);
   await page.getByRole("button", { name: "เข้าสู่ระบบ", exact: true }).click();
-  await page.waitForURL(/\/(home|app)(\?|$)/, { timeout: 30000 });
+  await page.waitForURL(base + "/", { timeout: 30000 });
   return { context, page };
 }
 
@@ -103,8 +104,8 @@ for (const role of ROLES) {
     page,
     unit,
     paths: {
-      "/home": "/home",
-      "/app": unit ? `/app?screen=${first}&unit=${encodeURIComponent(unit)}` : null,
+      "/": "/",
+      "detail": unit ? workflowPath(first, unit) : null,
       "/account": "/account",
     },
     appScreen: first,
@@ -138,7 +139,7 @@ for (const width of [1024, 1280, 1440, 1920]) {
 await check("T-LAY-02", "No dead 'ปิดเมนู' control is visible at desktop width", async () => {
   const s = sessions.SALES;
   await s.page.setViewportSize({ width: 1280, height: 900 });
-  await s.page.goto(base + "/home");
+  await s.page.goto(base + "/");
   await s.page.waitForLoadState("networkidle");
   const visibleClose = await s.page.evaluate(() =>
     [...document.querySelectorAll('[aria-label="ปิดเมนู"]')].filter((e) => {
@@ -162,7 +163,7 @@ await check("T-LAY-02", "No dead 'ปิดเมนู' control is visible at d
 await check("T-LAY-04", "Desktop menu panel starts at the top of the sidebar column (no gap pushed above it)", async () => {
   const s = sessions.SALES;
   await s.page.setViewportSize({ width: 1280, height: 900 });
-  await s.page.goto(base + "/home");
+  await s.page.goto(base + "/");
   await s.page.waitForLoadState("networkidle");
   const g = await s.page.evaluate(() => {
     const side = document.querySelector(".drawer-side").getBoundingClientRect();
@@ -177,7 +178,7 @@ for (const width of [390, 768]) {
   await check(`T-LAY-03@${width}`, `Menu hidden until opened, then exactly one menu at ${width}px`, async () => {
     const s = sessions.SALES;
     await s.page.setViewportSize({ width, height: 900 });
-    await s.page.goto(base + "/home");
+    await s.page.goto(base + "/");
     await s.page.waitForLoadState("networkidle");
     let st = await navState(s.page);
     assert.equal(st.navs.filter((n) => n.visible).length, 0, "menu visible before opening");
@@ -200,7 +201,7 @@ async function menuLabelsOn(page, p) {
   return nav;
 }
 
-await check("T-NAV-01", "Same menu labels on /home, /app and /account for each employee role; first item is งานของฉัน", async () => {
+await check("T-NAV-01", "Same menu labels on the overview, workflow details and /account for each employee role; first item is งานของฉัน", async () => {
   const detail = [];
   for (const [role, s] of Object.entries(sessions)) {
     const expected = [MY_WORK, ...screenRoles[role].map((k) => screens[k])];
@@ -220,10 +221,10 @@ await check("T-NAV-01", "Same menu labels on /home, /app and /account for each e
 await check("T-NAV-02", "aria-current marks the current page; none on /account", async () => {
   const detail = [];
   for (const [role, s] of Object.entries(sessions)) {
-    let nav = await menuLabelsOn(s.page, s.paths["/home"]);
+    let nav = await menuLabelsOn(s.page, s.paths["/"]);
     assert.deepEqual(nav.current, [MY_WORK], `${role} /home current`);
-    if (s.paths["/app"]) {
-      nav = await menuLabelsOn(s.page, s.paths["/app"]);
+    if (s.paths["detail"]) {
+      nav = await menuLabelsOn(s.page, s.paths["detail"]);
       assert.deepEqual(nav.current, [screens[s.appScreen]], `${role} /app current`);
     }
     nav = await menuLabelsOn(s.page, s.paths["/account"]);
@@ -233,30 +234,28 @@ await check("T-NAV-02", "aria-current marks the current page; none on /account",
   return { roles: detail };
 });
 
-// Phase 2A: every SALES menu item has a landing page (SCR-01, SCR-09, SCR-12, SCR-13), points to /tasks/SCR-XX and carries no house.
-const SALES_LANDING = ["SCR-01", "SCR-09", "SCR-12", "SCR-13"];
+// Phase 2A: every SALES menu item has a landing page (SCR-01, SCR-09, SCR-12, SCR-13), points to named routes and carries no house.
 const keyOf = (label) => Object.keys(screens).find((k) => screens[k] === label);
 
-await check("T-NAV-03", "งานของฉัน goes to /home; landing items go to /tasks without a house; others keep the open house", async () => {
+await check("T-NAV-03", "งานของฉัน goes to /home; workflow links open indexes without a selected house", async () => {
   const s = sessions.SALES;
   assert(s.unit, "fixture needs a house for sales");
-  const nav = await menuLabelsOn(s.page, s.paths["/app"]);
-  assert.equal(nav.hrefs[nav.labels.indexOf(MY_WORK)], "/home", "งานของฉัน href");
+  const nav = await menuLabelsOn(s.page, s.paths["detail"]);
+  assert.equal(nav.hrefs[nav.labels.indexOf(MY_WORK)], "/", "งานของฉัน href");
   for (const [i, label] of nav.labels.entries()) {
     if (label === MY_WORK) continue;
     const key = keyOf(label);
-    if (SALES_LANDING.includes(key)) assert.equal(nav.hrefs[i], "/tasks/" + key, label + ": " + nav.hrefs[i]);
-    else assert(nav.hrefs[i].includes("unit=" + encodeURIComponent(s.unit)), label + " lost the house: " + nav.hrefs[i]);
+    assert.equal(nav.hrefs[i], workflowPaths[key], label);
   }
   return { items_checked: nav.labels.length - 1 };
 });
 
-await check("T-NAV-04", "Clicking a house-scoped menu item from /home never adds a house by itself (Phase 1A regression)", async () => {
+await check("T-NAV-04", "Clicking a house-scoped menu item from the overview never adds a house by itself (Phase 1A regression)", async () => {
   const s = sessions.SALES;
   await s.page.setViewportSize({ width: 1280, height: 900 });
   const detail = [];
   for (const key of screenRoles.SALES.filter((k) => k !== "SCR-01")) {
-    await s.page.goto(base + "/home");
+    await s.page.goto(base + "/");
     await s.page.waitForLoadState("networkidle");
     const link = s.page.locator(NAV + ":visible").first().getByRole("link", { name: screens[key], exact: true });
     const before = s.page.url();
@@ -265,14 +264,14 @@ await check("T-NAV-04", "Clicking a house-scoped menu item from /home never adds
     await s.page.waitForLoadState("networkidle");
     const u = new URL(s.page.url());
     assert.equal(u.searchParams.get("unit"), null, key + ": URL gained a house: " + u.search);
-    if (SALES_LANDING.includes(key)) assert.equal(u.pathname, "/tasks/" + key, key + ": " + u.pathname);
+    assert.equal(u.pathname, workflowPaths[key], key);
     detail.push({ key, landed: u.pathname });
   }
   return { checked: detail };
 });
 
 // ---- Customer: menu consistency (Q12: behavior otherwise unchanged) ---------
-await check("T-NAV-05", "Customer sees งานของฉัน first with the same items on /home and /app", async () => {
+await check("T-NAV-05", "Customer sees งานของฉัน first with the same items on the overview and workflow pages", async () => {
   let cookie = null;
   for (const link of fixture.links) {
     const r = await fetch(base + "/api/auth/access", {
@@ -292,7 +291,7 @@ await check("T-NAV-05", "Customer sees งานของฉัน first with th
   const page = await context.newPage();
   const expected = [MY_WORK, ...screenRoles.CUSTOMER.map((k) => screens[k])];
   const detail = [];
-  for (const p of ["/home", "/app"]) {
+  for (const p of ["/", workflowPaths["SCR-17"]]) {
     const nav = await menuLabelsOn(page, p);
     assert.deepEqual(nav.labels, expected, `CUSTOMER ${p}: menu differs`);
     detail.push(p);
@@ -305,7 +304,7 @@ await check("T-NAV-05", "Customer sees งานของฉัน first with th
 await check("T-KBD-02", "Hamburger is a button with aria-expanded and aria-controls that points to the menu", async () => {
   const s = sessions.SALES;
   await s.page.setViewportSize({ width: 390, height: 800 });
-  await s.page.goto(base + "/home");
+  await s.page.goto(base + "/");
   await s.page.waitForLoadState("networkidle");
   const btn = s.page.locator('[aria-label="เปิดเมนู"]').first();
   const info = await btn.evaluate((e) => ({
@@ -323,7 +322,7 @@ await check("T-KBD-02", "Hamburger is a button with aria-expanded and aria-contr
 await check("T-KBD-01", "Keyboard opens the menu with Enter, Escape closes it and focus returns to the button", async () => {
   const s = sessions.SALES;
   await s.page.setViewportSize({ width: 390, height: 800 });
-  await s.page.goto(base + "/home");
+  await s.page.goto(base + "/");
   await s.page.waitForLoadState("networkidle");
   const btn = s.page.locator('[aria-label="เปิดเมนู"]').first();
   await btn.focus();
@@ -347,7 +346,7 @@ await check("T-KBD-01", "Keyboard opens the menu with Enter, Escape closes it an
 await check("T-KBD-04", "Mouse: button opens the menu, the X button and the overlay each close it", async () => {
   const s = sessions.SALES;
   await s.page.setViewportSize({ width: 390, height: 800 });
-  await s.page.goto(base + "/home");
+  await s.page.goto(base + "/");
   await s.page.waitForLoadState("networkidle");
   const open = () => s.page.locator('[aria-label="เปิดเมนู"]').first().click();
   const visibleNavs = async () => (await navState(s.page)).navs.filter((n) => n.visible).length;
@@ -366,21 +365,21 @@ await check("T-KBD-04", "Mouse: button opens the menu, the X button and the over
   return { closed_by: ["X button", "overlay"] };
 });
 
-await check("T-KBD-03","axe: no violations on /home and /app, menu closed and open, mobile and desktop", async () => {
+await check("T-KBD-03","axe: no violations on the overview and workflow pages, menu closed and open, mobile and desktop", async () => {
   const s = sessions.SALES;
   const found = [];
   const run = async (label) => {
     const r = await new AxeBuilder({ page: s.page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
     for (const v of r.violations) found.push({ at: label, id: v.id, impact: v.impact, nodes: v.nodes.length });
   };
-  for (const [width, p] of [[1280, s.paths["/home"]], [1280, s.paths["/app"]], [390, s.paths["/home"]]]) {
+  for (const [width, p] of [[1280, s.paths["/"]], [1280, s.paths["detail"]], [390, s.paths["/"]]]) {
     await s.page.setViewportSize({ width, height: 900 });
     await s.page.goto(base + p);
     await s.page.waitForLoadState("networkidle");
     await run(`${width} ${p.split("?")[0]}`);
   }
   await s.page.setViewportSize({ width: 390, height: 900 });
-  await s.page.goto(base + "/home");
+  await s.page.goto(base + "/");
   await s.page.waitForLoadState("networkidle");
   await s.page.locator('[aria-label="เปิดเมนู"]').first().click();
   await s.page.waitForTimeout(400);

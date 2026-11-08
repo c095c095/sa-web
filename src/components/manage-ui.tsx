@@ -2,7 +2,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import Link, { useLinkStatus } from "next/link";
 import { useRouter } from "next/navigation";
-import { landingKind, landingPath } from "@/lib/task-landing";
+import { adminPath, workflowPaths } from "@/lib/routes";
 import {
   House,
   LogOut,
@@ -131,14 +131,11 @@ function SidebarNav({
 export function buildNav(identity: SessionView) {
   const role = identity.kind === "CUSTOMER" ? "CUSTOMER" : identity.role;
   return [
-    { key: "home", href: "/home", label: "ภาพรวม" },
+    { key: "home", href: "/", label: "ภาพรวม" },
     ...(screenRoles[role] ?? []).map((key) => ({
       key,
       label: screens[key],
-      // Phase 2A: a menu item with a landing page opens it and carries no house.
-      href: role === "CUSTOMER" || landingKind(role, key)
-        ? landingPath(key)
-        : "/app?screen=" + key,
+      href: workflowPaths[key],
     })),
   ];
 }
@@ -200,7 +197,7 @@ export function AppFrame({
       ? Object.entries(managementSections).map(([key, label]) => ({
           key,
           label,
-          href: "/admin?section=" + key,
+          href: adminPath(key),
         }))
       : buildNav(identity));
   const initial = identity.fullName.trim().slice(0, 2) || "ผ";
@@ -232,7 +229,7 @@ export function AppFrame({
           </button>
 
           <Link
-            href={admin ? "/admin" : "/home"}
+            href="/"
             className="flex items-center gap-2.5 font-semibold text-base-content"
           >
             <House size={22} aria-hidden="true" />
@@ -284,7 +281,7 @@ export function AppFrame({
               <li className="mt-1 border-t border-base-300 pt-1">
                 <button
                   type="button"
-                  className="bg-error text-error-content hover:bg-error/80"
+                  className="bg-error! text-error-content! hover:bg-error/80!"
                   onClick={async () => {
                     try {
                       const r = await fetch("/api/auth/logout", {
@@ -653,7 +650,7 @@ export function Dialog({
   );
 }
 export function Back({
-  href = "/home",
+  href = "/",
   children = "กลับไปภาพรวม",
 }: {
   href?: string;

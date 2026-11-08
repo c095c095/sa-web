@@ -2,8 +2,8 @@ import "server-only";
 import { type Identity, employee, publicIdentity, requireReady } from "./auth";
 import { pool, rows, type Row } from "./db";
 import { journey, type Task } from "@/lib/journey";
-import { canIssueLink, landingKind } from "@/lib/task-landing";
-import { type Workspace } from "@/lib/runtime-contracts";
+import { canIssueLink } from "@/lib/task-landing";
+import { screenRoles, type Workspace } from "@/lib/runtime-contracts";
 
 // primary: the step journey.ts offers for this house. A row that is not primary is
 // the SCR-09 re-issue of a link for a customer that is already bound.
@@ -20,7 +20,7 @@ export async function taskLanding(
 ): Promise<LandingRow[]> {
   requireReady(id);
   const e = employee(id, ["SALES", "INSPECTOR"]);
-  if (landingKind(e.role, screen) !== "houses")
+  if (screen === "SCR-01" || !screenRoles[e.role].includes(screen))
     throw new Error("screen has no house landing for this role");
   const units = await rows(
     pool,

@@ -60,7 +60,7 @@ export function LoginForm({
         throw new Error(
           result.error?.message ?? "เข้าสู่ระบบไม่ได้ กรุณาลองใหม่",
         );
-      router.replace("/app");
+      router.replace("/");
       router.refresh();
     } catch (e) {
       setError(

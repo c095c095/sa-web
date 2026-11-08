@@ -1,3 +1,4 @@
+import { workflowPath } from "../src/lib/routes.ts";
 import fs from "node:fs";
 import path from "node:path";
 import assert from "node:assert/strict";
@@ -57,11 +58,11 @@ async function login(id) {
   await p.getByLabel("รหัสพนักงาน", { exact: true }).fill(id);
   await p.getByLabel("รหัสผ่าน", { exact: true }).fill(fixture.password);
   await p.getByRole("button", { name: "เข้าสู่ระบบ", exact: true }).click();
-  await p.waitForURL(/\/(home|app)(\?|$)/);
+  await p.waitForURL(base + "/");
   return p;
 }
 async function screen(p, s, u) {
-  await p.goto(`${base}/app?screen=${s}${u ? "&unit=" + u : ""}`);
+  await p.goto(base + workflowPath(s, u));
   await p.locator("h1").waitFor();
 }
 async function submit(p, title) {
@@ -79,7 +80,7 @@ async function submit(p, title) {
   await p.getByRole("button", { name: title, exact: true }).click();
   const r = await response;
   assert.equal(r.status(), 200, JSON.stringify(await r.json()));
-  if (r.url().endsWith("/UC-01")) await p.waitForURL(/\/home\?unit=/);
+  if (r.url().endsWith("/UC-01")) await p.waitForURL(/\/houses\//);
   else await p.getByRole("status").waitFor();
   const latest = await refreshed;
   assert.equal(latest.status(), 200);
@@ -92,12 +93,12 @@ async function check(name, fn) {
 }
 let sales, inspector, head, customer, unit, defect, handDefect;
 try {
-  await check("Employee login and protected old pilot redirect", async () => {
+  await check("Employee login and protected workflow index", async () => {
     sales = await login("EMP0001");
     inspector = await login("EMP0003");
     head = await login("EMP0008");
     const anonymous = await context();
-    await anonymous.goto(base + "/pilot/technician");
+    await anonymous.goto(base + "/repairs");
     await anonymous.waitForURL("**/login");
   });
   const project = "Browser ทดสอบสมมติ " + Date.now();
@@ -214,10 +215,13 @@ try {
     await customer
       .getByRole("button", { name: "เปิดข้อมูลบ้าน", exact: true })
       .click();
-    await customer.waitForURL("**/app");
+    await customer.waitForURL(base + "/");
     assert(!customer.url().includes("token"));
   });
   await check("UC10 inspection choice UC11 customer request", async () => {
+    await customer
+      .getByRole("link", { name: "เริ่มทำงานนี้", exact: true })
+      .click();
     await customer
       .getByRole("link", { name: "ต้องการตรวจบ้าน · เลือกวัน", exact: true })
       .click();
@@ -418,7 +422,7 @@ try {
       .getByRole("button", { name: "ออกจากระบบ", exact: true })
       .click();
     await sales.waitForURL("**/login");
-    await sales.goto(base + "/app");
+    await sales.goto(base + "/");
     await sales.waitForURL("**/login");
   });
 } catch (e) {

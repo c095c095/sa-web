@@ -76,7 +76,7 @@ try {
     });
     assert.equal(r.status(), 200);
     const p = await c.newPage();
-    await p.goto(base + "/app");
+    await p.goto(base + "/");
     await p.locator("main h1").waitFor();
     const ratio = await contrast(p, 'nav a[aria-current="page"]:visible');
     assert(ratio >= 4.5, "Selected menu contrast " + ratio);
@@ -113,7 +113,7 @@ try {
   await p.goto(raw.url.replace("/access?token=", "/access#token="));
   await p.waitForURL("**/access");
   await p.getByRole("button", { name: "เปิดข้อมูลบ้าน", exact: true }).click();
-  await p.waitForURL("**/app");
+  await p.waitForURL(base + "/");
   await p.locator("main h1").waitFor();
   assert(!p.url().includes("token"));
   out.cases.push({

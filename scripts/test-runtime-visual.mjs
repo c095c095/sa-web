@@ -1,3 +1,4 @@
+import { workflowPath } from "../src/lib/routes.ts";
 import fs from "node:fs";
 import path from "node:path";
 import assert from "node:assert/strict";
@@ -9,13 +10,11 @@ const fixture = JSON.parse(
   ),
   base = fixture.base;
 assert.equal(base, testBase);
-// Phase 1A (F12/Q7): a house-scoped screen opened without a house goes to the
-// picker. Workbench checks below open a house the technician can see.
-async function houseQuery(page) {
+async function houseId(page) {
   const body = (await (await page.request.get(base + "/api/workspace")).json()).data;
   const u = (body.units || [])[0];
   assert(u, "technician has no visible house in fixture");
-  return "&unit=" + encodeURIComponent(u.unit_id);
+  return u.unit_id;
 }
 const db = await connect("sa_web_test_p1"),
   browser = await chromium.launch({ channel: "msedge", headless: true });
@@ -55,7 +54,7 @@ async function customer(sales, unit, legacy = false) {
   await p.goto(legacy ? url.replace("#token=", "?token=") : url);
   await p.waitForURL(base + "/access");
   await p.getByRole("button", { name: "เปิดข้อมูลบ้าน", exact: true }).click();
-  await p.waitForURL("**/app");
+  await p.waitForURL(base + "/");
   assert(!p.url().includes("token"));
   await p.close();
   return c;
@@ -97,7 +96,7 @@ try {
     const p = await c.newPage();
     for (const width of [390, 1440]) {
       await p.setViewportSize({ width, height: 1000 });
-      await p.goto(base + `/app?screen=${s}&unit=${u}`);
+      await p.goto(base + workflowPath(s, u));
       await p.locator("h1").waitFor();
       await p.evaluate(() => document.fonts.ready);
       assert.equal(
@@ -173,7 +172,7 @@ try {
   }
   await check("Keyboard skip link focus", async () => {
     const p = await head.newPage();
-    await p.goto(base + "/app?screen=SCR-03" + (await houseQuery(p)));
+    await p.goto(base + workflowPath("SCR-03", await houseId(p)));
     await p.keyboard.press("Tab");
     assert.equal(
       await p.locator(":focus").getAttribute("href"),
@@ -185,7 +184,7 @@ try {
     "Network refresh error is visible without clearing saved data",
     async () => {
       const p = await head.newPage();
-      await p.goto(base + "/app?screen=SCR-03" + (await houseQuery(p)));
+      await p.goto(base + workflowPath("SCR-03", await houseId(p)));
       await p.route("**/api/workspace**", (route) => route.abort());
       await p.getByRole("button", { name: "โหลดข้อมูลล่าสุด" }).click();
       await p.locator("main").getByRole("alert").waitFor();
@@ -200,7 +199,7 @@ try {
   );
   await check("Validation error retains form input", async () => {
     const p = await sales.newPage();
-    await p.goto(base + "/app?screen=SCR-01");
+    await p.goto(base + workflowPath("SCR-01"));
     await p.getByLabel("โครงการ", { exact: true }).selectOption({ index: 1 });
     await p.getByLabel("เลขที่บ้าน", { exact: true }).fill("TEST-ERROR");
     await p.route("**/api/actions/UC-01", (route) =>
