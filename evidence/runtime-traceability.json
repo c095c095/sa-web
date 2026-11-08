@@ -1,0 +1,628 @@
+{
+  "recorded_at": "2026-11-08T12:40:53.734Z",
+  "status": "PASS",
+  "scope": "Semantic traceability audit, not SQL statement execution coverage",
+  "original_queries": 77,
+  "implemented_uc_branches": 18,
+  "screens": 19,
+  "reports": 2,
+  "catalog_sha256": "3c17f8bbc1bf42c8d55489aad2a3e9c0644cf86b92215103e057077dc17eb2c7",
+  "rows": [
+    {
+      "query_id": "Q01.1",
+      "uc_id": "UC-01",
+      "source_sha256": "6936022c208fc3f14a426c6272c7d4af23ec9aa1ea61538a50f0d2869c89f095",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-01",
+      "adaptation": "Atomic unique(project_name,house_no) enforces duplicate rejection instead of a racy pre-read."
+    },
+    {
+      "query_id": "Q01.2",
+      "uc_id": "UC-01",
+      "source_sha256": "2e38b460ce4b3e0b3afa36b4c54a5cd9b1d77ac93b219f93f965014308080f9f",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-01",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q02.1",
+      "uc_id": "UC-02",
+      "source_sha256": "efc8dffc7827bb3f0b7e16c089cb093260fcffcad131609dade370cbe28ccc06",
+      "runtime_file": "src/server/workspace.ts",
+      "runtime_symbol": "workspace",
+      "adaptation": "Consolidated role-scoped read model; eligible action choices and guards in Workbench and executeUc."
+    },
+    {
+      "query_id": "Q02.2",
+      "uc_id": "UC-02",
+      "source_sha256": "35f513e95a96538aacccda78a490aa6794450cb2903396f140bffa738d34e87c",
+      "runtime_file": "src/server/workspace.ts",
+      "runtime_symbol": "workspace",
+      "adaptation": "Consolidated role-scoped read model; eligible action choices and guards in Workbench and executeUc."
+    },
+    {
+      "query_id": "Q02.3",
+      "uc_id": "UC-02",
+      "source_sha256": "ea926aa35b519307e4f9da6d932cfa8f350631c6c0673ae0a1e54abf3067f67c",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-02",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q02.4",
+      "uc_id": "UC-02",
+      "source_sha256": "183cc30d1580a0d1600be04411034e8a8a436a6c834145f798b1d6bfe56c5287",
+      "runtime_file": "src/server/workspace.ts",
+      "runtime_symbol": "workspace",
+      "adaptation": "Consolidated role-scoped read model; eligible action choices and guards in Workbench and executeUc."
+    },
+    {
+      "query_id": "Q02.5",
+      "uc_id": "UC-02",
+      "source_sha256": "013d18fa21b08d3fa6d8dac3a3d2a61ffebfd8040dc1874643ce538f0fde6c35",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-02",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q02.6",
+      "uc_id": "UC-02",
+      "source_sha256": "23404613b8e21c8cf73471285bfa48ff3855e4e54b2df9d3ba615f7b61109900",
+      "runtime_file": "src/server/media.ts",
+      "runtime_symbol": "attach",
+      "adaptation": "Private verified media, single-owner metadata and physical-file transaction cleanup."
+    },
+    {
+      "query_id": "Q02.7",
+      "uc_id": "UC-02",
+      "source_sha256": "7fc02978e2dc68aba125d19504db0e2a4683ccffc3d29a018adac67483b6054a",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-02",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q02.8",
+      "uc_id": "UC-02",
+      "source_sha256": "37637c3707d4468bb60437a4e621981167d0719b3d5bf630acff194ca074cfac",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-02",
+      "adaptation": "Locked defect/round eligibility then guarded file-owner deletion; physical file removed after commit."
+    },
+    {
+      "query_id": "Q02.9",
+      "uc_id": "UC-02",
+      "source_sha256": "812e897a147377151dcf98b7a602deda8931ec33bf45989139db48f6786ec237",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-02",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q02.10",
+      "uc_id": "UC-02",
+      "source_sha256": "e1f2a1b1e54440fa673be0fc1286399f59ec1b99ce0956272a8fa2b767af8d54",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-02",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q03.1",
+      "uc_id": "UC-03",
+      "source_sha256": "958ee73052f1a183ca920ae5d31159aa5bbdbcebc4f878245be953449b7ebc14",
+      "runtime_file": "src/server/workspace.ts",
+      "runtime_symbol": "workspace",
+      "adaptation": "Consolidated role-scoped read model; eligible action choices and guards in Workbench and executeUc."
+    },
+    {
+      "query_id": "Q03.2",
+      "uc_id": "UC-03",
+      "source_sha256": "e24f517e2a103303591dc0eb389c77b8fd3abe85acb133f29b7131e41d86b449",
+      "runtime_file": "src/server/workspace.ts",
+      "runtime_symbol": "workspace",
+      "adaptation": "Consolidated role-scoped read model; eligible action choices and guards in Workbench and executeUc."
+    },
+    {
+      "query_id": "Q03.3",
+      "uc_id": "UC-03",
+      "source_sha256": "47e26a74ee4a71346d218517f2c95c2f84ba5baddd905e0017c43e4d06e1ca98",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-03",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q04.1",
+      "uc_id": "UC-04",
+      "source_sha256": "dc5b5782a2727f5d2ff55e89925f010899ec221b07bf42775816bd053bb4a152",
+      "runtime_file": "src/server/workspace.ts",
+      "runtime_symbol": "workspace",
+      "adaptation": "Consolidated role-scoped read model; eligible action choices and guards in Workbench and executeUc."
+    },
+    {
+      "query_id": "Q04.2",
+      "uc_id": "UC-04",
+      "source_sha256": "e6d20da5025e994d46a0d307f3bd01848fc79c69e617406320627b9e6f39c03e",
+      "runtime_file": "src/server/media.ts",
+      "runtime_symbol": "attach",
+      "adaptation": "Private verified media, single-owner metadata and physical-file transaction cleanup."
+    },
+    {
+      "query_id": "Q04.3",
+      "uc_id": "UC-04",
+      "source_sha256": "b3a347a6464fbadff838b5465d17e0b06b1f11dba8a39ebc37b1739891da95c4",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-04",
+      "adaptation": "Fresh-after-photo count preserves previous completion boundary; PostgreSQL -infinity replaced by MariaDB 1000-01-01."
+    },
+    {
+      "query_id": "Q04.4",
+      "uc_id": "UC-04",
+      "source_sha256": "4b1cb802f960cec3f4b6144c8624e8233f07596a543dfa4fb4bafd3b54f9f2c8",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-04",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q05.1",
+      "uc_id": "UC-05",
+      "source_sha256": "356a3626459cca86c3e7eba103ae57a02a7731b631f57efe0aa8817695392b49",
+      "runtime_file": "src/server/workspace.ts",
+      "runtime_symbol": "workspace",
+      "adaptation": "Consolidated role-scoped read model; eligible action choices and guards in Workbench and executeUc."
+    },
+    {
+      "query_id": "Q05.2",
+      "uc_id": "UC-05",
+      "source_sha256": "d0a867bc0a629fef1d67dc71f839c2bb2e3b97bcd2f301759ff24a0583d506a1",
+      "runtime_file": "src/server/workspace.ts",
+      "runtime_symbol": "workspace",
+      "adaptation": "Consolidated role-scoped read model; eligible action choices and guards in Workbench and executeUc."
+    },
+    {
+      "query_id": "Q05.3",
+      "uc_id": "UC-05",
+      "source_sha256": "cfdad3f0ddabdbbd5836655069612d5e1120b60f5b3893808d03d3bde4e66492",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-05",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q05.4",
+      "uc_id": "UC-05",
+      "source_sha256": "7856a94576ddd10adef17c52e07993e7f35ac8817e3ea2cf7f18d5abef9fe02d",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-05",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q06.1",
+      "uc_id": "UC-06",
+      "source_sha256": "c91b8d6439b390a126fbfa89e2719921935016fc197c2677606ba4f618e3d53c",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-06",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q06.2",
+      "uc_id": "UC-06",
+      "source_sha256": "8f2784914f594b90b551274a79d5d011e23ee61f2d6b5ce238b7da9f73975c7d",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-06",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q06.3",
+      "uc_id": "UC-06",
+      "source_sha256": "1be8552138f88f796e75b3ffead6fa950b81602b3225ab1d2470dbf208ce3351",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-06",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q06.4",
+      "uc_id": "UC-06",
+      "source_sha256": "284e7fa146f494b0155809b04cfc055a0b8aa080a98644467ce34d2d06d2c2f2",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-06",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q06.5",
+      "uc_id": "UC-06",
+      "source_sha256": "b68973134d1b211a34c17f430dead8437e999d40dff8aa462ce2ca3c56e90a40",
+      "runtime_file": "src/server/media.ts",
+      "runtime_symbol": "attach",
+      "adaptation": "Private verified media, single-owner metadata and physical-file transaction cleanup."
+    },
+    {
+      "query_id": "Q06.6",
+      "uc_id": "UC-06",
+      "source_sha256": "bfdb08aec436c62fb732e908207945a12d7f04d908782da29e467e234c328f74",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-06",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q07.1",
+      "uc_id": "UC-07",
+      "source_sha256": "a0d3a36bee499a3c01253b81069ff5fbe40cca4a2988ce22dde24533986d73dd",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-07",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q07.2",
+      "uc_id": "UC-07",
+      "source_sha256": "1a61984b5914141f084297a71f8b5698b10f80b2c3c27f60c8394486e689a70d",
+      "runtime_file": "src/server/workspace.ts",
+      "runtime_symbol": "workspace",
+      "adaptation": "Consolidated role-scoped read model; eligible action choices and guards in Workbench and executeUc."
+    },
+    {
+      "query_id": "Q07.3",
+      "uc_id": "UC-07",
+      "source_sha256": "18f9b09f78308d4e5a7f2f8c6422e2ec94c5ac69b91d36333f952074e4558687",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-07",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q08.1",
+      "uc_id": "UC-08",
+      "source_sha256": "098432f2987ced47567f583b6871a0eac5f1ac9fe7496da359aece65a11a73de",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-08",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q08.2",
+      "uc_id": "UC-08",
+      "source_sha256": "418119fb31eb159d69892dbc1e4e3905b5005af384ad6f2c6b56e60317dfb593",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-08",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q09.1",
+      "uc_id": "UC-09",
+      "source_sha256": "f74968891e1788a700c0eb0ffc570191c1a7d0b162e8e0b5bea72197a84cdefc",
+      "runtime_file": "src/server/workspace.ts",
+      "runtime_symbol": "workspace",
+      "adaptation": "Consolidated role-scoped read model; eligible action choices and guards in Workbench and executeUc."
+    },
+    {
+      "query_id": "Q09.2",
+      "uc_id": "UC-09",
+      "source_sha256": "aad35481ff7eb09d1f66ccb463ad2fb7533532c2ac44118c460e4647e737d12e",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-09",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q09.3",
+      "uc_id": "UC-09",
+      "source_sha256": "86492ed850ade0f992deb524642c8e43e671dc80bb93f6ef0d8e93bb726c9598",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-09",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q09.4",
+      "uc_id": "UC-09",
+      "source_sha256": "6554ab0dc746ac211aa7d53eef956d2eccde43f88cbaaadf363ba9b7cff616f8",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-09",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q09.5",
+      "uc_id": "UC-09",
+      "source_sha256": "f6ce5efcf28805f01197c253da3fa88f62cfe09e8f1c75fd98a02ad89f30ae46",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-09",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q10.1",
+      "uc_id": "UC-10",
+      "source_sha256": "70cb6312e78610a8c555910d052827ff6bc920c7b1178996a17435abd0430740",
+      "runtime_file": "src/server/auth.ts",
+      "runtime_symbol": "exchangeLink / identityForToken / recheckIdentity",
+      "adaptation": "Raw token exchanged once for opaque session; every request revalidates digest, expiry and current customer-house binding."
+    },
+    {
+      "query_id": "Q10.2",
+      "uc_id": "UC-10",
+      "source_sha256": "005688e6e3261b4160af1edcae5e7f18c8bd4dea9570e5a5983e174f95f46c34",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-10",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q11.1",
+      "uc_id": "UC-11",
+      "source_sha256": "716c136acc02217dd9fae14cddbd660efb7a2eb6fb1302f5a98c66f360ef15f4",
+      "runtime_file": "src/server/auth.ts",
+      "runtime_symbol": "exchangeLink / identityForToken / recheckIdentity",
+      "adaptation": "Raw token exchanged once for opaque session; every request revalidates digest, expiry and current customer-house binding."
+    },
+    {
+      "query_id": "Q11.2",
+      "uc_id": "UC-11",
+      "source_sha256": "ee9a472e87ba23a4b75d4941891742e4c8331420a544da0cf88da9c8fc1e7746",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-11",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q11.3",
+      "uc_id": "UC-11",
+      "source_sha256": "e87aedccbb84a42d6215b54dbb8a636c3a5d9830e9580a9164862678de179706",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-11",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q12.1",
+      "uc_id": "UC-12",
+      "source_sha256": "8bfae11afee4761c17693abd55c64ddb3a3e4d5510630e22c41e18c2c82fa89c",
+      "runtime_file": "src/server/workspace.ts",
+      "runtime_symbol": "workspace",
+      "adaptation": "Consolidated role-scoped read model; eligible action choices and guards in Workbench and executeUc."
+    },
+    {
+      "query_id": "Q12.2",
+      "uc_id": "UC-12",
+      "source_sha256": "b66a0d2f9605d0a08e04f029277308ade77474aed26391cc2052c5b1f75b03a2",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-12",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q12.3",
+      "uc_id": "UC-12",
+      "source_sha256": "c821e57260daa02b603d67d801f01cdf2292cdec7a6ad63a6cdeff6dedc06dbe",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-12",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q13.1",
+      "uc_id": "UC-13",
+      "source_sha256": "3be3374d129184772d266cf81b240b589fb46c57762ca4a73b13951291c10014",
+      "runtime_file": "src/server/workspace.ts",
+      "runtime_symbol": "workspace",
+      "adaptation": "Consolidated role-scoped read model; eligible action choices and guards in Workbench and executeUc."
+    },
+    {
+      "query_id": "Q13.2",
+      "uc_id": "UC-13",
+      "source_sha256": "a2a4b42ab5d13f72e1880aa625969307ba9bc1423bed4df7fe65a43046d20021",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-13",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q13.3",
+      "uc_id": "UC-13",
+      "source_sha256": "77d6330f892f520bb04790fb8e3fa923f1cdc4b2732e004c9e3a0c7943dd8d13",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-13",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q13.4",
+      "uc_id": "UC-13",
+      "source_sha256": "714fe72f8c115daf9dd081f00180c433bfbac03555af8ac48ca6c177db449d66",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-13",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q13.5",
+      "uc_id": "UC-13",
+      "source_sha256": "ba003d21335e0b7eb6c9df4c14fa1ed48a8b69c4ec003c9a8234dcf8409805a3",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-13",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q14.1",
+      "uc_id": "UC-14",
+      "source_sha256": "a92b419307b422ff7b5d3446aa938188c03385abc34ec4cc753994b25234b0de",
+      "runtime_file": "src/server/auth.ts",
+      "runtime_symbol": "exchangeLink / identityForToken / recheckIdentity",
+      "adaptation": "Raw token exchanged once for opaque session; every request revalidates digest, expiry and current customer-house binding."
+    },
+    {
+      "query_id": "Q14.2",
+      "uc_id": "UC-14",
+      "source_sha256": "36479f7c6a979bb046458d887e1aa5e6fada02ef7cd881e1a50094785e654048",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-14",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q14.3",
+      "uc_id": "UC-14",
+      "source_sha256": "5d35da43a42b7f5766a2ac77190b9a88410c6d1706cc0e3609269e61841816eb",
+      "runtime_file": "src/server/media.ts",
+      "runtime_symbol": "attach",
+      "adaptation": "Private verified media, single-owner metadata and physical-file transaction cleanup."
+    },
+    {
+      "query_id": "Q15.1",
+      "uc_id": "UC-15",
+      "source_sha256": "4ea6676b9e32ca7cec27f85f76a15a8172b86d800743110d0a1786f5498d9eda",
+      "runtime_file": "src/server/workspace.ts",
+      "runtime_symbol": "workspace",
+      "adaptation": "Consolidated role-scoped read model; eligible action choices and guards in Workbench and executeUc."
+    },
+    {
+      "query_id": "Q15.2",
+      "uc_id": "UC-15",
+      "source_sha256": "5785466cf828a7ccfb381a77eb9d7150084cc1011a4b7782e009a8ade47c70ea",
+      "runtime_file": "src/server/workspace.ts",
+      "runtime_symbol": "workspace",
+      "adaptation": "Consolidated role-scoped read model; eligible action choices and guards in Workbench and executeUc."
+    },
+    {
+      "query_id": "Q15.3",
+      "uc_id": "UC-15",
+      "source_sha256": "32a35cef9aac86ae399ea49bf425847aa4cf30e3843fbac2ad234b6375743049",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-15",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q16.1",
+      "uc_id": "UC-16",
+      "source_sha256": "af1bc243a5b3d4128438ab958a6339110927b7ce55b97393df7b307ef5739f13",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-16",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q16.2",
+      "uc_id": "UC-16",
+      "source_sha256": "a0b9c45520960eab614857ac2e0d2a61e6ff905dbad1bf92ac42f99589b7e8c4",
+      "runtime_file": "src/server/media.ts",
+      "runtime_symbol": "fileRows / repairPdf",
+      "adaptation": "Actual local uploads embedded in Thai-font A4 portrait PDF; original example URLs are never downloaded."
+    },
+    {
+      "query_id": "Q16.3",
+      "uc_id": "UC-16",
+      "source_sha256": "ce6dcdf1affef6f8dd19ff6479558407688a08c43f9227178867c8f6a56e6def",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-16",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q16.4",
+      "uc_id": "UC-16",
+      "source_sha256": "a9338750977e683c8b8b349456d460a5eec75e3731bb46ac217a647a63a94b39",
+      "runtime_file": "src/server/media.ts",
+      "runtime_symbol": "attach",
+      "adaptation": "Private verified media, single-owner metadata and physical-file transaction cleanup."
+    },
+    {
+      "query_id": "Q17.1",
+      "uc_id": "UC-17",
+      "source_sha256": "b4802f92c684b8666c60ff8d973392fcc73cad1e966ab0155f67cd6f290d0024",
+      "runtime_file": "src/server/auth.ts",
+      "runtime_symbol": "exchangeLink / identityForToken / recheckIdentity",
+      "adaptation": "Raw token exchanged once for opaque session; every request revalidates digest, expiry and current customer-house binding."
+    },
+    {
+      "query_id": "Q17.2",
+      "uc_id": "UC-17",
+      "source_sha256": "eae461b0795c22672c546e433c89dbf96637502bd60944b7095ecc5ec12bc322",
+      "runtime_file": "src/server/workspace.ts",
+      "runtime_symbol": "workspace",
+      "adaptation": "Consolidated role-scoped read model; eligible action choices and guards in Workbench and executeUc."
+    },
+    {
+      "query_id": "Q17.3",
+      "uc_id": "UC-17",
+      "source_sha256": "23180478321aec4e6353c6d92c5a12fe4437aa4f9a0c941158a2e4da09c834fa",
+      "runtime_file": "src/server/workspace.ts",
+      "runtime_symbol": "workspace",
+      "adaptation": "Consolidated role-scoped read model; eligible action choices and guards in Workbench and executeUc."
+    },
+    {
+      "query_id": "Q17.4",
+      "uc_id": "UC-17",
+      "source_sha256": "433a152cc756b0301edaa9bac75bbd12769409bf5c46d9ab078f77799daf51ae",
+      "runtime_file": "src/server/workspace.ts",
+      "runtime_symbol": "workspace",
+      "adaptation": "Consolidated role-scoped read model; eligible action choices and guards in Workbench and executeUc."
+    },
+    {
+      "query_id": "Q17.5",
+      "uc_id": "UC-17",
+      "source_sha256": "efde9f05b676f04fb99f2b4dcf6eed52383bc9287a69a8871aa2913703ed8aec",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-17",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q17.6",
+      "uc_id": "UC-17",
+      "source_sha256": "ba5af032e68b95f06f89b8a0a6ce7d6014dc8e8939bd4871c34f7a45dd728fe1",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-17",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q17.7",
+      "uc_id": "UC-17",
+      "source_sha256": "16cd93a82be139c5e6564e1772ac80763e4762e03b55fa286d91079e8c559705",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-17",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q17.8",
+      "uc_id": "UC-17",
+      "source_sha256": "49f7cfd662aab87fbe6d6394d9b9c73d7f9b521b6d6bb69e8cccadd4831b58cc",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-17",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q17.9",
+      "uc_id": "UC-17",
+      "source_sha256": "28c614bab7a4e18077a6e4e71e2723bf2f7824bea205c69475792faf478556de",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-17",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q17.10",
+      "uc_id": "UC-17",
+      "source_sha256": "66ed1f68ead6f6fecf8c8b8108fdf49305a2e2f8cc0430924ba2f1b1e40c095d",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-17",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q17.11",
+      "uc_id": "UC-17",
+      "source_sha256": "2807da74965e1619d14790dcd9c596cf178c42fc4d91e3d915a4c3a1eb1410fb",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-17",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q18.1",
+      "uc_id": "UC-18",
+      "source_sha256": "d033a38bc08cdb5d82426a63b527ee4763d6945fdd7ae10fd266c008ea9f6852",
+      "runtime_file": "src/server/auth.ts",
+      "runtime_symbol": "exchangeLink / identityForToken / recheckIdentity",
+      "adaptation": "Raw token exchanged once for opaque session; every request revalidates digest, expiry and current customer-house binding."
+    },
+    {
+      "query_id": "Q18.2",
+      "uc_id": "UC-18",
+      "source_sha256": "493828117aee44306824e397606f11e959dad8227a2f9b3cb40d65e34b5cf807",
+      "runtime_file": "src/server/media.ts",
+      "runtime_symbol": "attach",
+      "adaptation": "Private verified media, single-owner metadata and physical-file transaction cleanup."
+    },
+    {
+      "query_id": "Q18.3",
+      "uc_id": "UC-18",
+      "source_sha256": "ae57ec396e36ca5c6e89b9c3a2d2d25fca29a1a96d1bbdad2ff357dde3349f12",
+      "runtime_file": "src/server/workflows.ts",
+      "runtime_symbol": "executeUc / UC-18",
+      "adaptation": "Transactional service preserves the original business operation; predicates rechecked under locks."
+    },
+    {
+      "query_id": "Q00.1",
+      "uc_id": "SCR-00",
+      "source_sha256": "3d8e5c10699c9fc015cbd8edc66dd4c90ee13c5dff23109543c3ac3839053df7",
+      "runtime_file": "src/server/auth.ts",
+      "runtime_symbol": "login",
+      "adaptation": "Active account and bcrypt password verification before role-scoped server session issuance."
+    }
+  ]
+}

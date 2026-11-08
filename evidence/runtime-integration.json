@@ -1,0 +1,148 @@
+{
+  "started_at": "2026-11-08T12:38:39.732Z",
+  "scope": "Real HTTP endpoints against isolated MariaDB test database; all data synthetic",
+  "cases": [
+    {
+      "id": "AUTH-01 unauthenticated mutation denied",
+      "status": "PASS"
+    },
+    {
+      "id": "AUTH-02 active employee login and secret-free session",
+      "status": "PASS"
+    },
+    {
+      "id": "AUTH-03 inactive and wrong passwords denied",
+      "status": "PASS"
+    },
+    {
+      "id": "AUTH-04 origin enforcement and role spoof denied",
+      "status": "PASS"
+    },
+    {
+      "id": "UC01 register and persist Thai house",
+      "status": "PASS"
+    },
+    {
+      "id": "UC01 duplicate rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "UC02 add before photo",
+      "status": "PASS"
+    },
+    {
+      "id": "FILES genuine type and size validation",
+      "status": "PASS"
+    },
+    {
+      "id": "UC02 edit and delete with physical photo cleanup",
+      "status": "PASS"
+    },
+    {
+      "id": "UC02 finish locks persisted edits additions deletions",
+      "status": "PASS"
+    },
+    {
+      "id": "UC03 craft guard and atomic batch rollback",
+      "status": "PASS"
+    },
+    {
+      "id": "UC03 concurrent claim only one succeeds",
+      "status": "PASS"
+    },
+    {
+      "id": "UC04 requires fresh photo and completes repair",
+      "status": "PASS"
+    },
+    {
+      "id": "UC05 rejection rework and repeat repair",
+      "status": "PASS"
+    },
+    {
+      "id": "UC06 recheck found new defect reopens same round",
+      "status": "PASS"
+    },
+    {
+      "id": "UC06 no defect then UC07 XOR and same inspector blocked",
+      "status": "PASS"
+    },
+    {
+      "id": "UC08 ready for sale",
+      "status": "PASS"
+    },
+    {
+      "id": "UC09 bind customer and store only token digest",
+      "status": "PASS"
+    },
+    {
+      "id": "AUTH-05 wrong-house workspace resources blocked",
+      "status": "PASS"
+    },
+    {
+      "id": "UC11 customer inspection request and duplicate prevented",
+      "status": "PASS"
+    },
+    {
+      "id": "UC13 arrival needs appointment; reschedule same request",
+      "status": "PASS"
+    },
+    {
+      "id": "UC14 external reporter photo and server ownership",
+      "status": "PASS"
+    },
+    {
+      "id": "UC15 head only classifies",
+      "status": "PASS"
+    },
+    {
+      "id": "UC16 refuses incomplete repairs; UC17 refuses early acceptance",
+      "status": "PASS"
+    },
+    {
+      "id": "UC04 handover repair and UC16 genuine portrait PDF",
+      "status": "PASS"
+    },
+    {
+      "id": "UC17 rejection needs reason and rejects foreign point atomically",
+      "status": "PASS"
+    },
+    {
+      "id": "UC17 rejection rework stays in progress then acceptance atomic",
+      "status": "PASS"
+    },
+    {
+      "id": "UC18 blank signature rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "UC18 concurrent signature persisted only once",
+      "status": "PASS"
+    },
+    {
+      "id": "UC02 zero defect QC and single certification",
+      "status": "PASS"
+    },
+    {
+      "id": "UC10 no inspection direct signature without request round",
+      "status": "PASS"
+    },
+    {
+      "id": "UC12 sales submits on behalf of customer",
+      "status": "PASS"
+    },
+    {
+      "id": "AUTH-06 expiry revocation and logout replay denied",
+      "status": "PASS"
+    },
+    {
+      "id": "AUTH-07 wrong password throttled",
+      "status": "PASS"
+    },
+    {
+      "id": "FILES no staging orphans after rejected transactions",
+      "status": "PASS"
+    }
+  ],
+  "finished_at": "2026-11-08T12:38:45.806Z",
+  "status": "PASS"
+}

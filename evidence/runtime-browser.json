@@ -1,0 +1,883 @@
+{
+  "started_at": "2026-11-08T12:38:46.359Z",
+  "scope": "Browser forms against isolated test DB; synthetic data only",
+  "cases": [
+    {
+      "name": "Employee login and protected old pilot redirect",
+      "status": "PASS"
+    },
+    {
+      "name": "UC01 browser create and persisted reload",
+      "status": "PASS"
+    },
+    {
+      "name": "UC02 QC add photo and finish through forms",
+      "status": "PASS"
+    },
+    {
+      "name": "UC03 queue group focus and claim selection",
+      "status": "PASS"
+    },
+    {
+      "name": "UC04 photo upload persisted and private image readable",
+      "status": "PASS"
+    },
+    {
+      "name": "UC05 approve UC06 schedule and no-defect result",
+      "status": "PASS"
+    },
+    {
+      "name": "UC07 single certification UC08 sale readiness",
+      "status": "PASS"
+    },
+    {
+      "name": "UC09 customer binding and actual link exchange",
+      "status": "PASS"
+    },
+    {
+      "name": "UC10 inspection choice UC11 customer request",
+      "status": "PASS"
+    },
+    {
+      "name": "UC13 appointment arrival persisted Thai timezone",
+      "status": "PASS"
+    },
+    {
+      "name": "UC14 exclusive reporter controls and real photo",
+      "status": "PASS"
+    },
+    {
+      "name": "UC15 head classify and repeated repair workflow",
+      "status": "PASS"
+    },
+    {
+      "name": "UC16 generated PDF downloadable through protected link",
+      "status": "PASS"
+    },
+    {
+      "name": "UC17 select fixed reject rework accept then UC18 canvas signature",
+      "status": "PASS"
+    },
+    {
+      "name": "19 screens including employee login layout checked",
+      "status": "PASS"
+    },
+    {
+      "name": "Logout UI revokes access",
+      "status": "PASS"
+    }
+  ],
+  "layouts": [
+    {
+      "screen": "SCR-01",
+      "width": 360,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-09",
+      "width": 360,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-12",
+      "width": 360,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-13",
+      "width": 360,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-01",
+      "width": 390,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-09",
+      "width": 390,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-12",
+      "width": 390,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-13",
+      "width": 390,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-01",
+      "width": 640,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-09",
+      "width": 640,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-12",
+      "width": 640,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-13",
+      "width": 640,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-01",
+      "width": 768,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-09",
+      "width": 768,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-12",
+      "width": 768,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-13",
+      "width": 768,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-01",
+      "width": 1024,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-09",
+      "width": 1024,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-12",
+      "width": 1024,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-13",
+      "width": 1024,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-01",
+      "width": 1280,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-09",
+      "width": 1280,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-12",
+      "width": 1280,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-13",
+      "width": 1280,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-01",
+      "width": 1440,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-09",
+      "width": 1440,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-12",
+      "width": 1440,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-13",
+      "width": 1440,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-01",
+      "width": 1920,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-09",
+      "width": 1920,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-12",
+      "width": 1920,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-13",
+      "width": 1920,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-02",
+      "width": 360,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-05",
+      "width": 360,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-06",
+      "width": 360,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-07",
+      "width": 360,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-08",
+      "width": 360,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-16",
+      "width": 360,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-02",
+      "width": 390,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-05",
+      "width": 390,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-06",
+      "width": 390,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-07",
+      "width": 390,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-08",
+      "width": 390,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-16",
+      "width": 390,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-02",
+      "width": 640,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-05",
+      "width": 640,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-06",
+      "width": 640,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-07",
+      "width": 640,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-08",
+      "width": 640,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-16",
+      "width": 640,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-02",
+      "width": 768,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-05",
+      "width": 768,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-06",
+      "width": 768,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-07",
+      "width": 768,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-08",
+      "width": 768,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-16",
+      "width": 768,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-02",
+      "width": 1024,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-05",
+      "width": 1024,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-06",
+      "width": 1024,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-07",
+      "width": 1024,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-08",
+      "width": 1024,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-16",
+      "width": 1024,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-02",
+      "width": 1280,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-05",
+      "width": 1280,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-06",
+      "width": 1280,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-07",
+      "width": 1280,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-08",
+      "width": 1280,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-16",
+      "width": 1280,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-02",
+      "width": 1440,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-05",
+      "width": 1440,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-06",
+      "width": 1440,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-07",
+      "width": 1440,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-08",
+      "width": 1440,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-16",
+      "width": 1440,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-02",
+      "width": 1920,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-05",
+      "width": 1920,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-06",
+      "width": 1920,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-07",
+      "width": 1920,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-08",
+      "width": 1920,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-16",
+      "width": 1920,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-03",
+      "width": 360,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-04",
+      "width": 360,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-15",
+      "width": 360,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-03",
+      "width": 390,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-04",
+      "width": 390,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-15",
+      "width": 390,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-03",
+      "width": 640,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-04",
+      "width": 640,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-15",
+      "width": 640,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-03",
+      "width": 768,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-04",
+      "width": 768,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-15",
+      "width": 768,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-03",
+      "width": 1024,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-04",
+      "width": 1024,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-15",
+      "width": 1024,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-03",
+      "width": 1280,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-04",
+      "width": 1280,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-15",
+      "width": 1280,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-03",
+      "width": 1440,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-04",
+      "width": 1440,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-15",
+      "width": 1440,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-03",
+      "width": 1920,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-04",
+      "width": 1920,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-15",
+      "width": 1920,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-10",
+      "width": 360,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-11",
+      "width": 360,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-14",
+      "width": 360,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-17",
+      "width": 360,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-18",
+      "width": 360,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-10",
+      "width": 390,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-11",
+      "width": 390,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-14",
+      "width": 390,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-17",
+      "width": 390,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-18",
+      "width": 390,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-10",
+      "width": 640,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-11",
+      "width": 640,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-14",
+      "width": 640,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-17",
+      "width": 640,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-18",
+      "width": 640,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-10",
+      "width": 768,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-11",
+      "width": 768,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-14",
+      "width": 768,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-17",
+      "width": 768,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-18",
+      "width": 768,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-10",
+      "width": 1024,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-11",
+      "width": 1024,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-14",
+      "width": 1024,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-17",
+      "width": 1024,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-18",
+      "width": 1024,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-10",
+      "width": 1280,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-11",
+      "width": 1280,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-14",
+      "width": 1280,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-17",
+      "width": 1280,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-18",
+      "width": 1280,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-10",
+      "width": 1440,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-11",
+      "width": 1440,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-14",
+      "width": 1440,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-17",
+      "width": 1440,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-18",
+      "width": 1440,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-10",
+      "width": 1920,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-11",
+      "width": 1920,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-14",
+      "width": 1920,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-17",
+      "width": 1920,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-18",
+      "width": 1920,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-00",
+      "width": 360,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-00",
+      "width": 390,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-00",
+      "width": 640,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-00",
+      "width": 768,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-00",
+      "width": 1024,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-00",
+      "width": 1280,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-00",
+      "width": 1440,
+      "status": "PASS"
+    },
+    {
+      "screen": "SCR-00",
+      "width": 1920,
+      "status": "PASS"
+    }
+  ],
+  "accessibility": [
+    {
+      "screen": "SCR-13",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-13",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "SCR-16",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-16",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "SCR-15",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-15",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "SCR-18",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-18",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "SCR-00",
+      "width": 1920,
+      "violations": []
+    }
+  ],
+  "errors": [],
+  "finished_at": "2026-11-08T12:39:11.538Z",
+  "violation_count": 0,
+  "status": "PASS"
+}

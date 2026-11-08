@@ -1,0 +1,47 @@
+{
+  "recorded_at": "2026-11-08T12:48:57.877Z",
+  "status": "READY_FOR_G2",
+  "scope": "Integrated local behavior on synthetic data; user UAT, recovery/restore and G3 are pending",
+  "build_id": "ZK09sPsYSvdYEmATXEohn",
+  "source_tree_sha256": "ad84be20f715f016948ea3feca629bdc8a5ff5460bfa1e38695dcbb7fda866b3",
+  "node": "v24.18.0",
+  "database_version": "10.11.16-MariaDB",
+  "port": 3306,
+  "checks": {
+    "production_build": "PASS (observed build command and matching final smoke artifact)",
+    "typescript": "PASS (production build)",
+    "eslint": {
+      "errors": 0,
+      "warnings": 0
+    },
+    "http_scenarios": 35,
+    "browser_groups": 16,
+    "layout_checks": 152,
+    "additional_form_state_scans": 38,
+    "ui_recovery_checks": 3,
+    "axe_violations": 0,
+    "final_smoke": 7,
+    "query_semantic_mapping": 77,
+    "source_unchanged": 179,
+    "info_unchanged": 4,
+    "hallmark": {
+      "fails": 0,
+      "reflex": 0,
+      "warns": 0,
+      "waived": 0,
+      "rejected": 0,
+      "answered": 0,
+      "dismissed": 0,
+      "notes": 0,
+      "files": 17,
+      "render": "ran"
+    }
+  },
+  "post_suite_adjustments": [
+    "Copy punctuation",
+    "Explicit disabled cursor",
+    "Selected-menu foreground color; final contrast checked in delivery smoke"
+  ],
+  "next_gate": "User G2 behavior review before P6 / G3",
+  "review": "docs/G2-REVIEW.md"
+}

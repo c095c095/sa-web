@@ -1,4 +1,4 @@
-# ระบบออกแบบที่รับสำหรับ P1
+# ระบบออกแบบที่รับและใช้ต่อใน P2–P5
 
 ผู้ใช้อนุมัติ 8 พฤศจิกายน 2569: Hallmark Furrow แบบ app screen พื้นสว่างและสีเฉพาะ action/status ตาม website-plan/approval-g0.json
 
@@ -11,5 +11,5 @@
 - Focus ทันที, touch target อย่างน้อย 44px, coarse pointer 48px, reduced motion; รายการมี loading/empty/error/full
 - ช่องกรอกใช้พื้นขาวแยกจากพื้นกระดาษ; ช่องที่มีไอคอนและ input ร่วมกันใช้ focus ring ที่กรอบกลุ่มชั้นเดียว; ผู้แจ้งสองตัวเลือกใช้ native radio ที่แสดงเป็นปุ่ม
 - ป้ายสถานะเป็นไทย (CODE) ตาม CONTRACT v0.3.3; สีไม่ใช่ตัวบอกความหมายเพียงอย่างเดียว
-- P1 เป็น read-only review surface จาก fixture สมมติ หน้าทดลองทบทวนได้แต่ไม่แสดงว่าได้บันทึกจริง
-- G1 รับก่อนนำระบบออกแบบและ technical amendments ไปขยาย P2–P5
+- P1 เป็นบันทึก read-only review surface ส่วน P2–P5 บันทึกจริงหลัง server ยืนยันสำเร็จ ใช้ fixture สมมติที่ติดป้ายชัดเจน
+- G1 รับแล้ว ใช้ระบบออกแบบและ technical amendments เดิมต่อใน P2–P5; การตรวจรับพฤติกรรมรวมอยู่ที่ G2

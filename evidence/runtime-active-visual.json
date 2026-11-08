@@ -1,0 +1,249 @@
+{
+  "started_at": "2026-11-08T12:39:12.353Z",
+  "scope": "Active/eligible fixture forms: UI accessibility, field colors, layout and UI error recovery. No real customer data.",
+  "screens": [
+    {
+      "screen": "SCR-01",
+      "unit": "H0001",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-01",
+      "unit": "H0001",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "SCR-09",
+      "unit": "H0013",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-09",
+      "unit": "H0013",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "SCR-12",
+      "unit": "H0013",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-12",
+      "unit": "H0013",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "SCR-13",
+      "unit": "H0010",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-13",
+      "unit": "H0010",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "SCR-02",
+      "unit": "H0001",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-02",
+      "unit": "H0001",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "SCR-05",
+      "unit": "H0001",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-05",
+      "unit": "H0001",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "SCR-06",
+      "unit": "H0001",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-06",
+      "unit": "H0001",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "SCR-07",
+      "unit": "H0002",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-07",
+      "unit": "H0002",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "SCR-08",
+      "unit": "H0001",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-08",
+      "unit": "H0001",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "SCR-16",
+      "unit": "H0006",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-16",
+      "unit": "H0006",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "SCR-03",
+      "unit": "H0001",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-03",
+      "unit": "H0001",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "SCR-04",
+      "unit": "H0001",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-04",
+      "unit": "H0001",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "SCR-15",
+      "unit": "H0006",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-15",
+      "unit": "H0006",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "SCR-10",
+      "unit": "H0013",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-10",
+      "unit": "H0013",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "SCR-11",
+      "unit": "H0013",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-11",
+      "unit": "H0013",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "SCR-14",
+      "unit": "H0006",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-14",
+      "unit": "H0006",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "SCR-17",
+      "unit": "H0006",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-17",
+      "unit": "H0006",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "SCR-18",
+      "unit": "H0009",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-18",
+      "unit": "H0009",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "SCR-00",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "SCR-00",
+      "width": 1440,
+      "violations": []
+    }
+  ],
+  "checks": [
+    {
+      "name": "Keyboard skip link focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Network refresh error is visible without clearing saved data",
+      "status": "PASS"
+    },
+    {
+      "name": "Validation error retains form input",
+      "status": "PASS"
+    }
+  ],
+  "finished_at": "2026-11-08T12:39:40.293Z",
+  "violations": 0,
+  "status": "PASS"
+}

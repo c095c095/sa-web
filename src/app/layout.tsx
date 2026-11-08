@@ -6,7 +6,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: { default: "ระบบตรวจและส่งมอบบ้าน", template: "%s | ระบบตรวจและส่งมอบบ้าน" },
-  description: "หน้าทดลองระบบตรวจบ้าน ติดตามงานซ่อม และส่งมอบบ้าน สำหรับตรวจรับรูปแบบก่อนพัฒนาครบระบบ",
+  description: "ระบบตรวจบ้าน ติดตามงานซ่อม และส่งมอบบ้าน",
+  referrer: "no-referrer",
   robots: { index: false, follow: false },
 };
 

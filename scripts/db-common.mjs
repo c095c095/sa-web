@@ -24,7 +24,7 @@ export async function resetOwnedTest(c){
   const admin=await connect(row.db,true);
   try{
     await admin.query('SET FOREIGN_KEY_CHECKS=0');
-    try{for(const t of ['file','access_link','repair_report','defect','inspection_round','inspection_request','property_unit','customer','employee'])await admin.query(`TRUNCATE TABLE \`${t}\``);}finally{await admin.query('SET FOREIGN_KEY_CHECKS=1');}
+    try{const [[has]]=await admin.query("SELECT COUNT(*) n FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='app_session'");if(has.n)await admin.query('TRUNCATE TABLE app_session');for(const t of ['file','access_link','repair_report','defect','inspection_round','inspection_request','property_unit','customer','employee'])await admin.query(`TRUNCATE TABLE \`${t}\``);}finally{await admin.query('SET FOREIGN_KEY_CHECKS=1');}
     await runFile(admin,'seed-p1.sql');
   }finally{await admin.end();}
 }

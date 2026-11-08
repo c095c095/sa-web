@@ -11,16 +11,24 @@
     "db:generate": "node scripts/generate-db.mjs",
     "db:setup": "node scripts/setup-db.mjs",
     "test:db": "node scripts/test-db.mjs",
-    "test:pilot": "node scripts/test-pilot.mjs"
+    "test:pilot": "node scripts/test-pilot.mjs",
+    "db:migrate:runtime": "node scripts/migrate-runtime.mjs",
+    "test:runtime": "node scripts/test-runtime.mjs",
+    "test:runtime:browser": "node scripts/test-runtime-browser.mjs",
+    "test:runtime:visual": "node scripts/test-runtime-visual.mjs",
+    "audit:runtime": "node scripts/runtime-traceability.mjs"
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans-thai": "5.3.0",
     "bcryptjs": "3.0.3",
+    "file-type": "22.3.0",
     "lucide-react": "1.70.0",
     "mysql2": "3.24.6",
     "next": "16.4.5",
+    "puppeteer-core": "25.16.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "sharp": "0.35.5",
     "zod": "4.6.7"
   },
   "devDependencies": {
@@ -34,7 +42,7 @@
     "eslint": "9.39.5",
     "eslint-config-next": "16.4.5",
     "postcss": "8.5.32",
-    "puppeteer-core": "25.16.0",
+    "prettier": "3.9.10",
     "tailwindcss": "4.3.5",
     "typescript": "5.9.3"
   },

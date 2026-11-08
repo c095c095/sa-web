@@ -1,0 +1,14 @@
+{
+  "applied_at": "2026-11-08T11:55:58.564Z",
+  "status": "PASS",
+  "backup": "Local private backup created before migration; path omitted",
+  "databases": [
+    "sa_web_dev_p1",
+    "sa_web_test_p1"
+  ],
+  "technical_tables": [
+    "app_session"
+  ],
+  "business_tables": 9,
+  "token_storage": "SHA-256 digest, dev seed migrated exactly once"
+}

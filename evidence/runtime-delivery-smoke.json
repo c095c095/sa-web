@@ -1,0 +1,42 @@
+{
+  "started_at": "2026-11-08T12:43:26.081Z",
+  "scope": "Final production build, local development DB; login/read/logout only, no business mutations",
+  "cases": [
+    {
+      "name": "SALES production login and selected-menu contrast",
+      "status": "PASS",
+      "contrast": 13.09
+    },
+    {
+      "name": "INSPECTOR production login and selected-menu contrast",
+      "status": "PASS",
+      "contrast": 13.09
+    },
+    {
+      "name": "TECHNICIAN production login and selected-menu contrast",
+      "status": "PASS",
+      "contrast": 13.09
+    },
+    {
+      "name": "HEAD_TECHNICIAN production login and selected-menu contrast",
+      "status": "PASS",
+      "contrast": 13.09
+    },
+    {
+      "name": "Existing local synthetic customer link and clean URL",
+      "status": "PASS"
+    },
+    {
+      "name": "Primary button foreground contrast",
+      "status": "PASS",
+      "contrast": 14.61
+    },
+    {
+      "name": "All 9 business tables unchanged by final smoke check",
+      "status": "PASS"
+    }
+  ],
+  "build_id": "ZK09sPsYSvdYEmATXEohn",
+  "finished_at": "2026-11-08T12:43:30.549Z",
+  "status": "PASS"
+}
