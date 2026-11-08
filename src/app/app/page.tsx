@@ -4,6 +4,7 @@ import { workspace } from "@/server/workspace";
 import { screenRoles, type Workspace } from "@/lib/runtime-contracts";
 import { Workbench } from "@/components/workbench";
 import { journey } from "@/lib/journey";
+import { buildAppPath, requiresHouse } from "@/lib/deep-link";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export default async function AppPage({
@@ -19,6 +20,16 @@ export default async function AppPage({
   if (!p.screen && !p.unit && id.kind === "EMPLOYEE") redirect("/home");
   const role = id.kind === "CUSTOMER" ? "CUSTOMER" : id.role;
   const allowed = screenRoles[role];
+  // Phase 1A (F12, Q7): a house-scoped screen opened without a house must not
+  // pick one silently. Send the employee to the house picker and keep the target.
+  if (id.kind === "EMPLOYEE" && !p.unit) {
+    const wanted = allowed.includes(p.screen ?? "") ? p.screen! : allowed[0];
+    if (wanted && requiresHouse(wanted))
+      redirect(
+        "/home?next=" +
+          encodeURIComponent(buildAppPath({ screen: wanted, defect: p.defect })),
+      );
+  }
   const w = {
     identity: publicIdentity(id),
     ...(await workspace(id, p.unit || undefined)),

@@ -2,11 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 import assert from "node:assert/strict";
 import { chromium } from "@playwright/test";
-import { local, evidence } from "./db-common.mjs";
+import { local, evidence, testBase } from "./db-common.mjs";
 const f = JSON.parse(
   fs.readFileSync(path.join(local, "runtime-test.json"), "utf8"),
 );
-assert.equal(f.base, "http://127.0.0.1:3001");
+assert.equal(f.base, testBase);
 const b = await chromium.launch({ channel: "msedge", headless: true });
 const c = await b.newContext();
 let result = {

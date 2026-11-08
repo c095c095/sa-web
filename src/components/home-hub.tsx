@@ -5,14 +5,17 @@ import Link from "next/link";
 import { type Workspace, unitStates } from "@/lib/runtime-contracts";
 import { categories, defectStatuses } from "@/lib/domain";
 import { journey, taskUrl } from "@/lib/journey";
+import { buildAppPath, type DeepLink } from "@/lib/deep-link";
 import { AppFrame, Panel, Back, string, thaiTime } from "./manage-ui";
 import { Search, ArrowRight } from "lucide-react";
 export function HomeHub({
   initial,
   selected = false,
+  deepLink = null,
 }: {
   initial: Workspace;
   selected?: boolean;
+  deepLink?: DeepLink | null;
 }) {
   const router = useRouter();
   const [q, setQ] = useState(""),
@@ -274,6 +277,12 @@ export function HomeHub({
               </ul>
             </>
           ) : (
+            <>
+            {deepLink && !selected && (
+              <p className="alert" role="status">
+                เลือกบ้านก่อน แล้วจึงจะส่งลิงก์ได้
+              </p>
+            )}
             <ul className="divide-y divide-base-300 rounded-box border border-base-300 bg-base-100 px-5">
               {filtered.map((u) => (
                 <li
@@ -288,7 +297,14 @@ export function HomeHub({
                       {u.customer_name ? " · " + u.customer_name : ""}
                     </p>
                   </div>
-                  <Link href={"/home?unit=" + u.unit_id} className="btn">
+                  <Link
+                    href={
+                      deepLink && !selected
+                        ? buildAppPath(deepLink, string(u.unit_id))
+                        : "/home?unit=" + u.unit_id
+                    }
+                    className="btn"
+                  >
                     เปิดบ้าน
                     <ArrowRight size={17} aria-hidden="true" />
                   </Link>
@@ -298,6 +314,7 @@ export function HomeHub({
                 <li className="py-8 text-muted">ไม่พบบ้านที่ตรงกับการค้นหา</li>
               )}
             </ul>
+            </>
           )}
         </>
       )}

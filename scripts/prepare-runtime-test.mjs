@@ -3,7 +3,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 import bcrypt from "bcryptjs";
 import { prepareManagement } from "./management-db.mjs";
-import { local, connect, resetOwnedTest } from "./db-common.mjs";
+import { local, connect, resetOwnedTest, testBase } from "./db-common.mjs";
 const c = await connect("sa_web_test_p1");
 try {
   await resetOwnedTest(c);
@@ -20,7 +20,7 @@ try {
     path.join(local, "runtime-test.json"),
     JSON.stringify(
       {
-        base: "http://127.0.0.1:3001",
+        base: testBase,
         password,
         links: links.map((l) => ({ link_id: l.link_id, token: l.token })),
       },

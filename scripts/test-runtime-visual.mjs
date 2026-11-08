@@ -3,12 +3,20 @@ import path from "node:path";
 import assert from "node:assert/strict";
 import { chromium } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { connect, local, evidence } from "./db-common.mjs";
+import { connect, local, evidence, testBase } from "./db-common.mjs";
 const fixture = JSON.parse(
     fs.readFileSync(path.join(local, "runtime-test.json"), "utf8"),
   ),
   base = fixture.base;
-assert.equal(base, "http://127.0.0.1:3001");
+assert.equal(base, testBase);
+// Phase 1A (F12/Q7): a house-scoped screen opened without a house goes to the
+// picker. Workbench checks below open a house the technician can see.
+async function houseQuery(page) {
+  const body = (await (await page.request.get(base + "/api/workspace")).json()).data;
+  const u = (body.units || [])[0];
+  assert(u, "technician has no visible house in fixture");
+  return "&unit=" + encodeURIComponent(u.unit_id);
+}
 const db = await connect("sa_web_test_p1"),
   browser = await chromium.launch({ channel: "msedge", headless: true });
 const out = {
@@ -165,7 +173,7 @@ try {
   }
   await check("Keyboard skip link focus", async () => {
     const p = await head.newPage();
-    await p.goto(base + "/app?screen=SCR-03");
+    await p.goto(base + "/app?screen=SCR-03" + (await houseQuery(p)));
     await p.keyboard.press("Tab");
     assert.equal(
       await p.locator(":focus").getAttribute("href"),
@@ -177,7 +185,7 @@ try {
     "Network refresh error is visible without clearing saved data",
     async () => {
       const p = await head.newPage();
-      await p.goto(base + "/app?screen=SCR-03");
+      await p.goto(base + "/app?screen=SCR-03" + (await houseQuery(p)));
       await p.route("**/api/workspace**", (route) => route.abort());
       await p.getByRole("button", { name: "โหลดข้อมูลล่าสุด" }).click();
       await p.locator("main").getByRole("alert").waitFor();

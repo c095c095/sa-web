@@ -39,10 +39,11 @@ setup สร้างเฉพาะ `sa_web_dev_p1` และ `sa_web_test_p1` 
 npm run lint
 npm run typecheck
 npm run test:db
-npm run test:pilot
 ```
 
-test:db ต้องใช้ MariaDB ที่เปิดอยู่และสิทธิ์ดูแลสำหรับรีเซ็ต fixture ของฐานทดสอบเท่านั้น test:pilot ต้องมีเว็บไซต์เปิดพอร์ต 3000 และ Edge ติดตั้งอยู่
+test:db ต้องใช้ MariaDB ที่เปิดอยู่และสิทธิ์ดูแลสำหรับรีเซ็ต fixture ของฐานทดสอบเท่านั้น
+
+หมายเหตุ: `npm run test:pilot` ถูกถอดออกจากขั้นตอนตรวจงานแล้ว เพราะเส้นทาง `/pilot/*` ถูกยกเลิก (ทุก route redirect ไป `/app`) สคริปต์ `scripts/test-pilot.mjs` และหลักฐานเดิมยังคงอยู่โดยไม่ได้ลบ สถานะ BLOCKED (retired test) อยู่ใน `docs/PHASE-1A-REPORT.md` §11.1
 
 ## เอกสารหลัก
 

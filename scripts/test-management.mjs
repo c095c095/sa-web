@@ -5,12 +5,12 @@ import assert from "node:assert/strict";
 import sharp from "sharp";
 import { chromium } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { connect, local, evidence } from "./db-common.mjs";
+import { connect, local, evidence, testBase } from "./db-common.mjs";
 const fixture = JSON.parse(
     fs.readFileSync(path.join(local, "runtime-test.json"), "utf8"),
   ),
   base = fixture.base;
-assert.equal(base, "http://127.0.0.1:3001");
+assert.equal(base, testBase);
 const db = await connect("sa_web_test_p1"),
   browser = await chromium.launch({ channel: "msedge", headless: true }),
   contexts = [],

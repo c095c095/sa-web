@@ -27,8 +27,14 @@ export async function workspace(id: Identity, requestedUnit?: string) {
     `SELECT u.*,c.full_name customer_name FROM property_unit u LEFT JOIN customer c ON c.customer_id=u.customer_id ${where} ORDER BY u.created_at DESC,u.unit_id DESC`,
     values,
   );
+  // Phase 1A (F12): never pick a house silently for an employee. A missing unit
+  // means "no house context". A customer is bound to one house, so the single
+  // visible unit is used (Q8); with several units a customer must choose.
   const unitId =
-    requestedUnit ?? (units[0]?.unit_id ? String(units[0].unit_id) : "");
+    requestedUnit ??
+    (id.kind === "CUSTOMER" && units.length === 1
+      ? String(units[0].unit_id)
+      : "");
   if (unitId) await scopedUnit(id, unitId);
   const unit = units.find((u) => u.unit_id === unitId);
   const rounds = unit

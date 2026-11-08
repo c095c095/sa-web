@@ -3,12 +3,12 @@ import path from "node:path";
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import sharp from "sharp";
-import { local, evidence, connect } from "./db-common.mjs";
+import { local, evidence, connect, testBase } from "./db-common.mjs";
 const fixture = JSON.parse(
     fs.readFileSync(path.join(local, "runtime-test.json"), "utf8"),
   ),
   base = fixture.base;
-assert.equal(base, "http://127.0.0.1:3001");
+assert.equal(base, testBase);
 const db = await connect("sa_web_test_p1");
 const result = {
   started_at: new Date().toISOString(),

@@ -7,6 +7,16 @@ export const root = path.dirname(app);
 export const ownedNames = ["sa_web_dev_p1", "sa_web_test_p1"];
 export const local = path.join(app, ".local");
 export const evidence = path.join(app, "evidence");
+// Test-harness port. Default 3001 keeps the existing workflow; an isolated
+// environment may set SA_TEST_PORT (e.g. 3002). Harness-only; no app logic.
+export const testPort = (() => {
+  const raw = process.env.SA_TEST_PORT || "3001";
+  const n = Number(raw);
+  if (!Number.isInteger(n) || n < 1024 || n > 65535)
+    throw new Error("SA_TEST_PORT must be an integer between 1024 and 65535");
+  return n;
+})();
+export const testBase = `http://127.0.0.1:${testPort}`;
 fs.mkdirSync(evidence, { recursive: true });
 if (fs.existsSync(path.join(app, ".env.local")))
   process.loadEnvFile(path.join(app, ".env.local"));
