@@ -41,6 +41,7 @@
   --color-focus: oklch(43% 0.14 40);
   --color-muted: oklch(44% 0.012 60);
   --color-strong-rule: oklch(59% 0.01 60);
+  --color-field-surface: #ffffff;
   --dur-micro: 120ms;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --container-width: 80rem;
@@ -54,7 +55,12 @@ h1, h2, h3 { min-width: 0; overflow-wrap: break-word; font-weight: 600; line-hei
 button, a, input, select, textarea, summary { -webkit-tap-highlight-color: transparent; }
 :where(a, button, input, select, textarea, summary):focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 .input:focus-visible, .select:focus-visible, .textarea:focus-visible, .file-input:focus-visible { outline-offset: -3px; }
-.input, .select, .textarea, .file-input { border-color: var(--color-strong-rule); background: var(--color-base-100); font-size: 1rem; }
+.input, .select, .textarea, .file-input { border-color: var(--color-strong-rule); background: var(--color-field-surface); font-size: 1rem; }
+.input:has(> input):focus-within { border-color: var(--color-focus); outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.input > input:focus, .input > input:focus-visible { outline: 0; box-shadow: none; }
+.reporter-choice { justify-content: center; gap: 0.5rem; border-color: var(--color-strong-rule); background: var(--color-field-surface); }
+.reporter-choice:has(input:checked) { border-color: var(--color-base-content); background: var(--color-accent); color: var(--color-accent-content); }
+.reporter-choice:has(input:focus-visible) { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 .input, .select, .btn { min-height: 2.75rem; }
 .btn { font-weight: 500; box-shadow: none; transition: transform var(--dur-micro) var(--ease-out); }
 .btn:active:not(:disabled) { transform: translateY(1px); }

@@ -25,7 +25,7 @@
 | ข้อจำกัด DB | ผ่าน FK, unique บ้าน, active round, signature, file owner, role/craft, enum, NULL/XOR, case-sensitive token, ไทย และขีดจำกัดรหัส | evidence/db-compatibility.json |
 | พร้อมกันหลาย connection | สองช่างรับจุดเดียวสำเร็จหนึ่งราย; 30 sequence values ไม่ซ้ำ | เป็น DB proof ยังไม่ใช่ HTTP service acceptance |
 | Browser layouts | **24/24** | 3 หน้าที่ 320/375/390/768/1024/1280/1440/1920px; ไม่ล้น viewport |
-| Browser interactions | **10/10** | filter/reload, empty/error/loading, selection, validation/focus, file limit/no POST, FIXED-only และ SSR ไม่มี JS |
+| Browser interactions | **12/12** | filter/reload, empty/error/loading, selection, group focus, reporter radio/keyboard, white fields, validation, file limit/no POST, FIXED-only และ SSR ไม่มี JS |
 | Accessibility อัตโนมัติ | **0 violations ในชุดที่ตรวจ** | axe WCAG2A/AA/2.1AA ที่ 390 และ 1280px ทั้ง 3 หน้า; ไม่อ้างว่าครอบคลุมทุกกรณี |
 | Hallmark | **Floor 0 FAIL / Reflex 0 / Warn 0** | static + render จริง 3 URLs; 15 ภาพจาก render tier |
 | Code/build | lint, TypeScript และ production build ผ่าน | ใช้ PostCSS แทนตัวโหลด CSS จากแม่แบบที่ build ไม่ผ่านบนเครื่องนี้ |

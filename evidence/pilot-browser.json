@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-11-08T11:02:52.008Z",
+  "started_at": "2026-11-08T11:36:19.661Z",
   "scope": "P1 read-only pilot browser tests, not full application E2E",
   "routes": [
     {
@@ -237,6 +237,14 @@
       "status": "PASS"
     },
     {
+      "name": "Search focus ring surrounds group only, for pointer and keyboard",
+      "status": "PASS"
+    },
+    {
+      "name": "Reporter choices are exclusive and support arrow keys; fields are white",
+      "status": "PASS"
+    },
+    {
       "name": "Form validation focuses first invalid field",
       "status": "PASS"
     },
@@ -294,7 +302,7 @@
       "violations": []
     }
   ],
-  "finished_at": "2026-11-08T11:03:14.543Z",
+  "finished_at": "2026-11-08T11:36:43.055Z",
   "violations": 0,
   "failed": 0,
   "status": "PASS"

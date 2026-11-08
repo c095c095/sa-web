@@ -1,0 +1,75 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "width": 320,
+      "status": "PASS",
+      "labels": [
+        {
+          "text": "ลูกค้า",
+          "height": 23.09375
+        },
+        {
+          "text": "บริษัทตรวจนอก",
+          "height": 23.09375
+        }
+      ]
+    },
+    {
+      "width": 375,
+      "status": "PASS",
+      "labels": [
+        {
+          "text": "ลูกค้า",
+          "height": 23.09375
+        },
+        {
+          "text": "บริษัทตรวจนอก",
+          "height": 23.09375
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "status": "PASS",
+      "labels": [
+        {
+          "text": "ลูกค้า",
+          "height": 23.09375
+        },
+        {
+          "text": "บริษัทตรวจนอก",
+          "height": 23.09375
+        }
+      ]
+    },
+    {
+      "width": 768,
+      "status": "PASS",
+      "labels": [
+        {
+          "text": "ลูกค้า",
+          "height": 23.09375
+        },
+        {
+          "text": "บริษัทตรวจนอก",
+          "height": 23.09375
+        }
+      ]
+    },
+    {
+      "width": 1280,
+      "status": "PASS",
+      "labels": [
+        {
+          "text": "ลูกค้า",
+          "height": 23.09375
+        },
+        {
+          "text": "บริษัทตรวจนอก",
+          "height": 23.09375
+        }
+      ]
+    }
+  ]
+}
