@@ -775,7 +775,6 @@ export function AdminPanel({
           label,
           href: "/admin?section=" + key,
         })),
-        { key: "account", label: "บัญชีของฉัน", href: "/account" },
       ]}
     >
       {result && (

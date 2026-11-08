@@ -15,6 +15,7 @@ import {
   type Workspace,
   type DataRow,
   screens,
+  screenRoles,
   unitStates,
 } from "@/lib/runtime-contracts";
 import { categories, defectStatuses } from "@/lib/domain";
@@ -530,6 +531,7 @@ export function Workbench({
     [completed, setCompleted] = useState(false);
   const router = useRouter();
   const identity = w.identity,
+    role = identity.kind === "CUSTOMER" ? "CUSTOMER" : identity.role,
     unit = w.unit,
     unitId = str(unit?.unit_id),
     qc = w.rounds.find(
@@ -1427,7 +1429,15 @@ export function Workbench({
   }
   return (
     <PickedDefect.Provider value={selectedDefect}>
-      <AppFrame identity={identity}>
+      <AppFrame
+        identity={identity}
+        active={screen}
+        nav={(screenRoles[role] ?? []).map((key) => ({
+          key,
+          label: screens[key],
+          href: "/app?screen=" + key + "&unit=" + unitId,
+        }))}
+      >
         <Back href={unitId ? "/home?unit=" + unitId : "/home"}>
           {unit
             ? "กลับไปภาพรวมบ้านเลขที่ " + unit.house_no

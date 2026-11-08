@@ -2,7 +2,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { House, LogOut, Menu, ArrowLeft } from "lucide-react";
+import { House, LogOut, Menu, ArrowLeft, UserRound } from "lucide-react";
 import { type SessionView, roleLabels } from "@/lib/runtime-contracts";
 export const string = (v: unknown) => String(v ?? "");
 export const thaiTime = (v: unknown) =>
@@ -33,8 +33,8 @@ export function AppFrame({
       href: admin ? "/admin" : "/home",
       label: admin ? "ภาพรวม" : "งานของฉัน",
     },
-    { key: "account", href: "/account", label: "บัญชีของฉัน" },
   ];
+  const initial = identity.fullName.trim().slice(0, 2) || "ผ";
   const links = (
     <ul className="menu w-full gap-1">
       {items.map((x) => (
@@ -68,37 +68,59 @@ export function AppFrame({
             <House size={24} aria-hidden="true" />
             ระบบตรวจและส่งมอบบ้าน
           </Link>
-          <div className="ml-auto flex items-center gap-3">
-            <Link
-              href="/account"
-              className="text-sm underline-offset-4 hover:underline"
-            >
-              {identity.fullName}
-              <span className="block text-muted">
-                {identity.kind === "CUSTOMER"
-                  ? "ลูกค้า / บริษัทตรวจนอก"
-                  : roleLabels[identity.role]}
+          <details className="dropdown dropdown-end ml-auto">
+            <summary className="btn btn-ghost list-none gap-2" aria-label="เมนูบัญชี">
+              <div className="avatar avatar-placeholder">
+                <div className="size-9 rounded-full bg-neutral text-sm text-neutral-content">
+                  <span>{initial}</span>
+                </div>
+              </div>
+              <span className="hidden text-left sm:block">
+                <span className="block text-sm">{identity.fullName}</span>
+                <span className="block text-xs text-muted">
+                  {identity.kind === "CUSTOMER"
+                    ? "ลูกค้า / บริษัทตรวจนอก"
+                    : roleLabels[identity.role]}
+                </span>
               </span>
-            </Link>
-            <button
-              type="button"
-              className="btn btn-ghost"
-              aria-label="ออกจากระบบ"
-              onClick={async () => {
-                try {
-                  const r = await fetch("/api/auth/logout", { method: "POST" });
-                  if (!r.ok) throw Error();
-                  router.replace("/login");
-                  router.refresh();
-                } catch {
-                  setError("ออกจากระบบไม่ได้ กรุณาลองใหม่");
-                }
-              }}
-            >
-              <LogOut size={18} aria-hidden="true" />
-              <span className="hidden sm:inline">ออกจากระบบ</span>
-            </button>
-          </div>
+            </summary>
+            <ul className="menu dropdown-content z-10 mt-3 w-60 rounded-box border border-base-300 bg-base-100 p-2 shadow">
+              <li className="menu-title pointer-events-none">
+                <span className="flex items-center gap-3 normal-case">
+                  <UserRound size={18} aria-hidden="true" />
+                  <span>
+                    <span className="block">{identity.fullName}</span>
+                    <span className="block text-xs font-normal text-muted">
+                      {identity.kind === "CUSTOMER"
+                        ? "ลูกค้า / บริษัทตรวจนอก"
+                        : roleLabels[identity.role]}
+                    </span>
+                  </span>
+                </span>
+              </li>
+              <li>
+                <Link href="/account">บัญชีของฉัน</Link>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const r = await fetch("/api/auth/logout", { method: "POST" });
+                      if (!r.ok) throw Error();
+                      router.replace("/login");
+                      router.refresh();
+                    } catch {
+                      setError("ออกจากระบบไม่ได้ กรุณาลองใหม่");
+                    }
+                  }}
+                >
+                  <LogOut size={18} aria-hidden="true" />
+                  ออกจากระบบ
+                </button>
+              </li>
+            </ul>
+          </details>
         </div>
       </header>
       <div className="page-container grid w-full flex-1 gap-6 py-6 lg:grid-cols-[14rem_minmax(0,1fr)]">
