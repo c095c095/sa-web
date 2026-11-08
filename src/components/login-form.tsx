@@ -3,14 +3,17 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { House, LogIn } from "lucide-react";
+import { demoRoles } from "@/lib/demo-roles";
 export function LoginForm({
   access = false,
   initialToken = "",
   setupAvailable = false,
+  demo = false,
 }: {
   access?: boolean;
   initialToken?: string;
   setupAvailable?: boolean;
+  demo?: boolean;
 }) {
   const [pending, setPending] = useState(false),
     [error, setError] = useState("");
@@ -29,32 +32,32 @@ export function LoginForm({
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    if (!access) {
+      await authenticate("/api/auth/login", {
+        employee_id: form.get("employee_id"),
+        password: form.get("password"),
+      });
+      return;
+    }
+    let token = String(form.get("token") ?? initialToken);
+    try {
+      const url = new URL(token);
+      token =
+        url.searchParams.get("token") ??
+        new URLSearchParams(url.hash.slice(1)).get("token") ??
+        token;
+    } catch {}
+    await authenticate("/api/auth/access", { token });
+  }
+  async function authenticate(path: string, data: object) {
     setError("");
     setPending(true);
     try {
-      let token = String(form.get("token") ?? initialToken);
-      try {
-        const url = new URL(token);
-        token =
-          url.searchParams.get("token") ??
-          new URLSearchParams(url.hash.slice(1)).get("token") ??
-          token;
-      } catch {}
-      const response = await fetch(
-        access ? "/api/auth/access" : "/api/auth/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(
-            access
-              ? { token }
-              : {
-                  employee_id: form.get("employee_id"),
-                  password: form.get("password"),
-                },
-          ),
-        },
-      );
+      const response = await fetch(path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
       const result = await response.json();
       if (!response.ok)
         throw new Error(
@@ -105,7 +108,34 @@ export function LoginForm({
               {error}
             </p>
           )}
-          <form onSubmit={submit} className="mt-7 space-y-5">
+          {demo && (
+            <fieldset
+              className="fieldset mt-5 rounded-box border border-base-300 bg-base-200 p-4"
+              disabled={pending}
+            >
+              <legend className="fieldset-legend">
+                เข้าสู่ระบบด่วน · โหมดสาธิต
+              </legend>
+              <p className="mb-2 text-sm text-base-content">
+                เลือกบทบาทเพื่อเปิดข้อมูลสาธิต
+              </p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {Object.entries(demoRoles).map(([role, label]) => (
+                  <button
+                    key={role}
+                    type="button"
+                    className="btn btn-sm h-auto min-h-10 whitespace-normal py-2"
+                    onClick={() =>
+                      void authenticate("/api/auth/demo", { role })
+                    }
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          )}
+          <form method="post" onSubmit={submit} className="mt-7 space-y-5">
             {access ? (
               <div>
                 <label htmlFor="token" className="field-label">

@@ -15,6 +15,7 @@ import { payload } from "@/server/payload";
 import { workspace } from "@/server/workspace";
 import { executeUc } from "@/server/workflows";
 import { privateFile } from "@/server/media";
+import { demoLogin } from "@/server/demo";
 import {
   setupAvailable,
   setupAdmin,
@@ -94,6 +95,10 @@ export async function POST(req: Request, ctx: Context) {
     }
     if (key === "auth/access") {
       const r = await exchangeLink(input.data, req);
+      return ok({ identity: r.identity }, r.cookie);
+    }
+    if (key === "auth/demo") {
+      const r = await demoLogin(input.data, req);
       return ok({ identity: r.identity }, r.cookie);
     }
     const id = await needIdentity(req);
