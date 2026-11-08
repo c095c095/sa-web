@@ -5,6 +5,7 @@ import {
   useId,
   useRef,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import Image from "next/image";
@@ -200,6 +201,8 @@ export function Empty({
   return <p className="py-5 text-muted">{children}</p>;
 }
 export type Run = (uc: string, data: Payload, files?: File[]) => Promise<void>;
+const subscribeToHydration = () => () => {};
+
 export function Action({
   uc,
   extra = {},
@@ -209,6 +212,7 @@ export function Action({
   disabled = false,
   primary = false,
   reset = true,
+  review,
 }: {
   uc: string;
   extra?: Payload;
@@ -218,9 +222,17 @@ export function Action({
   disabled?: boolean;
   primary?: boolean;
   reset?: boolean;
+  review?: (data: Payload, files: File[]) => [string, string][];
 }) {
   const [busy, setBusy] = useState(false),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [preview, setPreview] = useState<[string, string][] | null>(null);
+  // Keep the server-rendered form inert until React can handle the submission.
+  const hydrated = useSyncExternalStore(
+    subscribeToHydration,
+    () => true,
+    () => false,
+  );
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget,
@@ -235,16 +247,22 @@ export function Action({
     if (fd.has("is_single_certify")) data.is_single_certify = true;
     if (fd.has("appointment")) {
       const v = str(fd.get("appointment"));
-      if (v) data.appointment = new Date(v).toISOString();
+      if (v) data.appointment = new Date(v + "+07:00").toISOString();
     }
     const files = [...fd.values()].filter(
       (v): v is File => v instanceof File && v.size > 0,
     );
+    if (review && !preview) {
+      setError("");
+      setPreview(review(data, files));
+      return;
+    }
     setBusy(true);
     setError("");
     try {
       await run(uc, data, files);
       if (reset) form.reset();
+      setPreview(null);
     } catch (err) {
       setError(
         err instanceof TypeError
@@ -258,9 +276,26 @@ export function Action({
     }
   }
   return (
-    <form onSubmit={submit} className="space-y-5">
-      <fieldset disabled={busy || disabled} className="space-y-5">
+    <form
+      onSubmit={submit}
+      onChange={review ? () => setPreview(null) : undefined}
+      className="space-y-5"
+    >
+      <fieldset disabled={!hydrated || busy || disabled} className="space-y-5">
         {children}
+        {preview && (
+          <div className="border-y border-base-300 py-4" aria-live="polite">
+            <p className="font-semibold">ทบทวนข้อมูลก่อนยืนยัน</p>
+            <dl className="mt-3 space-y-2">
+              {preview.map(([label, value]) => (
+                <div key={label} className="break-words">
+                  <dt className="text-sm text-muted">{label}</dt>
+                  <dd>{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        )}
         {error && (
           <p role="alert" className="alert alert-error">
             {error}
@@ -273,7 +308,7 @@ export function Action({
               aria-hidden="true"
             />
           )}
-          {busy ? "กำลังบันทึก" : title}
+          {busy ? "กำลังบันทึก" : review && !preview ? "ทบทวนก่อนส่ง" : title}
         </button>
       </fieldset>
     </form>

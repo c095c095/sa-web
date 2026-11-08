@@ -23,6 +23,7 @@ export interface Workspace {
   newDefects: DataRow[];
   inspectors: DataRow[];
   projects: DataRow[];
+  customerLink?: DataRow;
 }
 export const roleLabels = {
   ADMIN: "ผู้ดูแลระบบ",

@@ -1,5 +1,6 @@
 "use client";
-import { defectStatuses } from "@/lib/domain";
+import { useState } from "react";
+import { categories, defectStatuses } from "@/lib/domain";
 import {
   Action,
   Check,
@@ -19,9 +20,32 @@ export function IssueRepairReport({
   handoverDefs,
   actionBase,
 }: WorkflowState) {
+  const pending = handoverDefs.filter(
+    (defect) => !["FIXED", "VERIFIED"].includes(str(defect.status)),
+  );
   return (
     <>
-      <RepairDocuments reports={w.reports} files={w.files} />
+      <Panel title="ความพร้อมของรายงาน">
+        {hand ? (
+          <>
+            <p>
+              ซ่อมเสร็จ {handoverDefs.length - pending.length} จาก{" "}
+              {handoverDefs.length} จุด
+            </p>
+            {handoverDefs.length > 0 && (
+              <progress
+                className="progress progress-success mt-3 w-full"
+                aria-label="สัดส่วนจุดที่ซ่อมเสร็จ"
+                value={handoverDefs.length - pending.length}
+                max={handoverDefs.length}
+              />
+            )}
+            {pending.length > 0 && <Defects items={pending} files={w.files} />}
+          </>
+        ) : (
+          <Empty>ยังไม่มีรอบตรวจก่อนรับมอบที่เปิดอยู่</Empty>
+        )}
+      </Panel>
       <Panel title="สร้างเอกสารสรุปการซ่อม">
         <Action
           {...actionBase}
@@ -48,6 +72,7 @@ export function IssueRepairReport({
           />
         </Action>
       </Panel>
+      <RepairDocuments reports={w.reports} files={w.files} />
     </>
   );
 }
@@ -59,6 +84,19 @@ export function ReviewHandoverRepairs({
   canCustomer,
   actionBase,
 }: WorkflowState) {
+  const [status, setStatus] = useState(""),
+    [category, setCategory] = useState("");
+  const matches = handoverDefs
+    .filter(
+      (defect) =>
+        (!status || defect.status === status) &&
+        (!category || (defect.category ?? "uncategorized") === category),
+    )
+    .sort(
+      (a, b) =>
+        Number(["FIXED", "VERIFIED"].includes(str(a.status))) -
+        Number(["FIXED", "VERIFIED"].includes(str(b.status))),
+    );
   return (
     <>
       <Panel title="ภาพรวมการซ่อมรอบตรวจก่อนรับมอบ">
@@ -86,7 +124,67 @@ export function ReviewHandoverRepairs({
         )}
       </Panel>
       <Panel title="รายการจุดและหลักฐานการซ่อม">
-        <Defects files={w.files} items={handoverDefs} />
+        {handoverDefs.length > 0 && (
+          <div className="mb-4 flex flex-wrap items-end gap-3">
+            <div className="grid gap-2">
+              <label htmlFor="report-status">สถานะจุด</label>
+              <select
+                id="report-status"
+                className="select"
+                value={status}
+                onChange={(event) => setStatus(event.target.value)}
+              >
+                <option value="">ทุกสถานะ</option>
+                {Object.entries(defectStatuses).map(([code, title]) => (
+                  <option key={code} value={code}>
+                    {title}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="grid gap-2">
+              <label htmlFor="report-category">หมวดงาน</label>
+              <select
+                id="report-category"
+                className="select"
+                value={category}
+                onChange={(event) => setCategory(event.target.value)}
+              >
+                <option value="">ทุกหมวด</option>
+                {Object.entries(categories).map(([code, title]) => (
+                  <option key={code} value={code}>
+                    {title}
+                  </option>
+                ))}
+                <option value="uncategorized">ยังไม่แยกประเภท</option>
+              </select>
+            </div>
+            {(status || category) && (
+              <button
+                className="btn btn-ghost"
+                type="button"
+                onClick={() => {
+                  setStatus("");
+                  setCategory("");
+                }}
+              >
+                ล้างตัวกรอง
+              </button>
+            )}
+          </div>
+        )}
+        <p className="text-sm text-muted" role="status">
+          แสดง {matches.length} จาก {handoverDefs.length} จุด
+        </p>
+        {matches.length ? (
+          <Defects files={w.files} items={matches} />
+        ) : (
+          <Empty>
+            {handoverDefs.length
+              ? "ไม่พบจุดที่ตรงกับตัวกรอง"
+              : "ยังไม่มีจุดในรอบปัจจุบัน"}
+          </Empty>
+        )}
         {w.rounds
           .filter(
             (round) =>

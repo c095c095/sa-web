@@ -631,7 +631,8 @@ export function AdminPanel({
     }
   }
   const pageLink = (page: number) =>
-    adminPath(section) + "?" +
+    adminPath(section) +
+    "?" +
     new URLSearchParams({
       q: query,
       status,
@@ -639,6 +640,15 @@ export function AdminPanel({
       page: String(page),
     });
   const title = managementSections[section] ?? "ภาพรวม",
+    sectionHelp: Record<string, string> = {
+      projects: "ดูโครงการที่รับบ้านใหม่และจำนวนบ้านในแต่ละโครงการ",
+      units: "เปิดรายละเอียดบ้านเพื่อดูรอบตรวจ คำขอ และเอกสาร",
+      customers: "ค้นหาลูกค้าจากชื่อ รหัส หรือเบอร์โทร แล้วเปิดดูบ้านที่ผูกไว้",
+      employees: "ตรวจสอบบทบาท สถานะบัญชี และงานที่พนักงานรับผิดชอบ",
+      links: "ตรวจวันหมดอายุและสถานะการเพิกถอนของลิงก์ลูกค้า",
+      sessions: "ดูรายการเข้าสู่ระบบที่ยังใช้งานอยู่พร้อมวันหมดอายุ",
+      audit: "ค้นหาเหตุการณ์จากผู้ดำเนินการ รหัสรายการ หรือชื่อการดำเนินการ",
+    },
     creatable = ["employees", "projects", "units", "customers"].includes(
       section,
     ),
@@ -829,7 +839,13 @@ export function AdminPanel({
                 "projects",
               ],
               ["บัญชีที่เปิดใช้", view.tasks?.active_employees, "employees"],
-              ["จุดที่รอดำเนินการ", view.tasks?.pending_defects, "units"],
+              ["บ้านที่มีงานค้าง", view.tasks?.pending_units, "units"],
+              [
+                "ลิงก์หมดอายุหรือถูกเพิกถอน",
+                view.tasks?.inactive_links,
+                "links",
+              ],
+              ["เซสชันที่ยังใช้งาน", view.tasks?.active_sessions, "sessions"],
             ].map(([label, n, key]) => (
               <Link
                 key={string(key)}
@@ -840,7 +856,9 @@ export function AdminPanel({
                     ? "?status=active"
                     : key === "units"
                       ? "?status=pending-work"
-                      : "")
+                      : key === "links"
+                        ? "?status=inactive"
+                        : "")
                 }
               >
                 <span className="stat-card-label">{label}</span>
@@ -863,9 +881,34 @@ export function AdminPanel({
               <p className="text-muted">ไม่มีนัดหมายที่กำลังจะมาถึง</p>
             )}
           </Panel>
+          <Panel title="กิจกรรมการจัดการล่าสุด">
+            {view.recentAudit?.length ? (
+              <ul className="divide-y divide-base-300">
+                {view.recentAudit.map((event) => (
+                  <li
+                    key={string(event.event_id)}
+                    className="flex flex-wrap justify-between gap-x-4 py-3"
+                  >
+                    <span>
+                      {event.action_name} โดย {event.actor_name}
+                    </span>
+                    <span className="text-muted">
+                      {thaiTime(event.created_at)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-muted">ยังไม่มีกิจกรรมการจัดการที่บันทึกไว้</p>
+            )}
+            <Link className="btn mt-4" href={adminPath("audit")}>
+              เปิดประวัติการจัดการ
+            </Link>
+          </Panel>
         </>
       ) : (
         <>
+          <p className="text-muted">{sectionHelp[section]}</p>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <p className="text-muted">ทั้งหมด {view.total ?? 0} รายการ</p>
             {creatable && (

@@ -6,7 +6,11 @@ export type Task = {
   hint: string;
   defect?: string;
 };
-export function taskUrl(t: Task, unit: string, q?: string) {
+export function taskUrl(
+  t: Task,
+  unit: string,
+  q?: Parameters<typeof workflowPath>[3],
+) {
   return workflowPath(t.screen, unit, t.defect, q);
 }
 export function journey(w: Workspace) {

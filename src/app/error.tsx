@@ -1,17 +1,22 @@
 "use client";
-export default function ErrorPage({ retry }: { retry: () => void }) {
+
+import Link from "next/link";
+
+export default function Error({ retry }: { retry: () => void }) {
   return (
-    <main className="page-container flex min-h-dvh w-full items-center justify-center">
-      <section className="max-w-lg space-y-5 rounded-box bg-base-100 p-8">
-        <h1 className="text-2xl">ยังเปิดข้อมูลไม่ได้</h1>
-        <p>
-          กรุณาตรวจว่า MySQL ใน XAMPP ยังเปิดอยู่ แล้วลองอีกครั้ง
-          ข้อมูลที่ยังไม่ยืนยันบันทึกจะไม่ถูกส่งซ้ำอัตโนมัติ
-        </p>
-        <button className="btn btn-primary" onClick={retry}>
-          ลองเปิดข้อมูลอีกครั้ง
+    <main className="mx-auto w-full max-w-xl space-y-4 p-6">
+      <h1 className="page-heading">เปิดข้อมูลหน้านี้ไม่ได้</h1>
+      <p className="alert alert-error" role="alert">
+        กรุณาลองโหลดข้อมูลอีกครั้ง
+      </p>
+      <div className="flex flex-wrap gap-3">
+        <button className="btn btn-primary" type="button" onClick={retry}>
+          ลองอีกครั้ง
         </button>
-      </section>
+        <Link className="btn" href="/">
+          กลับหน้าแรก
+        </Link>
+      </div>
     </main>
   );
 }

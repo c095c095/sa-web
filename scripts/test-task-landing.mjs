@@ -76,6 +76,8 @@ function expectedRows(role, screen) {
       continue;
     }
     if (task) out.push({ unit: String(unit.unit_id), house: String(unit.house_no), status: unit.status, href: taskUrl(task, String(unit.unit_id)), primary: true, title: task.title });
+    else if (screen === "SCR-16" && rounds.some((round) => round.round_type === "CUSTOMER_HANDOVER"))
+      out.push({ unit: String(unit.unit_id), href: workflowPath(screen, String(unit.unit_id)), primary: false });
   }
   return out;
 }

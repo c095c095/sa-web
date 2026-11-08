@@ -41,14 +41,9 @@ import {
   screenRoles,
 } from "@/lib/runtime-contracts";
 import { managementSections } from "@/lib/management-contracts";
+import { string } from "@/lib/display-time";
 
-export const string = (v: unknown) => String(v ?? "");
-export const thaiTime = (v: unknown) =>
-  v
-    ? new Date(
-        string(v).replace(" ", "T") + (string(v).endsWith("Z") ? "" : "Z"),
-      ).toLocaleString("th-TH", { timeZone: "Asia/Bangkok" })
-    : "ยังไม่ระบุ";
+export { string, thaiTime } from "@/lib/display-time";
 
 /* ── Icon map ── */
 const sectionIcons: Record<string, React.ReactNode> = {
@@ -85,7 +80,13 @@ const screenIcons: Record<string, React.ReactNode> = {
 
 export function LinkPending() {
   const { pending } = useLinkStatus();
-  return pending ? <span className="loading loading-spinner loading-xs" role="status" aria-label="กำลังเปิดข้อมูล" /> : null;
+  return pending ? (
+    <span
+      className="loading loading-spinner loading-xs"
+      role="status"
+      aria-label="กำลังเปิดข้อมูล"
+    />
+  ) : null;
 }
 
 function SidebarNav({
@@ -269,7 +270,9 @@ export function AppFrame({
           >
             <div className="mt-2 space-y-2 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg">
               <div className="rounded-field bg-base-200 px-3 py-2.5">
-                <p className="wrap-break-word font-medium">{identity.fullName}</p>
+                <p className="wrap-break-word font-medium">
+                  {identity.fullName}
+                </p>
                 <p className="text-xs text-muted">{roleName}</p>
               </div>
               <Link
@@ -597,7 +600,10 @@ export function MutationForm({
               {error}
             </p>
           )}
-          <button type="submit" className={`btn ${primary ? "btn-primary" : ""}`}>
+          <button
+            type="submit"
+            className={`btn ${primary ? "btn-primary" : ""}`}
+          >
             {busy ? (
               <>
                 <span

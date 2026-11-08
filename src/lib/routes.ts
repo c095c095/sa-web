@@ -19,15 +19,29 @@ export const workflowPaths: Readonly<Record<string, string>> = {
   "SCR-18": "/handover-signatures",
 };
 
-export function withSearch(path: string, q?: string) {
-  return q ? path + "?q=" + encodeURIComponent(q) : path;
+export type ListFilters = {
+  q?: string;
+  project?: string;
+  status?: string;
+  category?: string;
+};
+
+export function withSearch(path: string, filters?: string | ListFilters) {
+  const params = new URLSearchParams();
+  const values = typeof filters === "string" ? { q: filters } : filters;
+  for (const [key, value] of Object.entries(values ?? {})) {
+    if (value) params.set(key, value);
+  }
+  return params.size
+    ? path + "?" + params.toString().replaceAll("+", "%20")
+    : path;
 }
 
 export function workflowPath(
   screen: string,
   unit?: string,
   defect?: string,
-  q?: string,
+  q?: string | ListFilters,
 ) {
   const path = workflowPaths[screen];
   if (!path) throw new Error("Unknown workflow: " + screen);

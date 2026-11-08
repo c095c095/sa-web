@@ -10,6 +10,7 @@ export interface ManagementView {
   counts?: DataRow[];
   tasks?: DataRow;
   upcoming?: DataRow[];
+  recentAudit?: DataRow[];
 }
 export interface ManagementDetail {
   files?: DataRow[];

@@ -16,6 +16,7 @@ import {
   workflowPath,
   workflowPaths,
   withSearch,
+  type ListFilters,
 } from "@/lib/routes";
 import { Panel, PickedDefect, str, type Run } from "./workflows/controls";
 
@@ -50,13 +51,13 @@ export function WorkflowFrame({
   Operation,
   screen,
   selectedDefect = "",
-  listQuery = "",
+  listQuery,
 }: {
   initial: Workspace;
   Operation: ComponentType<WorkflowState>;
   screen: string;
   selectedDefect?: string;
-  listQuery?: string;
+  listQuery?: ListFilters;
 }) {
   const [w, setW] = useState(initial),
     [message, setMessage] = useState(""),

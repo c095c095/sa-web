@@ -71,17 +71,23 @@ async function submit(p, title) {
     (await p.getByRole("button", { name: "รับงานนี้", exact: true }).count())
   )
     title = "รับงานนี้";
+  const review = p.getByRole("button", { name: "ทบทวนก่อนส่ง", exact: true });
+  const action = p.getByRole("button", { name: title, exact: true });
+  if (!(await action.count()) && (await review.count())) {
+    await review.click();
+    await p.getByText("ทบทวนข้อมูลก่อนยืนยัน", { exact: true }).waitFor();
+  }
   const refreshed = p.waitForResponse(
     (r) => r.url().includes("/api/workspace") && r.request().method() === "GET",
   );
   const response = p.waitForResponse(
     (r) => r.url().includes("/api/actions/") && r.request().method() === "POST",
   );
-  await p.getByRole("button", { name: title, exact: true }).click();
+  await action.click();
   const r = await response;
   assert.equal(r.status(), 200, JSON.stringify(await r.json()));
   if (r.url().endsWith("/UC-01")) await p.waitForURL(/\/houses\//);
-  else await p.getByRole("status").waitFor();
+  else await p.locator('[role="status"].alert-success').waitFor();
   const latest = await refreshed;
   assert.equal(latest.status(), 200);
   await latest.finished();
@@ -119,6 +125,37 @@ try {
     await screen(sales, "SCR-09", unit);
     assert((await sales.locator("main").innerText()).includes(project));
   });
+  await check(
+    "House register filters persist through the detail link",
+    async () => {
+      await sales.goto(base + "/houses");
+      await sales.getByLabel("ค้นหาบ้านในรายการ").fill("BROWSER-01");
+      await sales.getByLabel("โครงการ", { exact: true }).selectOption(project);
+      await sales
+        .getByLabel("สถานะบ้าน", { exact: true })
+        .selectOption("IN_QC");
+      await sales.getByLabel("ค้นหาบ้านในรายการ").press("Enter");
+      await sales.waitForURL(
+        (url) => url.searchParams.get("project") === project,
+      );
+      await sales.getByRole("link", { name: "เปิดบ้าน BROWSER-01" }).click();
+      await sales.waitForURL((url) => url.pathname === "/houses/" + unit);
+      await sales.getByRole("link", { name: "กลับไปภาพรวม" }).click();
+      await sales.waitForURL(
+        (url) =>
+          url.pathname === "/houses" &&
+          url.searchParams.get("status") === "IN_QC",
+      );
+      assert.equal(
+        await sales.getByLabel("ค้นหาบ้านในรายการ").inputValue(),
+        "BROWSER-01",
+      );
+      assert.equal(
+        await sales.getByLabel("โครงการ", { exact: true }).inputValue(),
+        project,
+      );
+    },
+  );
   await check("UC02 QC add photo and finish through forms", async () => {
     await screen(inspector, "SCR-02", unit);
     await inspector
@@ -231,11 +268,20 @@ try {
     await submit(customer, "ยื่นคำขอตรวจบ้าน");
   });
   await check("UC13 appointment arrival persisted Thai timezone", async () => {
-    await screen(sales, "SCR-13", unit);
+    const scripts = "**/_next/static/**/*.js";
+    const delayScripts = async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 700));
+      await route.continue();
+    };
+    await sales.route(scripts, delayScripts);
+    await sales.goto(base + workflowPath("SCR-13", unit), {
+      waitUntil: "commit",
+    });
     await sales
       .getByLabel("วันและเวลานัด (เวลาไทย)", { exact: true })
       .fill("2026-11-18T09:30");
     await submit(sales, "บันทึกหรือเลื่อนนัด");
+    await sales.unroute(scripts, delayScripts);
     const [[appointment]] = await db.query(
       "SELECT appointment FROM inspection_request WHERE unit_id=? ORDER BY request_id DESC LIMIT 1",
       [unit],
@@ -306,6 +352,16 @@ try {
     "UC17 select fixed reject rework accept then UC18 canvas signature",
     async () => {
       await screen(customer, "SCR-17", unit);
+      await customer
+        .getByLabel("สถานะจุด", { exact: true })
+        .selectOption("VERIFIED");
+      await customer
+        .getByText("ไม่พบจุดที่ตรงกับตัวกรอง", { exact: true })
+        .waitFor();
+      await customer
+        .getByRole("button", { name: "ล้างตัวกรอง", exact: true })
+        .click();
+      await customer.getByText("แสดง 1 จาก 1 จุด", { exact: true }).waitFor();
       await customer
         .getByLabel("เลือกจุด " + handDefect, { exact: true })
         .check();

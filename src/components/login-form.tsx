@@ -123,7 +123,8 @@ export function LoginForm({
                   aria-describedby="link-help"
                 />
                 <p id="link-help" className="helper mt-2">
-                  ลิงก์ใช้ได้ 30 วัน หากหมดอายุให้ติดต่อฝ่ายขาย
+                  ลิงก์ใช้ได้ 30 วัน หากหมดอายุหรือใช้ไม่ได้
+                  ให้ติดต่อฝ่ายขายพร้อมเลขที่บ้านและชื่อโครงการเพื่อขอลิงก์ใหม่
                 </p>
               </div>
             ) : (
@@ -144,6 +145,7 @@ export function LoginForm({
                   />
                   <p id="employee-help" className="helper mt-1">
                     พนักงานใช้รหัสที่ได้รับ ผู้ดูแลระบบใช้ ADMIN
+                    หากจำรหัสผ่านไม่ได้ ให้ติดต่อผู้ดูแลระบบ
                   </p>
                 </div>
                 <div>

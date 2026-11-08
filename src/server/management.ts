@@ -375,13 +375,23 @@ export async function managementView(id: Identity, p: URLSearchParams) {
     );
     const tasks = await one(
       pool,
-      "SELECT (SELECT COUNT(*) FROM defect WHERE status IN ('NEW','WAITING_ASSIGN','ASSIGNED','REWORK')) pending_defects,(SELECT COUNT(*) FROM employee WHERE is_active=1) active_employees,(SELECT COUNT(*) FROM project WHERE is_active=1) active_projects",
+      `SELECT
+        (SELECT COUNT(*) FROM defect WHERE status IN ('NEW','WAITING_ASSIGN','ASSIGNED','REWORK')) pending_defects,
+        (SELECT COUNT(DISTINCT u.unit_id) FROM property_unit u JOIN inspection_round r ON r.unit_id=u.unit_id JOIN defect d ON d.round_id=r.round_id WHERE u.archived_at IS NULL AND d.status IN ('NEW','WAITING_ASSIGN','ASSIGNED','REWORK')) pending_units,
+        (SELECT COUNT(*) FROM employee WHERE is_active=1) active_employees,
+        (SELECT COUNT(*) FROM project WHERE is_active=1) active_projects,
+        (SELECT COUNT(*) FROM access_link WHERE revoked_at IS NOT NULL OR expires_at<=NOW()) inactive_links,
+        (SELECT COUNT(*) FROM app_session WHERE revoked_at IS NULL AND expires_at>NOW()) active_sessions`,
     );
     const upcoming = await rows(
       pool,
-      "SELECT r.request_id,r.appointment,u.unit_id,u.house_no,u.project_name FROM inspection_request r JOIN property_unit u ON u.unit_id=r.unit_id WHERE r.status='SUBMITTED' AND r.appointment>=NOW() ORDER BY r.appointment LIMIT 12",
+      "SELECT r.request_id,r.appointment,u.unit_id,u.house_no,u.project_name FROM inspection_request r JOIN property_unit u ON u.unit_id=r.unit_id WHERE u.archived_at IS NULL AND r.status='SUBMITTED' AND r.appointment>=NOW() ORDER BY r.appointment LIMIT 12",
     );
-    return { section, counts, tasks, upcoming };
+    const recentAudit = await rows(
+      pool,
+      "SELECT event_id,action_name,actor_name,created_at FROM audit_event ORDER BY event_id DESC LIMIT 5",
+    );
+    return { section, counts, tasks, upcoming, recentAudit };
   }
   switch (section) {
     case "employees":

@@ -1,5 +1,5 @@
 "use client";
-import { Action, Check, Empty, Field, Panel, str } from "./controls";
+import { Action, Check, Empty, Field, Panel, str, when } from "./controls";
 import { type WorkflowState } from "../workflow-frame";
 
 export function MarkReadyForSale({
@@ -9,10 +9,18 @@ export function MarkReadyForSale({
   unitExtra,
   actionBase,
 }: WorkflowState) {
+  const closed = w.rounds.find(
+    (round) => round.round_type === "QC_INTERNAL" && round.status === "CLOSED",
+  );
   return (
     <Panel title="พร้อมขาย">
       <p className="mb-5 text-muted">
         เมื่อรอบ QC ปิดแล้วจึงแจ้งฝ่ายขายให้ทำสัญญาและผูกลูกค้าได้
+      </p>
+      <p className="mb-5 border-b border-base-300 pb-4">
+        {closed
+          ? `รอบ ${closed.round_id} ปิดแล้วเมื่อ ${when(closed.closed_at)}`
+          : "ยังไม่มีรอบ QC ที่ปิดแล้ว"}
       </p>
       <Action
         {...actionBase}
@@ -20,13 +28,7 @@ export function MarkReadyForSale({
         extra={unitExtra}
         title="แจ้งบ้านพร้อมขาย"
         primary
-        disabled={
-          !unitId ||
-          unit?.status !== "IN_QC" ||
-          !w.rounds.some(
-            (r) => r.round_type === "QC_INTERNAL" && r.status === "CLOSED",
-          )
-        }
+        disabled={!unitId || unit?.status !== "IN_QC" || !closed}
       >
         <Check required title="ตรวจข้อมูลบ้านและการปิดรอบ QC แล้ว" />
       </Action>
@@ -35,12 +37,31 @@ export function MarkReadyForSale({
 }
 
 export function IssueCustomerAccess({
+  w,
   unit,
   unitExtra,
   actionBase,
 }: WorkflowState) {
   return (
     <Panel title="ผูกลูกค้าและออกลิงก์">
+      <dl className="mb-5 grid gap-4 border-b border-base-300 pb-4 sm:grid-cols-2">
+        <div>
+          <dt className="text-muted">ลูกค้าที่ผูกกับบ้าน</dt>
+          <dd>{unit?.customer_name || "ยังไม่ผูกลูกค้า"}</dd>
+        </div>
+        <div>
+          <dt className="text-muted">ลิงก์ล่าสุด</dt>
+          <dd>
+            {w.customerLink?.status === "ACTIVE"
+              ? `ใช้งานได้ถึง ${when(w.customerLink.expires_at)}`
+              : w.customerLink?.status === "REVOKED"
+                ? "ถูกเพิกถอนแล้ว"
+                : w.customerLink?.status === "EXPIRED"
+                  ? "หมดอายุแล้ว"
+                  : "ยังไม่มีลิงก์"}
+          </dd>
+        </div>
+      </dl>
       {unit?.status === "READY_TO_SELL" ? (
         <Action
           {...actionBase}

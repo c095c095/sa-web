@@ -25,6 +25,10 @@ export function SetupForm() {
           ตั้งชื่อที่แสดงและรหัสผ่านของคุณ รหัสตั้งค่าอยู่ในไฟล์ ADMIN-SETUP.md
           ที่เครื่องนี้
         </p>
+        <p className="text-sm text-muted">
+          หลังสร้างบัญชีแล้ว
+          ระบบจะเปิดหน้าภาพรวมสำหรับจัดการโครงการและเพิ่มพนักงาน
+        </p>
         {error && (
           <p role="alert" className="alert alert-error">
             {error}

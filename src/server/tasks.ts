@@ -2,12 +2,17 @@ import "server-only";
 import { type Identity, employee, publicIdentity, requireReady } from "./auth";
 import { pool, rows, type Row } from "./db";
 import { journey, type Task } from "@/lib/journey";
-import { canIssueLink } from "@/lib/task-landing";
+import { canIssueLink, taskContext } from "@/lib/task-landing";
 import { screenRoles, type Workspace } from "@/lib/runtime-contracts";
 
-// primary: the step journey.ts offers for this house. A row that is not primary is
-// the SCR-09 re-issue of a link for a customer that is already bound.
-export type LandingRow = { unit: Row; task: Task; primary: boolean };
+// Primary rows are actionable according to journey.ts. Secondary rows support
+// reissuing existing access or reviewing report readiness and history.
+export type LandingRow = {
+  unit: Row;
+  task: Task;
+  primary: boolean;
+  context: string;
+};
 
 // Houses whose journey (src/lib/journey.ts) offers `screen` to this employee.
 // The eligibility rule is journey.ts itself; this function only loads the data
@@ -16,11 +21,11 @@ export type LandingRow = { unit: Row; task: Task; primary: boolean };
 // non-archived houses for SALES and INSPECTOR.
 export async function taskLanding(
   id: Identity,
-  screen: string,
+  screen?: string,
 ): Promise<LandingRow[]> {
   requireReady(id);
   const e = employee(id, ["SALES", "INSPECTOR"]);
-  if (screen === "SCR-01" || !screenRoles[e.role].includes(screen))
+  if (screen && (screen === "SCR-01" || !screenRoles[e.role].includes(screen)))
     throw new Error("screen has no house landing for this role");
   const units = await rows(
     pool,
@@ -41,21 +46,31 @@ export async function taskLanding(
       "SELECT q.* FROM inspection_request q JOIN property_unit u ON u.unit_id=q.unit_id WHERE u.archived_at IS NULL ORDER BY q.created_at DESC",
     ),
   ]);
-  const by = (list: Row[], unit: Row) =>
-    list.filter((x) => String(x.unit_id) === String(unit.unit_id));
+  const groupByUnit = (list: Row[]) => {
+    const groups = new Map<string, Row[]>();
+    for (const row of list) {
+      const key = String(row.unit_id);
+      const group = groups.get(key);
+      if (group) group.push(row);
+      else groups.set(key, [row]);
+    }
+    return groups;
+  };
+  const roundsByUnit = groupByUnit(rounds);
+  const defectsByUnit = groupByUnit(defects);
+  const requestsByUnit = groupByUnit(requests);
   const identity = publicIdentity(id);
   const result: LandingRow[] = [];
   for (const unit of units) {
-    const unitRounds = by(rounds, unit);
-    const roundIds = new Set(unitRounds.map((r) => String(r.round_id)));
+    const key = String(unit.unit_id);
     const w: Workspace = {
       identity,
       units: [],
       unit,
-      rounds: unitRounds,
-      defects: defects.filter((d) => roundIds.has(String(d.round_id))),
+      rounds: roundsByUnit.get(key) ?? [],
+      defects: defectsByUnit.get(key) ?? [],
       files: [],
-      requests: by(requests, unit),
+      requests: requestsByUnit.get(key) ?? [],
       reports: [],
       queue: [],
       myJobs: [],
@@ -63,7 +78,18 @@ export async function taskLanding(
       inspectors: [],
       projects: [],
     };
-    const task = journey(w).actions.find((a) => a.screen === screen);
+    const actions = journey(w).actions;
+    if (!screen) {
+      for (const task of actions)
+        result.push({
+          unit,
+          task,
+          primary: true,
+          context: taskContext(w, task.screen),
+        });
+      continue;
+    }
+    const task = actions.find((a) => a.screen === screen);
     if (screen === "SCR-09") {
       if (!canIssueLink(unit)) continue;
       result.push({
@@ -74,10 +100,28 @@ export async function taskLanding(
           hint: `ลูกค้า ${unit.customer_name ?? ""} · ลิงก์ใหม่มีอายุ 30 วัน`,
         },
         primary: Boolean(task),
+        context: taskContext(w, screen),
       });
       continue;
     }
-    if (task) result.push({ unit, task, primary: true });
+    if (task) {
+      result.push({
+        unit,
+        task,
+        primary: true,
+        context: taskContext(w, screen),
+      });
+    } else if (
+      screen === "SCR-16" &&
+      w.rounds.some((round) => round.round_type === "CUSTOMER_HANDOVER")
+    ) {
+      result.push({
+        unit,
+        task: { screen, title: "ดูความคืบหน้าและเอกสาร", hint: "" },
+        primary: false,
+        context: taskContext(w, screen),
+      });
+    }
   }
   return result;
 }

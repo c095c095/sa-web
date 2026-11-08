@@ -121,6 +121,16 @@ export async function workspace(id: Identity, requestedUnit?: string) {
     unit: unit ?? null,
     rounds,
     defects: visible,
+    customerLink:
+      unit && id.kind === "EMPLOYEE" && id.role === "SALES"
+        ? (
+            await rows(
+              pool,
+              "SELECT expires_at,revoked_at,CASE WHEN revoked_at IS NOT NULL THEN 'REVOKED' WHEN expires_at<=NOW() THEN 'EXPIRED' ELSE 'ACTIVE' END status FROM access_link WHERE unit_id=? AND customer_id=? ORDER BY created_at DESC,link_id DESC LIMIT 1",
+              [unitId, unit.customer_id],
+            )
+          )[0]
+        : undefined,
     files,
     requests: unit
       ? await rows(

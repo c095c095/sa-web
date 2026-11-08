@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { workflowPath } from "@/lib/routes";
+import { thaiTime } from "@/lib/display-time";
 import {
   Action,
   Check,
@@ -18,6 +19,7 @@ import {
 import { type WorkflowState } from "../workflow-frame";
 
 export function SetInspectionPreference({
+  w,
   unit,
   unitId,
   actionBase,
@@ -51,8 +53,11 @@ export function SetInspectionPreference({
         </>
       ) : (
         <Empty>
-          บ้านนี้ตอบความต้องการตรวจแล้ว
-          ดูสถานะบ้านด้านบนและเลือกขั้นตอนถัดไปจากเมนู
+          {w.requests.length
+            ? "เลือกตรวจบ้านแล้ว ดูวันนัดล่าสุดจากภาพรวมบ้าน"
+            : unit
+              ? "บ้านออกจากขั้นเลือกวิธีตรวจแล้ว ดูสถานะปัจจุบันจากภาพรวมบ้าน"
+              : "ยังไม่มีข้อมูลบ้าน"}
         </Empty>
       )}
     </Panel>
@@ -71,6 +76,10 @@ export function RequestInspection({
         uc={"UC-11"}
         extra={unitExtra}
         title="ยื่นคำขอตรวจบ้าน"
+        review={(data) => [
+          ["บ้านเลขที่", str(unit?.house_no)],
+          ["วันที่ต้องการตรวจ", thaiTime(data.preferred_date)],
+        ]}
         primary
         disabled={unit?.status !== "CONTRACTED"}
       >
@@ -96,6 +105,11 @@ export function RequestAssistedInspection({
         uc={"UC-12"}
         extra={unitExtra}
         title="ยื่นคำขอตรวจบ้าน"
+        review={(data) => [
+          ["บ้านเลขที่", str(unit?.house_no)],
+          ["ลูกค้า", str(unit?.customer_name)],
+          ["วันที่ต้องการตรวจ", thaiTime(data.preferred_date)],
+        ]}
         primary
         disabled={unit?.status !== "CONTRACTED"}
       >
@@ -129,6 +143,10 @@ export function ManageAppointment({ w, request, actionBase }: WorkflowState) {
                 mode: "appointment",
               }}
               title="บันทึกหรือเลื่อนนัด"
+              review={(data) => [
+                ["เลขคำขอ", str(request.request_id)],
+                ["วันและเวลานัด", thaiTime(data.appointment)],
+              ]}
               primary
             >
               <Field
@@ -157,6 +175,7 @@ export function ManageAppointment({ w, request, actionBase }: WorkflowState) {
         )}
       </Panel>
       <Panel title="ประวัติคำขอตรวจ">
+        {!w.requests.length && <Empty>ยังไม่มีคำขอตรวจสำหรับบ้านนี้</Empty>}
         <ul className="divide-y divide-base-300">
           {w.requests.map((r) => (
             <li key={str(r.request_id)} className="py-3">
@@ -174,6 +193,7 @@ export function ManageAppointment({ w, request, actionBase }: WorkflowState) {
 
 export function RecordHandoverDefect({
   w,
+  hand,
   handoverDefs,
   canCustomer,
   actionBase,
@@ -181,10 +201,25 @@ export function RecordHandoverDefect({
   return (
     <>
       <Panel title="แจ้งจุดใหม่">
+        {hand && (
+          <p className="mb-5 text-muted">
+            รอบ {str(hand.round_id)} เปิดเมื่อ {thaiTime(hand.started_at)}{" "}
+            แจ้งแล้ว {handoverDefs.length} จุด
+          </p>
+        )}
         <Action
           {...actionBase}
           uc="UC-14"
           title="บันทึกจุดที่ต้องแก้ไข"
+          review={(data, files) => [
+            [
+              "ผู้แจ้ง",
+              data.reported_by_type === "EXTERNAL" ? "บริษัทตรวจนอก" : "ลูกค้า",
+            ],
+            ["ตำแหน่ง", str(data.location_pin)],
+            ["รายละเอียด", str(data.description) || "ยังไม่ระบุ"],
+            ["รูปที่แนบ", `${files.length} รูป`],
+          ]}
           primary
           disabled={!canCustomer}
         >
@@ -224,8 +259,38 @@ export function RecordHandoverDefect({
 }
 
 export function SignHandover({ w, unit, run, actionBase }: WorkflowState) {
+  const request = w.requests[0];
   return (
     <>
+      <Panel title="ข้อมูลก่อนรับมอบ">
+        <dl className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <dt className="text-muted">บ้านที่จะรับมอบ</dt>
+            <dd>
+              {str(unit?.house_no)} {str(unit?.project_name)}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-muted">ผลการตรวจรับ</dt>
+            <dd>
+              {request?.accept_result === "ACCEPTED"
+                ? "ยอมรับสภาพแล้ว"
+                : request?.accept_result === "REJECTED"
+                  ? "ส่งกลับแก้ไข"
+                  : request
+                    ? "รอผลยืนยัน"
+                    : "ไม่มีคำขอตรวจ"}
+            </dd>
+          </div>
+        </dl>
+        <p className="mt-4">
+          {unit?.status === "READY_HANDOVER"
+            ? "ตรวจสอบข้อมูลบ้านแล้วลงนามเพื่อบันทึกวันรับมอบ"
+            : unit?.status === "HANDED_OVER"
+              ? "เปิดหลักฐานการรับมอบด้านล่างได้"
+              : "ลงนามได้เมื่อบ้านมีสถานะพร้อมรับมอบ"}
+        </p>
+      </Panel>
       <Panel title="ลงลายเซ็นรับมอบ">
         {unit?.status === "HANDED_OVER" ? (
           <>

@@ -248,9 +248,30 @@ export function RecheckQc({
   );
 }
 
-export function CloseQc({ w, qc, roundExtra, actionBase }: WorkflowState) {
+export function CloseQc({
+  w,
+  qc,
+  qcDefs,
+  roundExtra,
+  actionBase,
+}: WorkflowState) {
+  const pending = qcDefs.filter(
+    (defect) => defect.status !== "VERIFIED",
+  ).length;
   return (
     <Panel title="รับรองและปิดรอบ QC">
+      <ul className="mb-5 space-y-2 border-b border-base-300 pb-4">
+        <li>
+          ผลตรวจซ้ำ{" "}
+          {qc?.recheck_result === "NO_DEFECT"
+            ? "ไม่พบจุดที่ต้องแก้"
+            : "ยังไม่ผ่านเงื่อนไขปิดรอบ"}
+        </li>
+        <li>
+          จุดที่ยังตรวจไม่ผ่าน {pending} จาก {qcDefs.length} จุด
+        </li>
+        <li>เลือกผู้ตรวจร่วม หรือยืนยันรับรองคนเดียว</li>
+      </ul>
       {qc?.status === "RECHECK_SCHEDULED" &&
       qc.recheck_result === "NO_DEFECT" ? (
         <>
@@ -259,6 +280,7 @@ export function CloseQc({ w, qc, roundExtra, actionBase }: WorkflowState) {
             uc="UC-07"
             extra={{ ...roundExtra, is_single_certify: false }}
             title="ปิดรอบด้วยผู้ตรวจร่วม"
+            disabled={pending > 0}
             primary
           >
             <Select
@@ -279,6 +301,7 @@ export function CloseQc({ w, qc, roundExtra, actionBase }: WorkflowState) {
               uc="UC-07"
               extra={{ ...roundExtra, is_single_certify: true }}
               title="ปิดรอบแบบรับรองคนเดียว"
+              disabled={pending > 0}
             >
               <Check required title="ยืนยันรับรองผลการตรวจคนเดียว" />
             </Action>

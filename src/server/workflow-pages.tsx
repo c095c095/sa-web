@@ -10,8 +10,12 @@ import { HomeHub } from "@/components/home-hub";
 import { RegisterLanding, TaskLanding } from "@/components/task-landing";
 import { RepairQueue } from "@/components/repair-queue";
 import { WorkflowFrame, type WorkflowState } from "@/components/workflow-frame";
+import { type ListFilters } from "@/lib/routes";
+import { taskContext } from "@/lib/task-landing";
 
-export type WorkflowQuery = Promise<{ q?: string | string[] }>;
+export type WorkflowQuery = Promise<
+  Partial<Record<keyof ListFilters, string | string[]>>
+>;
 type Query = Awaited<WorkflowQuery>;
 
 export async function pageIdentity() {
@@ -47,8 +51,16 @@ async function pageWorkspace(
   }
 }
 
-const searchText = (query: Query) =>
-  typeof query.q === "string" ? query.q : "";
+function listFilters(query: Query): ListFilters {
+  const value = (key: keyof ListFilters) =>
+    typeof query[key] === "string" ? query[key] : undefined;
+  return {
+    q: value("q"),
+    project: value("project"),
+    status: value("status"),
+    category: value("category"),
+  };
+}
 
 export async function HouseOverview({
   unitId,
@@ -86,7 +98,7 @@ export async function RegisterIndex({
       identity={w.identity}
       screen={screen}
       units={w.units}
-      query={searchText(query)}
+      filters={listFilters(query)}
     />
   );
 }
@@ -103,7 +115,7 @@ export async function RepairIndex({
     <RepairQueue
       initial={await pageWorkspace(id)}
       screen={screen}
-      query={searchText(query)}
+      filters={listFilters(query)}
     />
   );
 }
@@ -125,7 +137,7 @@ export async function HouseWorkflowIndex({
       identity={publicIdentity(id)}
       screen={screen}
       items={items}
-      query={searchText(query)}
+      filters={listFilters(query)}
     />
   );
 }
@@ -134,13 +146,15 @@ async function customerItems(
   id: Awaited<ReturnType<typeof pageIdentity>>,
   screen: string,
 ) {
-  const { unit } = await pageWorkspace(id);
+  const w = await pageWorkspace(id);
+  const { unit } = w;
   return unit
     ? [
         {
           unit,
           task: { screen, title: "เปิดรายละเอียด", hint: "" },
           primary: true,
+          context: taskContext(w, screen),
         },
       ]
     : [];
@@ -170,7 +184,7 @@ export async function WorkflowDetail({
       screen={screen}
       Operation={Operation}
       selectedDefect={defectId}
-      listQuery={searchText(query)}
+      listQuery={listFilters(query)}
     />
   );
 }

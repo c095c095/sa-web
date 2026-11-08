@@ -29,6 +29,24 @@ export function AccountPanel({
     forced = employee && identity.mustChangePassword;
   return (
     <AppFrame identity={identity} active="account" title="บัญชีของฉัน">
+      <Panel title="การเข้าถึงของบัญชีนี้">
+        <dl className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <dt className="text-muted">บทบาท</dt>
+            <dd>{employee ? roleLabels[identity.role] : "ลูกค้า"}</dd>
+          </div>
+          <div>
+            <dt className="text-muted">สถานะ</dt>
+            <dd>
+              {forced
+                ? "รอตั้งรหัสผ่านใหม่"
+                : employee
+                  ? "พร้อมใช้งาน"
+                  : "เข้าถึงบ้านที่ผูกกับลิงก์"}
+            </dd>
+          </div>
+        </dl>
+      </Panel>
       {notice && (
         <p role="status" className="alert alert-success">
           {notice}

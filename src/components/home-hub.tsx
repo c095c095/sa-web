@@ -9,7 +9,13 @@ import {
 } from "@/lib/runtime-contracts";
 import { categories, defectStatuses } from "@/lib/domain";
 import { journey, taskUrl } from "@/lib/journey";
-import { housePath, withSearch, workflowPath } from "@/lib/routes";
+import {
+  housePath,
+  withSearch,
+  workflowPath,
+  workflowPaths,
+} from "@/lib/routes";
+import { screens } from "@/lib/runtime-contracts";
 import { RepairTable, statusBadgeMap } from "./repair-queue";
 import {
   AppFrame,
@@ -26,10 +32,12 @@ export function HomeHub({
   initial,
   selected = false,
   backPath = "/",
+  workCounts = {},
 }: {
   initial: Workspace;
   selected?: boolean;
   backPath?: string;
+  workCounts?: Record<string, number>;
 }) {
   const router = useRouter();
   const [refreshing, startRefresh] = useTransition();
@@ -68,6 +76,45 @@ export function HomeHub({
     flow = journey(w),
     unit = w.unit;
   const overview = w.identity.kind === "CUSTOMER" || !selected;
+  const priorities = tech
+    ? ([
+        [
+          "SCR-04",
+          w.myJobs.filter((job) => job.status === "REWORK").length,
+          "งานแก้ซ้ำของฉัน",
+          "REWORK",
+        ],
+        ["SCR-04", w.myJobs.length, "งานซ่อมของฉัน", ""],
+        ["SCR-15", w.newDefects.length, "งานรอแยกประเภท", ""],
+        ["SCR-03", w.queue.length, "งานที่รับได้", ""],
+      ] as const)
+    : (role === "INSPECTOR"
+        ? ["SCR-05", "SCR-06", "SCR-07", "SCR-16", "SCR-02", "SCR-08"]
+        : ["SCR-13", "SCR-09", "SCR-12"]
+      ).map(
+        (screen) =>
+          [screen, workCounts[screen] ?? 0, screens[screen], ""] as const,
+      );
+  const actionable = priorities.filter(([, count]) => count > 0);
+  const latestRequest = w.requests[0];
+  const milestones = [
+    { title: "ลงทะเบียนบ้าน", date: unit?.created_at },
+    ...w.rounds.flatMap((round) => {
+      const title =
+        round.round_type === "QC_INTERNAL" ? "รอบ QC" : "รอบตรวจก่อนรับมอบ";
+      return [
+        { title: "เปิด" + title, date: round.started_at },
+        { title: "ปิด" + title, date: round.closed_at },
+      ];
+    }),
+    ...w.requests.flatMap((request) => [
+      { title: "ส่งคำขอตรวจ", date: request.created_at },
+      { title: "มาถึงเพื่อตรวจบ้าน", date: request.arrival },
+    ]),
+    { title: "ลงนามรับมอบ", date: unit?.handed_over_at },
+  ]
+    .filter((event) => event.date)
+    .sort((a, b) => string(b.date).localeCompare(string(a.date)));
   const filtered = w.units.filter((u) =>
     [u.house_no, u.project_name, u.customer_name, unitStates[string(u.status)]]
       .join(" ")
@@ -103,6 +150,32 @@ export function HomeHub({
             </p>
           </div>
           {w.identity.kind === "EMPLOYEE" && (
+            <div>
+              <h3 className="text-lg font-semibold">งานที่ต้องดูตอนนี้</h3>
+              {actionable.length ? (
+                <ul className="mt-2 divide-y divide-base-300">
+                  {actionable.map(([screen, count, label, status]) => (
+                    <li key={label}>
+                      <Link
+                        href={withSearch(workflowPaths[screen], { status })}
+                        className="flex min-h-11 items-center justify-between gap-3 py-2 link"
+                      >
+                        {label}
+                        <span className="badge badge-outline">
+                          {count} {tech ? "จุด" : "หลัง"}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-2 text-muted">
+                  ตอนนี้ไม่มีงานที่รอให้คุณดำเนินการ
+                </p>
+              )}
+            </div>
+          )}
+          {w.identity.kind === "EMPLOYEE" && (
             <ul className="grid gap-x-6 border-b border-base-300 sm:grid-cols-2">
               {buildNav(w.identity)
                 .filter((item) => item.key !== "home")
@@ -134,7 +207,13 @@ export function HomeHub({
       {selected && unit ? (
         <>
           {w.identity.kind === "EMPLOYEE" && (
-            <Back href={withSearch(backPath, q)} />
+            <Back
+              href={withSearch(backPath, {
+                q,
+                project: search.get("project") ?? "",
+                status: search.get("status") ?? "",
+              })}
+            />
           )}
           <div className="border-y border-base-300 py-5">
             <p className="text-lg">{string(unit.project_name)}</p>
@@ -194,12 +273,44 @@ export function HomeHub({
             {!w.defects.length && (
               <p className="text-muted">ยังไม่มีรายการจุดที่ต้องแก้ไขในระบบ</p>
             )}
-            {w.requests[0] && (
-              <p className="mt-5 text-sm">
-                นัดตรวจ {thaiTime(w.requests[0].appointment)}
-              </p>
-            )}
           </Panel>
+          {latestRequest && (
+            <Panel title="คำขอตรวจล่าสุด">
+              <dl className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <dt className="text-muted">เลขคำขอ</dt>
+                  <dd>{latestRequest.request_id}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted">วันที่ขอตรวจ</dt>
+                  <dd>{thaiTime(latestRequest.preferred_date)}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted">วันนัดที่ยืนยัน</dt>
+                  <dd>
+                    {latestRequest.appointment
+                      ? thaiTime(latestRequest.appointment)
+                      : "รอยืนยันวันนัด"}
+                  </dd>
+                </div>
+              </dl>
+            </Panel>
+          )}
+          {milestones.length > 0 && (
+            <Panel title="เหตุการณ์ล่าสุดของบ้าน">
+              <ol className="divide-y divide-base-300">
+                {milestones.slice(0, 5).map(({ title, date }, index) => (
+                  <li
+                    key={title + string(date) + index}
+                    className="flex flex-wrap justify-between gap-x-4 py-3"
+                  >
+                    <span>{title}</span>
+                    <span className="text-muted">{thaiTime(date)}</span>
+                  </li>
+                ))}
+              </ol>
+            </Panel>
+          )}
           <details className="panel-surface p-5">
             <summary className="cursor-pointer font-medium">
               ดูประวัติและรายการจุด
