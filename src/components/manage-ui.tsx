@@ -3,7 +3,13 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { House, LogOut, Menu, ArrowLeft, UserRound } from "lucide-react";
-import { type SessionView, roleLabels } from "@/lib/runtime-contracts";
+import {
+  type SessionView,
+  roleLabels,
+  screens,
+  screenRoles,
+} from "@/lib/runtime-contracts";
+import { managementSections } from "@/lib/management-contracts";
 export const string = (v: unknown) => String(v ?? "");
 export const thaiTime = (v: unknown) =>
   v
@@ -27,13 +33,23 @@ export function AppFrame({
   const router = useRouter(),
     [error, setError] = useState("");
   const admin = identity.kind === "EMPLOYEE" && identity.role === "ADMIN";
-  const items = nav ?? [
-    {
-      key: "home",
-      href: admin ? "/admin" : "/home",
-      label: admin ? "ภาพรวม" : "งานของฉัน",
-    },
-  ];
+  const role = identity.kind === "CUSTOMER" ? "CUSTOMER" : identity.role;
+  const items =
+    nav ??
+    (admin
+      ? Object.entries(managementSections).map(([key, label]) => ({
+          key,
+          label,
+          href: "/admin?section=" + key,
+        }))
+      : [
+          { key: "home", href: "/home", label: "งานของฉัน" },
+          ...(screenRoles[role] ?? []).map((key) => ({
+            key,
+            label: screens[key],
+            href: "/app?screen=" + key,
+          })),
+        ]);
   const initial = identity.fullName.trim().slice(0, 2) || "ผ";
   const links = (
     <ul className="menu w-full gap-1">
