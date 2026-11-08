@@ -1,0 +1,17 @@
+{
+  "summary": {
+    "fails": 0,
+    "reflex": 0,
+    "warns": 0,
+    "waived": 0,
+    "rejected": 0,
+    "answered": 0,
+    "dismissed": 0,
+    "notes": 0,
+    "files": 26,
+    "render": "ran"
+  },
+  "findings": [],
+  "recorded_at": "2026-11-08T15:07:21.252Z",
+  "scope": "Static full source and rendered main login; authenticated views checked in management suite"
+}

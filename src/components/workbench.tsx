@@ -1,18 +1,26 @@
 "use client";
-import { useId, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useId,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { House, LogOut, Search, RefreshCw } from "lucide-react";
+import { Search, RefreshCw } from "lucide-react";
 import {
   type Workspace,
   type DataRow,
   screens,
-  screenRoles,
-  roleLabels,
   unitStates,
 } from "@/lib/runtime-contracts";
 import { categories, defectStatuses } from "@/lib/domain";
+import { AppFrame, Back } from "./manage-ui";
+import { journey, taskUrl } from "@/lib/journey";
+const PickedDefect = createContext("");
 type Payload = Record<string, unknown>;
 const str = (v: unknown) => String(v ?? "");
 const label = (map: Record<string, string>, v: unknown) =>
@@ -68,7 +76,14 @@ function Select({
   items: { value: string; title: string }[];
   required?: boolean;
 }) {
-  const id = useId();
+  const id = useId(),
+    picked = useContext(PickedDefect);
+  const chosen =
+    name === "defect_id" && items.some((i) => i.value === picked)
+      ? picked
+      : items.length === 1
+        ? items[0].value
+        : "";
   return (
     <div>
       <label htmlFor={id} className="field-label">
@@ -79,7 +94,8 @@ function Select({
         name={name}
         required={required}
         className="select w-full"
-        defaultValue=""
+        key={items.map((i) => i.value).join(",") + chosen}
+        defaultValue={chosen}
       >
         <option value="" disabled={required}>
           {required ? "เลือกรายการ" : "ไม่ระบุ"}
@@ -149,11 +165,13 @@ function Check({
   title,
   required = false,
   value,
+  defaultChecked = false,
 }: {
   name?: string;
   title: string;
   required?: boolean;
   value?: string;
+  defaultChecked?: boolean;
 }) {
   return (
     <label className="flex min-h-12 cursor-pointer items-start gap-3 py-2">
@@ -161,6 +179,7 @@ function Check({
         name={name}
         type="checkbox"
         value={value}
+        defaultChecked={defaultChecked}
         required={required}
         className="checkbox mt-1 shrink-0"
       />
@@ -496,20 +515,21 @@ function Defects({
 export function Workbench({
   initial,
   screen,
+  selectedDefect = "",
 }: {
   initial: Workspace;
   screen: string;
+  selectedDefect?: string;
 }) {
   const [w, setW] = useState(initial),
     [message, setMessage] = useState(""),
     [resultUrl, setResultUrl] = useState(""),
     [loadError, setLoadError] = useState(""),
     [refreshing, setRefreshing] = useState(false),
-    [search, setSearch] = useState("");
+    [search, setSearch] = useState(""),
+    [completed, setCompleted] = useState(false);
   const router = useRouter();
   const identity = w.identity,
-    role = identity.kind === "CUSTOMER" ? "CUSTOMER" : identity.role,
-    nav = screenRoles[role],
     unit = w.unit,
     unitId = str(unit?.unit_id),
     qc = w.rounds.find(
@@ -564,7 +584,24 @@ export function Workbench({
     setMessage(result.data.message);
     setResultUrl(result.data.url ?? result.data.path ?? "");
     await reload();
+    setCompleted(
+      !(
+        (uc === "UC-02" && data.mode !== "finish") ||
+        (uc === "UC-06" && data.mode === "schedule") ||
+        uc === "UC-14" ||
+        (uc === "UC-13" && data.mode === "appointment")
+      ),
+    );
+    if (uc === "UC-01" && result.data.unit_id)
+      router.push("/home?unit=" + result.data.unit_id);
   };
+  const prefer = (items: DataRow[]) =>
+    selectedDefect
+      ? items.filter((d) => d.defect_id === selectedDefect)
+      : items;
+  const localJobs = prefer(w.myJobs.filter((d) => d.unit_id === unitId)),
+    localNew = prefer(w.newDefects.filter((d) => d.unit_id === unitId));
+  const flow = journey(w);
   const unitExtra = { unit_id: unitId },
     roundExtra = { round_id: str(qc?.round_id) },
     qcDefs = w.defects.filter((d) => d.round_id === qc?.round_id),
@@ -573,7 +610,7 @@ export function Workbench({
     editable = qcDefs.filter(
       (d) => d.status === "WAITING_ASSIGN" && !qc?.inspection_finished_at,
     ),
-    fixed = qcDefs.filter((d) => d.status === "FIXED"),
+    fixed = prefer(qcDefs.filter((d) => d.status === "FIXED")),
     request = w.requests.find((r) => r.status === "SUBMITTED"),
     canCustomer = unit?.status === "IN_INSPECTION" && Boolean(hand);
   const opts = (items: DataRow[], key = "defect_id") =>
@@ -591,7 +628,14 @@ export function Workbench({
       content = (
         <Panel title="ข้อมูลบ้านใหม่">
           <Action {...actionBase} uc="UC-01" title="ลงทะเบียนบ้าน" primary>
-            <Field name="project_name" title="ชื่อโครงการ" />
+            <Select
+              name="project_id"
+              title="โครงการ"
+              items={w.projects.map((p) => ({
+                value: str(p.project_id),
+                title: str(p.project_name),
+              }))}
+            />
             <Field name="house_no" title="เลขที่บ้าน" max={20} />
             <Field name="unit_type" title="แบบบ้าน" required={false} max={50} />
           </Action>
@@ -714,44 +758,72 @@ export function Workbench({
       );
       break;
     case "SCR-03": {
-      const items = w.queue.filter((d) =>
-        (str(d.house_no) + str(d.location_pin) + str(d.project_name)).includes(
-          search,
-        ),
+      const items = prefer(w.queue.filter((d) => d.unit_id === unitId)).filter(
+        (d) =>
+          (
+            str(d.house_no) +
+            str(d.location_pin) +
+            str(d.project_name)
+          ).includes(search),
       );
       content = (
         <Panel title="งานที่รอช่างรับ">
-          <label htmlFor="queue-search" className="field-label">
-            ค้นหางาน
-          </label>
-          <div className="input mb-6 flex w-full items-center gap-3">
-            <Search size={19} aria-hidden="true" />
-            <input
-              id="queue-search"
-              type="search"
-              autoComplete="off"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="เลขที่บ้านหรือตำแหน่งที่ต้องแก้"
-              className="min-w-0 grow"
-            />
-          </div>
+          {!selectedDefect && (
+            <>
+              <label htmlFor="queue-search" className="field-label">
+                ค้นหางาน
+              </label>
+              <div className="input mb-6 flex w-full items-center gap-3">
+                <Search size={19} aria-hidden="true" />
+                <input
+                  id="queue-search"
+                  type="search"
+                  autoComplete="off"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="เลขที่บ้านหรือตำแหน่งที่ต้องแก้"
+                  className="min-w-0 grow"
+                />
+              </div>
+            </>
+          )}
           {items.length ? (
-            <Action {...actionBase} uc="UC-03" title="รับงานที่เลือก" primary>
+            <Action
+              {...actionBase}
+              uc="UC-03"
+              extra={selectedDefect ? { defect_ids: [selectedDefect] } : {}}
+              title={items.length === 1 ? "รับงานนี้" : "รับงานที่เลือก"}
+              primary
+            >
               <ul className="divide-y divide-base-300">
                 {items.map((d) => (
                   <li key={str(d.defect_id)}>
-                    <Check
-                      name="defect_ids"
-                      value={str(d.defect_id)}
-                      title={`บ้าน ${d.house_no} · ${d.location_pin} · ${label(categories, d.category)} · ${d.defect_id}`}
-                    />
-                    <details className="mb-4 pl-9">
+                    {selectedDefect ? (
+                      <div className="py-3">
+                        <h3>{str(d.location_pin)}</h3>
+                        <p className="text-sm text-muted">
+                          {label(categories, d.category)}
+                        </p>
+                      </div>
+                    ) : (
+                      <Check
+                        name="defect_ids"
+                        defaultChecked={
+                          items.length === 1 || d.defect_id === selectedDefect
+                        }
+                        value={str(d.defect_id)}
+                        title={`บ้าน ${d.house_no} · ${d.location_pin} · ${label(categories, d.category)} · ${d.defect_id}`}
+                      />
+                    )}
+                    <details className={selectedDefect ? "mb-4" : "mb-4 pl-9"}>
                       <summary className="cursor-pointer py-2 underline underline-offset-4">
                         รายละเอียดและรูปก่อนซ่อม
                       </summary>
                       <p className="whitespace-pre-wrap break-words">
                         {str(d.description) || "ไม่มีรายละเอียดเพิ่มเติม"}
+                      </p>
+                      <p className="text-sm text-muted">
+                        รหัสงาน {str(d.defect_id)}
                       </p>
                       <Files files={w.files} defectId={str(d.defect_id)} />
                     </details>
@@ -760,7 +832,11 @@ export function Workbench({
               </ul>
             </Action>
           ) : (
-            <Empty>ไม่มีงานที่ตรงกับการค้นหาหรือประเภทช่างของคุณ</Empty>
+            <Empty>
+              {selectedDefect
+                ? "ไม่พบงานนี้ในคิวที่รับได้ เปิดรายการงานล่าสุดจากภาพรวมบ้าน"
+                : "ไม่มีงานที่ตรงกับการค้นหาหรือประเภทช่างของคุณ"}
+            </Empty>
           )}
         </Panel>
       );
@@ -770,7 +846,7 @@ export function Workbench({
       content = (
         <>
           <Panel title="บันทึกผลซ่อม">
-            {w.myJobs.length ? (
+            {localJobs.length ? (
               <Action
                 {...actionBase}
                 uc="UC-04"
@@ -780,7 +856,7 @@ export function Workbench({
                 <Select
                   name="defect_id"
                   title="งานที่คุณรับไว้"
-                  items={opts(w.myJobs)}
+                  items={opts(localJobs)}
                 />
                 <Photos required />
               </Action>
@@ -789,7 +865,7 @@ export function Workbench({
             )}
           </Panel>
           <Panel title="งานซ่อมของคุณ">
-            <Defects files={w.files} items={w.myJobs} />
+            <Defects files={w.files} items={localJobs} />
           </Panel>
         </>
       );
@@ -1186,12 +1262,12 @@ export function Workbench({
       content = (
         <>
           <Panel title="จุดใหม่ที่รอแยกประเภท">
-            {w.newDefects.length ? (
+            {localNew.length ? (
               <Action {...actionBase} uc="UC-15" title="ส่งเข้าคิวช่าง" primary>
                 <Select
                   name="defect_id"
                   title="จุดใหม่"
-                  items={opts(w.newDefects)}
+                  items={opts(localNew)}
                 />
                 <Category />
                 <Field
@@ -1206,7 +1282,7 @@ export function Workbench({
             )}
           </Panel>
           <Panel title="รายละเอียดจุดใหม่">
-            <Defects files={w.files} items={w.newDefects} />
+            <Defects files={w.files} items={localNew} />
           </Panel>
         </>
       );
@@ -1350,198 +1426,119 @@ export function Workbench({
       content = <Empty>เลือกขั้นตอนจากเมนู</Empty>;
   }
   return (
-    <>
-      <a href="#main-content" className="skip-link">
-        ข้ามไปเนื้อหา
-      </a>
-      <header className="border-b border-base-300 bg-base-100">
-        <div className="page-container flex flex-wrap items-center gap-4 py-5">
-          <Link href="/app" className="flex items-center gap-3 font-semibold">
-            <House size={25} aria-hidden="true" />
-            ระบบตรวจและส่งมอบบ้าน
-          </Link>
-          <div className="ml-auto flex items-center gap-4">
-            <p className="text-sm">
-              {identity.fullName}
-              <span className="block text-muted">
-                {role === "CUSTOMER"
-                  ? "ลูกค้า / บริษัทตรวจนอก"
-                  : roleLabels[role]}
+    <PickedDefect.Provider value={selectedDefect}>
+      <AppFrame identity={identity}>
+        <Back href={unitId ? "/home?unit=" + unitId : "/home"}>
+          {unit
+            ? "กลับไปภาพรวมบ้านเลขที่ " + unit.house_no
+            : "กลับไปทะเบียนบ้าน"}
+        </Back>
+        <div className="flex items-start gap-4">
+          <h1 className="page-heading flex-1">{screens[screen]}</h1>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            aria-label="โหลดข้อมูลล่าสุด"
+            disabled={refreshing}
+            onClick={reload}
+          >
+            <RefreshCw
+              size={19}
+              className={refreshing ? "animate-spin" : ""}
+              aria-hidden="true"
+            />
+          </button>
+        </div>
+        {unit && (
+          <section className="border-y border-base-300 py-4">
+            <p className="text-lg font-semibold">
+              บ้านเลขที่ {str(unit.house_no)}{" "}
+              <span className="ml-2 text-sm font-normal">
+                {unitStates[str(unit.status)]}
               </span>
             </p>
-            <button
-              type="button"
-              className="btn btn-ghost"
-              aria-label="ออกจากระบบ"
-              onClick={async () => {
-                try {
-                  const r = await fetch("/api/auth/logout", { method: "POST" });
-                  if (!r.ok) throw new Error();
-                  router.replace("/login");
-                  router.refresh();
-                } catch {
-                  setLoadError("ออกจากระบบไม่ได้ กรุณาลองใหม่");
-                }
-              }}
-            >
-              <LogOut size={17} aria-hidden="true" />
-              <span className="hidden sm:inline">ออกจากระบบ</span>
-            </button>
-          </div>
-        </div>
-      </header>
-      <div className="page-container grid w-full flex-1 gap-8 py-6 lg:grid-cols-[16rem_minmax(0,1fr)]">
-        <aside>
-          <nav aria-label="ขั้นตอนการทำงาน">
-            <details className="lg:hidden">
-              <summary className="cursor-pointer py-3">
-                เมนู · {screens[screen]}
-              </summary>
-              <ul className="menu w-full">
-                {nav.map((s) => (
-                  <li key={s}>
-                    <Link
-                      href={`/app?screen=${s}&unit=${unitId}`}
-                      aria-current={screen === s ? "page" : undefined}
-                    >
-                      {screens[s]}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </details>
-            <ul className="menu hidden w-full gap-1 lg:flex">
-              {nav.map((s) => (
-                <li key={s}>
-                  <Link
-                    href={`/app?screen=${s}&unit=${unitId}`}
-                    className={s === screen ? "bg-base-300 text-base-content font-medium" : ""}
-                    aria-current={screen === s ? "page" : undefined}
-                  >
-                    {screens[s]}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        </aside>
-        <main id="main-content" className="min-w-0 space-y-6">
-          <div className="flex items-start gap-4">
-            <h1 className="page-heading flex-1">{screens[screen]}</h1>
-            <button
-              type="button"
-              className="btn btn-ghost"
-              aria-label="โหลดข้อมูลล่าสุด"
-              disabled={refreshing}
-              onClick={reload}
-            >
-              <RefreshCw
-                size={19}
-                className={refreshing ? "animate-spin" : ""}
-                aria-hidden="true"
-              />
-            </button>
-          </div>
-          <p className="text-sm text-muted">
-            ข้อมูลตั้งต้นเป็นข้อมูลสมมติสำหรับโครงงาน
-            การบันทึกในหน้านี้เปลี่ยนข้อมูลในระบบได้จริง
-          </p>
-          {loadError && (
-            <p role="alert" className="alert alert-error">
-              {loadError}
+            <p>{str(unit.project_name)}</p>
+            <p className="mt-2 text-sm text-muted">
+              {flow.actions.find((a) => a.screen === screen)?.hint ??
+                flow.waiting}
             </p>
-          )}
-          {message && (
-            <div role="status" className="alert alert-success block">
-              <p>{message}</p>
-              {resultUrl && (
-                <div className="mt-3 min-w-0">
-                  <a
-                    href={resultUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="break-all underline underline-offset-4"
+          </section>
+        )}
+        {loadError && (
+          <p role="alert" className="alert alert-error">
+            {loadError}
+          </p>
+        )}
+        {message && (
+          <div role="status" className="alert alert-success block">
+            <p>{message}</p>
+            {resultUrl && (
+              <div className="mt-3 space-y-3">
+                <a
+                  href={resultUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block break-all underline underline-offset-4"
+                >
+                  {resultUrl.startsWith("/api/")
+                    ? "เปิดเอกสารที่บันทึกแล้ว"
+                    : resultUrl}
+                </a>
+                {!resultUrl.startsWith("/api/") && (
+                  <button
+                    type="button"
+                    className="btn"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(resultUrl);
+                        setMessage("คัดลอกลิงก์แล้ว ส่งให้ลูกค้าเปิดได้");
+                      } catch {
+                        setMessage("เลือกและคัดลอกลิงก์ด้านบนได้เลย");
+                      }
+                    }}
                   >
-                    {resultUrl.startsWith("/api/")
-                      ? "เปิดเอกสารที่บันทึกแล้ว"
-                      : resultUrl}
-                  </a>
-                  {!resultUrl.startsWith("/api/") && (
-                    <button
-                      type="button"
-                      className="btn ml-3 mt-2"
-                      onClick={async () => {
-                        try {
-                          await navigator.clipboard.writeText(resultUrl);
-                          setMessage("คัดลอกลิงก์แล้ว");
-                        } catch {
-                          setMessage(
-                            "คัดลอกอัตโนมัติไม่ได้ ให้เลือกลิงก์และคัดลอกด้วยตนเอง",
-                          );
-                        }
-                      }}
-                    >
-                      คัดลอกลิงก์
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-          {role !== "CUSTOMER" && (
-            <div>
-              <label htmlFor="unit-picker" className="field-label">
-                บ้านที่กำลังทำงาน
-              </label>
-              <select
-                id="unit-picker"
-                value={unitId}
-                className="select w-full"
-                onChange={(e) =>
-                  router.push(`/app?screen=${screen}&unit=${e.target.value}`)
-                }
-              >
-                <option value="" disabled>
-                  เลือกบ้าน
-                </option>
-                {w.units.map((u) => (
-                  <option key={str(u.unit_id)} value={str(u.unit_id)}>
-                    {u.house_no} · {u.project_name} ·{" "}
-                    {label(unitStates, u.status)}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-          {unit && (
-            <section className="border-y border-base-300 py-5">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h2 className="text-xl">บ้านเลขที่ {str(unit.house_no)}</h2>
-                  <p>{str(unit.project_name)}</p>
-                  {unit.customer_name && (
-                    <p className="text-sm text-muted">
-                      ลูกค้า {str(unit.customer_name)}
-                    </p>
-                  )}
-                  {w.requests[0] && (
-                    <p className="text-sm text-muted">
-                      นัดตรวจ {when(w.requests[0].appointment)}
-                    </p>
-                  )}
-                </div>
-                <span className="badge badge-outline">
-                  {label(unitStates, unit.status)}
-                </span>
+                    คัดลอกลิงก์
+                  </button>
+                )}
               </div>
-            </section>
-          )}
-          {content}
-        </main>
-      </div>
-      <footer className="page-container w-full border-t border-base-300 py-5 text-sm text-muted">
-        กรณีศึกษา โครงการ ANNA Townhome ราชพฤกษ์-แจ้งวัฒนะ
-      </footer>
-    </>
+            )}
+          </div>
+        )}
+        {completed ? (
+          <Panel
+            title={flow.actions.length ? "ทำอะไรต่อ" : "ส่งต่อขั้นตอนแล้ว"}
+          >
+            <p className="mb-5 text-muted">{flow.waiting}</p>
+            <div className="flex flex-wrap gap-3">
+              {flow.actions.map((a, i) => (
+                <Link
+                  key={a.screen + a.defect}
+                  className={"btn " + (i === 0 ? "btn-primary" : "")}
+                  href={taskUrl(a, unitId)}
+                >
+                  {a.title}
+                </Link>
+              ))}
+              <Link
+                className="btn"
+                href={unitId ? "/home?unit=" + unitId : "/home"}
+              >
+                ดูภาพรวมบ้าน
+              </Link>
+            </div>
+          </Panel>
+        ) : (
+          content
+        )}
+        {!completed && message && screen === "SCR-14" && (
+          <Link className="btn" href={"/app?screen=SCR-17&unit=" + unitId}>
+            แจ้งครบแล้ว ติดตามการซ่อม
+          </Link>
+        )}
+        <p className="text-sm text-muted">
+          ข้อมูลตั้งต้นเป็นข้อมูลสมมติ การยืนยันบันทึกจะเปลี่ยนข้อมูลในระบบจริง
+        </p>
+      </AppFrame>
+    </PickedDefect.Provider>
   );
 }

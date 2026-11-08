@@ -3,9 +3,10 @@ export type SessionView =
   | {
       kind: "EMPLOYEE";
       employeeId: string;
-      role: "SALES" | "INSPECTOR" | "TECHNICIAN" | "HEAD_TECHNICIAN";
+      role: "SALES" | "INSPECTOR" | "TECHNICIAN" | "HEAD_TECHNICIAN" | "ADMIN";
       craft: string | null;
       fullName: string;
+      mustChangePassword: boolean;
     }
   | { kind: "CUSTOMER"; unitId: string; fullName: string };
 export interface Workspace {
@@ -21,8 +22,10 @@ export interface Workspace {
   myJobs: DataRow[];
   newDefects: DataRow[];
   inspectors: DataRow[];
+  projects: DataRow[];
 }
 export const roleLabels = {
+  ADMIN: "ผู้ดูแลระบบ",
   SALES: "ฝ่ายขาย",
   INSPECTOR: "ฝ่ายตรวจบ้าน",
   TECHNICIAN: "ช่าง",

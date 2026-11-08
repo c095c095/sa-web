@@ -6,9 +6,11 @@ import { House, LogIn } from "lucide-react";
 export function LoginForm({
   access = false,
   initialToken = "",
+  setupAvailable = false,
 }: {
   access?: boolean;
   initialToken?: string;
+  setupAvailable?: boolean;
 }) {
   const [pending, setPending] = useState(false),
     [error, setError] = useState("");
@@ -85,10 +87,18 @@ export function LoginForm({
           <h1 className="text-2xl">
             {access ? "เข้าดูบ้านของคุณ" : "เข้าสู่ระบบพนักงาน"}
           </h1>
+          {setupAvailable && (
+            <p className="alert alert-info mt-5">
+              เริ่มใช้ระบบครั้งแรก{" "}
+              <Link className="underline underline-offset-4" href="/setup">
+                ตั้งบัญชีแอดมิน
+              </Link>
+            </p>
+          )}
           <p className="mt-2 text-muted">
             {access
               ? "ใช้ลิงก์ที่ได้รับจากฝ่ายขายเพื่อแจ้งจุดและติดตามการซ่อม"
-              : "ใช้รหัสพนักงานและรหัสผ่านของคุณ"}
+              : "ใช้รหัสบัญชีและรหัสผ่านของคุณ"}
           </p>
           {error && (
             <p role="alert" className="alert alert-error mt-5">
@@ -124,6 +134,7 @@ export function LoginForm({
                   </label>
                   <input
                     id="employee_id"
+                    aria-describedby="employee-help"
                     name="employee_id"
                     type="text"
                     autoComplete="username"
@@ -131,6 +142,9 @@ export function LoginForm({
                     maxLength={12}
                     className="input w-full"
                   />
+                  <p id="employee-help" className="helper mt-1">
+                    พนักงานใช้รหัสที่ได้รับ ผู้ดูแลระบบใช้ ADMIN
+                  </p>
                 </div>
                 <div>
                   <label htmlFor="password" className="field-label">

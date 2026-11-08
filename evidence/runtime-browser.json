@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-11-08T12:38:46.359Z",
+  "started_at": "2026-11-08T14:54:12.575Z",
   "scope": "Browser forms against isolated test DB; synthetic data only",
   "cases": [
     {
@@ -877,7 +877,7 @@
     }
   ],
   "errors": [],
-  "finished_at": "2026-11-08T12:39:11.538Z",
+  "finished_at": "2026-11-08T14:54:35.983Z",
   "violation_count": 0,
   "status": "PASS"
 }

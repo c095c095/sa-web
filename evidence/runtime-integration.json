@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-11-08T12:38:39.732Z",
+  "started_at": "2026-11-08T14:54:06.288Z",
   "scope": "Real HTTP endpoints against isolated MariaDB test database; all data synthetic",
   "cases": [
     {
@@ -143,6 +143,6 @@
       "status": "PASS"
     }
   ],
-  "finished_at": "2026-11-08T12:38:45.806Z",
+  "finished_at": "2026-11-08T14:54:12.069Z",
   "status": "PASS"
 }

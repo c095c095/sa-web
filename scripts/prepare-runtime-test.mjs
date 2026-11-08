@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import bcrypt from "bcryptjs";
+import { prepareManagement } from "./management-db.mjs";
 import { local, connect, resetOwnedTest } from "./db-common.mjs";
 const c = await connect("sa_web_test_p1");
 try {
@@ -33,6 +34,7 @@ try {
 } finally {
   await c.end();
 }
+await prepareManagement("sa_web_test_p1");
 const storage = path.resolve(local, "test-storage"),
   archive = path.resolve(local, "backups", "test-storage-" + Date.now());
 if (

@@ -5,7 +5,8 @@ import { cookies } from "next/headers";
 import { z } from "zod";
 import { pool, one, rows, change, type Db } from "./db";
 import { AppError, requireThat } from "./errors";
-export type Role = "SALES" | "INSPECTOR" | "TECHNICIAN" | "HEAD_TECHNICIAN";
+export type Role =
+  "SALES" | "INSPECTOR" | "TECHNICIAN" | "HEAD_TECHNICIAN" | "ADMIN";
 export type Identity =
   | {
       kind: "EMPLOYEE";
@@ -13,6 +14,7 @@ export type Identity =
       role: Role;
       craft: string | null;
       fullName: string;
+      mustChangePassword: boolean;
       sessionId: string;
     }
   | {
@@ -55,9 +57,9 @@ export async function identityForToken(
   const sessionId = digest(raw);
   const r = await one(
     db,
-    `SELECT s.session_kind,s.employee_id,s.link_id,e.full_name employee_name,e.role,e.craft_category,l.unit_id,l.customer_id,c.full_name customer_name
+    `SELECT s.session_kind,s.employee_id,s.link_id,e.full_name employee_name,e.role,e.craft_category,e.must_change_password,l.unit_id,l.customer_id,c.full_name customer_name
     FROM app_session s LEFT JOIN employee e ON e.employee_id=s.employee_id LEFT JOIN access_link l ON l.link_id=s.link_id LEFT JOIN customer c ON c.customer_id=l.customer_id LEFT JOIN property_unit u ON u.unit_id=l.unit_id
-    WHERE s.session_id=? AND s.revoked_at IS NULL AND s.expires_at>NOW(6) AND ((s.session_kind='EMPLOYEE' AND e.is_active=1) OR (s.session_kind='CUSTOMER' AND l.expires_at>NOW(6) AND u.customer_id=l.customer_id))`,
+    WHERE s.session_id=? AND s.revoked_at IS NULL AND s.expires_at>NOW(6) AND ((s.session_kind='EMPLOYEE' AND e.is_active=1) OR (s.session_kind='CUSTOMER' AND l.revoked_at IS NULL AND l.expires_at>NOW(6) AND u.customer_id=l.customer_id))`,
     [sessionId],
   );
   if (!r) return null;
@@ -68,6 +70,7 @@ export async function identityForToken(
         role: r.role as Role,
         craft: r.craft_category ? String(r.craft_category) : null,
         fullName: String(r.employee_name),
+        mustChangePassword: Boolean(r.must_change_password),
         sessionId,
       }
     : {
@@ -115,6 +118,7 @@ export function publicIdentity(id: Identity) {
       role: id.role,
       craft: id.craft,
       fullName: id.fullName,
+      mustChangePassword: id.mustChangePassword,
     };
   return { kind: id.kind, unitId: id.unitId, fullName: id.fullName };
 }
@@ -139,6 +143,14 @@ async function issueSession(
     cookie: cookie(raw, secure),
     identity: publicIdentity((await identityForToken(raw))!),
   };
+}
+export async function renewedEmployeeSession(employeeId: string, req: Request) {
+  return issueSession(
+    "EMPLOYEE",
+    employeeId,
+    null,
+    new URL(req.url).protocol === "https:",
+  );
 }
 export async function login(data: unknown, req: Request) {
   const d = z
@@ -198,7 +210,7 @@ export async function exchangeLink(data: unknown, req: Request) {
   const d = z.object({ token: z.string().min(32).max(128) }).parse(data);
   const r = await one(
     pool,
-    "SELECT l.link_id FROM access_link l JOIN property_unit u ON u.unit_id=l.unit_id WHERE l.token=? AND l.expires_at>NOW(6) AND u.customer_id=l.customer_id",
+    "SELECT l.link_id FROM access_link l JOIN property_unit u ON u.unit_id=l.unit_id WHERE l.token=? AND l.revoked_at IS NULL AND l.expires_at>NOW(6) AND u.customer_id=l.customer_id",
     [digest(d.token)],
   );
   requireThat(r, "ลิงก์ไม่ถูกต้องหรือหมดอายุ กรุณาติดต่อฝ่ายขาย", 401);
@@ -236,18 +248,22 @@ export async function recheckIdentity(id: Identity, db: Db) {
   if (id.kind === "EMPLOYEE") {
     const e = await one(
       db,
-      "SELECT role,is_active,craft_category FROM employee WHERE employee_id=? FOR UPDATE",
+      "SELECT role,is_active,craft_category,must_change_password FROM employee WHERE employee_id=? FOR UPDATE",
       [id.employeeId],
     );
     requireThat(
-      e && e.is_active && e.role === id.role && e.craft_category === id.craft,
+      e &&
+        e.is_active &&
+        e.role === id.role &&
+        e.craft_category === id.craft &&
+        Boolean(e.must_change_password) === id.mustChangePassword,
       "สิทธิ์ผู้ใช้เปลี่ยนไป กรุณาเข้าสู่ระบบใหม่",
       401,
     );
   } else {
     const l = await one(
       db,
-      "SELECT l.link_id FROM access_link l JOIN property_unit u ON u.unit_id=l.unit_id WHERE l.link_id=? AND l.expires_at>NOW(6) AND l.unit_id=? AND l.customer_id=? AND u.customer_id=l.customer_id FOR UPDATE",
+      "SELECT l.link_id FROM access_link l JOIN property_unit u ON u.unit_id=l.unit_id WHERE l.link_id=? AND l.revoked_at IS NULL AND l.expires_at>NOW(6) AND l.unit_id=? AND l.customer_id=? AND u.customer_id=l.customer_id FOR UPDATE",
       [id.linkId, id.unitId, id.customerId],
     );
     requireThat(l, "ลิงก์ไม่ถูกต้องหรือหมดอายุ", 401);
@@ -267,6 +283,11 @@ export async function scopedUnit(
     [unitId],
   );
   requireThat(r, "ไม่พบข้อมูลบ้าน", 404);
+  if (lock)
+    requireThat(
+      !r.archived_at,
+      "บ้านนี้เก็บเข้าคลังแล้ว เปิดข้อมูลจากทะเบียนก่อนทำงานต่อ",
+    );
   return r;
 }
 export async function scopedDefect(
@@ -277,7 +298,7 @@ export async function scopedDefect(
 ) {
   const r = await one(
     db,
-    `SELECT d.*,r.unit_id,r.round_type,r.status round_status,r.inspection_finished_at,r.inspector_id FROM defect d JOIN inspection_round r ON r.round_id=d.round_id WHERE d.defect_id=?${lock ? " FOR UPDATE" : ""}`,
+    `SELECT d.*,r.unit_id,r.round_type,r.status round_status,r.inspection_finished_at,r.inspector_id,u.archived_at FROM defect d JOIN inspection_round r ON r.round_id=d.round_id JOIN property_unit u ON u.unit_id=r.unit_id WHERE d.defect_id=?${lock ? " FOR UPDATE" : ""}`,
     [defectId],
   );
   requireThat(
@@ -292,7 +313,15 @@ export async function scopedDefect(
       "ไม่พบข้อมูลจุดที่ต้องแก้ไข",
       404,
     );
+  if (lock) requireThat(!r.archived_at, "บ้านนี้เก็บเข้าคลังแล้ว");
   return r;
+}
+export function requireReady(id: Identity) {
+  requireThat(
+    id.kind !== "EMPLOYEE" || !id.mustChangePassword,
+    "กรุณาเปลี่ยนรหัสผ่านชั่วคราวก่อนเริ่มใช้งาน",
+    409,
+  );
 }
 export async function inspectors() {
   return rows(

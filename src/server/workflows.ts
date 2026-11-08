@@ -9,6 +9,7 @@ import {
   scopedUnit,
   scopedDefect,
   recheckIdentity,
+  requireReady,
   digest,
 } from "./auth";
 import { transact, one, rows, change, type Tx } from "./db";
@@ -135,7 +136,14 @@ async function ready(tx: Tx, roundId: string, states: string[]) {
 }
 const roles: Record<
   string,
-  ("SALES" | "INSPECTOR" | "TECHNICIAN" | "HEAD_TECHNICIAN" | "CUSTOMER")[]
+  (
+    | "SALES"
+    | "INSPECTOR"
+    | "TECHNICIAN"
+    | "HEAD_TECHNICIAN"
+    | "CUSTOMER"
+    | "ADMIN"
+  )[]
 > = {
   "UC-01": ["SALES"],
   "UC-02": ["INSPECTOR"],
@@ -169,6 +177,7 @@ export async function executeUc(
     "คุณไม่มีสิทธิ์ทำงานนี้",
     403,
   );
+  requireReady(id);
   if (
     uc === "UC-18" &&
     files.length === 1 &&
@@ -197,11 +206,24 @@ export async function executeUc(
       switch (uc) {
         case "UC-01": {
           const e = employee(id, ["SALES"]);
+          const project = await one(
+            tx.db,
+            d.project_id
+              ? "SELECT project_id,project_name,is_active FROM project WHERE project_id=? FOR UPDATE"
+              : "SELECT project_id,project_name,is_active FROM project WHERE project_name=? FOR UPDATE",
+            [d.project_id ? code(d, "project_id") : text(d, "project_name")],
+          );
+          requireThat(
+            project?.is_active,
+            "กรุณาเลือกโครงการที่เปิดรับบ้านใหม่ หากยังไม่มีให้ผู้ดูแลเพิ่มโครงการก่อน",
+            422,
+          );
           const u = await one(
             tx.db,
-            "INSERT INTO property_unit(project_name,house_no,unit_type,registered_by) VALUES(?,?,?,?) RETURNING unit_id,status",
+            "INSERT INTO property_unit(project_id,project_name,house_no,unit_type,registered_by) VALUES(?,?,?,?,?) RETURNING unit_id,status",
             [
-              text(d, "project_name"),
+              project.project_id,
+              project.project_name,
               text(d, "house_no", 20),
               optional(d, "unit_type", 50),
               e.employeeId,

@@ -1,0 +1,51 @@
+{
+  "recorded_at": "2026-11-08T15:11:51.134Z",
+  "status": "READY_FOR_A5_REVIEW",
+  "build_id": "ciYJ79Cjj23OM6RzCahmu",
+  "source_tree_sha256": "14305eb4b960c86ce9fee47986fd8aa1ca3aacfb3f77d526317240546349c50e",
+  "node": "v24.18.0",
+  "database_version": "10.11.16-MariaDB",
+  "base_tables": 13,
+  "admin_setup_pending": true,
+  "real_admin": "Created by owner using local one-time setup form, not assigned from report team data",
+  "production_url": "http://127.0.0.1:3000/login",
+  "checks": {
+    "production_build": "PASS",
+    "typescript": "PASS",
+    "eslint_errors": 0,
+    "eslint_warnings": 0,
+    "core_http_scenarios": 35,
+    "core_browser_groups": 16,
+    "core_layouts": 152,
+    "core_form_state_scans": 38,
+    "core_ui_recovery": 3,
+    "management_and_guided_flow_scenarios": 21,
+    "management_a11y_scans": 18,
+    "axe_violations": 0,
+    "stale_job_regression": "PASS",
+    "bootstrap": "Created through browser form in this fixture",
+    "production_smoke": 7,
+    "theme": {
+      "fails": 0,
+      "reflex": 0,
+      "warns": 0,
+      "waived": 0,
+      "rejected": 0,
+      "answered": 0,
+      "dismissed": 0,
+      "notes": 0,
+      "files": 26,
+      "render": "ran"
+    },
+    "original_sources_unchanged": 179,
+    "info_files_unchanged": 4
+  },
+  "migration_backup": {
+    "database_bytes": 102235,
+    "storage_present_in_backup": false,
+    "note": "No development upload storage existed when the migration backup was made; database backup is private. Restore has not yet been tested."
+  },
+  "scope": "Implemented approved admin/account extension plus task-oriented workflow; original SA sources preserved",
+  "next": "User A5 usability review, then P6 recovery/restore/UAT and final delivery",
+  "review": "docs/ADMIN-REVIEW.md"
+}

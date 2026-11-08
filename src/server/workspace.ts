@@ -1,16 +1,25 @@
 import "server-only";
-import { type Identity, employee, scopedUnit, inspectors } from "./auth";
+import {
+  type Identity,
+  employee,
+  scopedUnit,
+  inspectors,
+  requireReady,
+} from "./auth";
 import { pool, rows, type Row } from "./db";
 import { mediaKey } from "./media";
 export async function workspace(id: Identity, requestedUnit?: string) {
+  requireReady(id);
+  if (id.kind === "EMPLOYEE")
+    employee(id, ["SALES", "INSPECTOR", "TECHNICIAN", "HEAD_TECHNICIAN"]);
   const values: (string | null)[] = [];
-  let where = "";
+  let where = "WHERE u.archived_at IS NULL";
   if (id.kind === "CUSTOMER") {
     where = "WHERE u.unit_id=? AND u.customer_id=?";
     values.push(id.unitId, id.customerId);
   } else if (id.role === "TECHNICIAN") {
     where =
-      "WHERE EXISTS(SELECT 1 FROM inspection_round r JOIN defect d ON d.round_id=r.round_id WHERE r.unit_id=u.unit_id AND d.category=? AND (d.technician_id=? OR d.status='WAITING_ASSIGN'))";
+      "WHERE u.archived_at IS NULL AND EXISTS(SELECT 1 FROM inspection_round r JOIN defect d ON d.round_id=r.round_id WHERE r.unit_id=u.unit_id AND d.category=? AND (d.technician_id=? OR d.status='WAITING_ASSIGN'))";
     values.push(id.craft, id.employeeId);
   }
   const units = await rows(
@@ -127,6 +136,13 @@ export async function workspace(id: Identity, requestedUnit?: string) {
     inspectors:
       id.kind === "EMPLOYEE" && id.role === "INSPECTOR"
         ? await inspectors()
+        : [],
+    projects:
+      id.kind === "EMPLOYEE" && id.role === "SALES"
+        ? await rows(
+            pool,
+            "SELECT project_id,project_name FROM project WHERE is_active=1 ORDER BY project_name",
+          )
         : [],
   };
 }

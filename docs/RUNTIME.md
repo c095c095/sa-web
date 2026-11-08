@@ -1,5 +1,7 @@
 # การเปิดและตรวจระบบบน Windows
 
+สถานะปัจจุบันเพิ่มส่วนจัดการและการเดินงานใหม่แล้ว ดู [ADMIN-REVIEW.md](ADMIN-REVIEW.md) ผู้ดูแลครั้งแรกตั้งบัญชีผ่านลิงก์ใน `.local/ADMIN-SETUP.md` ส่วนรายละเอียด P2–P5 เดิมด้านล่างเป็นฐานที่ใช้ต่อ
+
 ## เปิดระบบที่ติดตั้งแล้ว
 
 1. เปิด MySQL ใน XAMPP
@@ -12,7 +14,7 @@
 ## โครงสร้างและขอบเขต
 
 - Next server เป็น backend เชื่อม MariaDB 10.11.16 ด้วยบัญชีจำกัดสิทธิ์ ไม่ได้เพิ่ม PHP API
-- 9 ตารางธุรกิจเดิมและตารางเทคนิค `app_session` ตาม AM-04 ที่รับใน G1
+- 9 ตารางธุรกิจเดิม, `app_session` ตาม AM-04 และ migration 003 เพิ่ม `project`, `app_control`, `audit_event` ตามแผนส่วนจัดการที่อนุมัติ
 - `/login` เป็น SCR-00; `/app?screen=SCR-01` ถึง `SCR-18` ใช้เมนูตาม role ทั้ง 4 actor; HEAD_TECHNICIAN อยู่ภายใต้ actor ช่าง
 - ทุก mutation ผ่าน `POST /api/actions/UC-01` ถึง `UC-18` โดยแยก mode สำหรับ add/edit/delete/finish และขั้นตอนย่อย
 - `GET /api/workspace` เป็น read model ตามสิทธิ์; `/api/files/<opaque-key>` ตรวจสิทธิ์ทุกครั้ง; ไม่มีไฟล์แนบใน public directory
@@ -40,6 +42,9 @@ npm run dev -- --hostname 127.0.0.1 --port 3001
 ```powershell
 node scripts/test-runtime.mjs
 node scripts/test-runtime-browser.mjs
+node scripts/test-runtime-visual.mjs
+node scripts/test-management.mjs
+node scripts/test-stale-task.mjs
 ```
 
 Browser test ใช้ Microsoft Edge ที่ติดตั้งอยู่ PDF ใช้ Chrome หรือ Edge ในเครื่อง สามารถระบุ `CHROME_PATH` ได้ ชุดทดสอบเขียนข้อมูลสมมติและรูปเส้นทดสอบจริง ไม่ใช่หลักฐานผลตรวจบ้านจริง
@@ -48,7 +53,7 @@ Browser test ใช้ Microsoft Edge ที่ติดตั้งอยู่
 
 ## ข้อจำกัดก่อน G3
 
-G2 ตรวจพฤติกรรมที่เชื่อมกัน ส่วน UAT โดยผู้ใช้ การทดลอง restore backup และสถานการณ์ storage เต็ม/ไฟดับ/DB ขาดการเชื่อมต่อระหว่าง commit อยู่ใน P6 หลัง G2 การใช้ LAN/โดเมน/public deployment ยังไม่อยู่ในขอบเขต local นี้
+G2 เดิมรับแล้วและส่วนจัดการพร้อมให้ตรวจ A5 ส่วน UAT โดยผู้ใช้ การทดลอง restore backup และสถานการณ์ storage เต็ม/ไฟดับ/DB ขาดการเชื่อมต่อระหว่าง commit อยู่ใน P6 หลัง G2 การใช้ LAN/โดเมน/public deployment ยังไม่อยู่ในขอบเขต local นี้
 
 ลายเซ็นเป็นภาพประกอบการรับมอบตามโครงงาน ผู้ถือ access link มีสิทธิ์ของลูกค้า/บริษัทตรวจนอกตามบ้านนั้น ไม่มีการเพิ่มระบบพิสูจน์บุคคลภายนอกเหนือ source
 

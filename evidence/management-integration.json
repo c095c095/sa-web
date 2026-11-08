@@ -1,0 +1,188 @@
+{
+  "started_at": "2026-11-08T14:55:07.419Z",
+  "build_id": "ciYJ79Cjj23OM6RzCahmu",
+  "scope": "Real management HTTP/DB/browser and workflow tests; isolated synthetic fixture only",
+  "cases": [
+    {
+      "id": "ADM-01 first admin setup or previously established owner login",
+      "status": "PASS"
+    },
+    {
+      "id": "ADM-02 direct endpoint permissions and role spoof denied",
+      "status": "PASS"
+    },
+    {
+      "id": "ADM-03 create project through UI",
+      "status": "PASS"
+    },
+    {
+      "id": "ADM-04 create and edit house through UI with stale-write guard",
+      "status": "PASS"
+    },
+    {
+      "id": "ADM-05 create technician through UI and mandatory password change",
+      "status": "PASS"
+    },
+    {
+      "id": "ACC-01 profile save persists, self role injection denied",
+      "status": "PASS"
+    },
+    {
+      "id": "ACC-02 revoke another login and wrong current password denied",
+      "status": "PASS"
+    },
+    {
+      "id": "UX-01 choose home and follow QC task, no repeated house selection",
+      "status": "PASS"
+    },
+    {
+      "id": "UX-02 open one job, accept and continue directly to repair",
+      "status": "PASS"
+    },
+    {
+      "id": "UX-03 stale job link does not substitute a different job",
+      "status": "PASS"
+    },
+    {
+      "id": "ADM-06 block active-job account changes and wrong-craft transfer rollback",
+      "status": "PASS"
+    },
+    {
+      "id": "ADM-07 archive guard, finish QC, archive and restore preserve history",
+      "status": "PASS"
+    },
+    {
+      "id": "ADM-08 project rename mirrors houses and closed project prevents new house",
+      "status": "PASS"
+    },
+    {
+      "id": "ADM-09 create customer, bind house and issue scoped link",
+      "status": "PASS"
+    },
+    {
+      "id": "ADM-10 revoke link invalidates both existing session and token",
+      "status": "PASS"
+    },
+    {
+      "id": "ADM-11 customer rebind updates pending request and revokes former access",
+      "status": "PASS"
+    },
+    {
+      "id": "ADM-12 password reset invalidates sessions and requires a fresh password",
+      "status": "PASS"
+    },
+    {
+      "id": "ADM-13 concurrent last-admin protection and recovery through remaining admin",
+      "status": "PASS"
+    },
+    {
+      "id": "ADM-14 overview counts match source and audit omits credentials",
+      "status": "PASS"
+    },
+    {
+      "id": "ADM-15 pagination filter and direct session revocation",
+      "status": "PASS"
+    },
+    {
+      "id": "ADM-16 protected house files and sorting are usable",
+      "status": "PASS"
+    }
+  ],
+  "accessibility": [
+    {
+      "section": "overview",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "section": "projects",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "section": "units",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "section": "customers",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "section": "employees",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "section": "links",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "section": "sessions",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "section": "audit",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "section": "account",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "section": "overview",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "section": "projects",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "section": "units",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "section": "customers",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "section": "employees",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "section": "links",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "section": "sessions",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "section": "audit",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "section": "account",
+      "width": 1440,
+      "violations": []
+    }
+  ],
+  "page_errors": [],
+  "bootstrap": "Created through browser form in this fixture",
+  "finished_at": "2026-11-08T14:55:30.022Z",
+  "violations": 0,
+  "status": "PASS"
+}

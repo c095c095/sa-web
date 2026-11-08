@@ -193,9 +193,7 @@ try {
   await check("Validation error retains form input", async () => {
     const p = await sales.newPage();
     await p.goto(base + "/app?screen=SCR-01");
-    await p
-      .getByLabel("ชื่อโครงการ", { exact: true })
-      .fill("ข้อมูลทดสอบยังไม่ถูกบันทึก");
+    await p.getByLabel("โครงการ", { exact: true }).selectOption({ index: 1 });
     await p.getByLabel("เลขที่บ้าน", { exact: true }).fill("TEST-ERROR");
     await p.route("**/api/actions/UC-01", (route) =>
       route.fulfill({
@@ -207,8 +205,8 @@ try {
     await p.getByRole("button", { name: "ลงทะเบียนบ้าน", exact: true }).click();
     await p.locator("main").getByRole("alert").waitFor();
     assert.equal(
-      await p.getByLabel("ชื่อโครงการ", { exact: true }).inputValue(),
-      "ข้อมูลทดสอบยังไม่ถูกบันทึก",
+      await p.getByLabel("เลขที่บ้าน", { exact: true }).inputValue(),
+      "TEST-ERROR",
     );
     await p.close();
   });

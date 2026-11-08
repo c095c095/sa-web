@@ -1,0 +1,8 @@
+{
+  "date": "2026-11-08",
+  "entries": [
+    {"observation":"Browser test asserted the URL before client navigation completed.","change":"Wait for the exact destination URL before asserting selected home/job context.","scope":"Test synchronization; not a change to application navigation."},
+    {"observation":"History guard test supplied a house number longer than its 20-character constraint, producing validation 422 before the expected state guard.","change":"Use a valid-length changed house number; retain the 409 assertion for the history restriction.","scope":"Test fixture correction; application field and history guards unchanged."},
+    {"observation":"A stale/unknown selected job fell back to other eligible jobs and exposed a claim button.","reproduction":"test-stale-task.mjs against live production test build returned claim_buttons=1 and FAIL at 2026-11-08T14:49:06.017Z.","trace":"Workbench prefer() returned the whole eligible list when selectedDefect was not present. Other jobs were not the explicitly selected job.","change":"With explicit job context, return only that job or an empty list. Show a missing-job recovery message. Selected single-job view no longer asks for search/selection again.","validation":"The same regression returned claim_buttons=0 and PASS after the fix; the management suite also exercises a stale job URL."}
+  ]
+}

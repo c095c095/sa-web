@@ -11,7 +11,8 @@ import { pool, one, rows, type Tx, type Row } from "./db";
 import { type Identity, scopedDefect } from "./auth";
 import { AppError, requireThat } from "./errors";
 // Runtime data is backed up separately; never bundle private uploads or secrets.
-const root = path.resolve(/* turbopackIgnore: true */
+const root = path.resolve(
+  /* turbopackIgnore: true */
   process.cwd(),
   process.env.APP_STORAGE_DIR ?? ".local/storage",
 );

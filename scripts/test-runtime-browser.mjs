@@ -57,7 +57,7 @@ async function login(id) {
   await p.getByLabel("รหัสพนักงาน", { exact: true }).fill(id);
   await p.getByLabel("รหัสผ่าน", { exact: true }).fill(fixture.password);
   await p.getByRole("button", { name: "เข้าสู่ระบบ", exact: true }).click();
-  await p.waitForURL("**/app");
+  await p.waitForURL(/\/(home|app)(\?|$)/);
   return p;
 }
 async function screen(p, s, u) {
@@ -65,6 +65,11 @@ async function screen(p, s, u) {
   await p.locator("h1").waitFor();
 }
 async function submit(p, title) {
+  if (
+    title === "รับงานที่เลือก" &&
+    (await p.getByRole("button", { name: "รับงานนี้", exact: true }).count())
+  )
+    title = "รับงานนี้";
   const refreshed = p.waitForResponse(
     (r) => r.url().includes("/api/workspace") && r.request().method() === "GET",
   );
@@ -74,7 +79,8 @@ async function submit(p, title) {
   await p.getByRole("button", { name: title, exact: true }).click();
   const r = await response;
   assert.equal(r.status(), 200, JSON.stringify(await r.json()));
-  await p.getByRole("status").waitFor();
+  if (r.url().endsWith("/UC-01")) await p.waitForURL(/\/home\?unit=/);
+  else await p.getByRole("status").waitFor();
   const latest = await refreshed;
   assert.equal(latest.status(), 200);
   await latest.finished();
@@ -95,9 +101,12 @@ try {
     await anonymous.waitForURL("**/login");
   });
   const project = "Browser ทดสอบสมมติ " + Date.now();
+  await db.query("INSERT INTO project(project_name) VALUES(?)", [project]);
   await check("UC01 browser create and persisted reload", async () => {
     await screen(sales, "SCR-01");
-    await sales.getByLabel("ชื่อโครงการ", { exact: true }).fill(project);
+    await sales
+      .getByLabel("โครงการ", { exact: true })
+      .selectOption({ label: project });
     await sales.getByLabel("เลขที่บ้าน", { exact: true }).fill("BROWSER-01");
     await submit(sales, "ลงทะเบียนบ้าน");
     const [[u]] = await db.query(

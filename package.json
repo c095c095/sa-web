@@ -16,7 +16,10 @@
     "test:runtime": "node scripts/test-runtime.mjs",
     "test:runtime:browser": "node scripts/test-runtime-browser.mjs",
     "test:runtime:visual": "node scripts/test-runtime-visual.mjs",
-    "audit:runtime": "node scripts/runtime-traceability.mjs"
+    "audit:runtime": "node scripts/runtime-traceability.mjs",
+    "db:migrate:management": "node scripts/migrate-management.mjs",
+    "test:management": "node scripts/test-management.mjs",
+    "test:stale-task": "node scripts/test-stale-task.mjs"
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans-thai": "5.3.0",

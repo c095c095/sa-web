@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { ZodError } from "zod";
+import { ZodError, z } from "zod";
+z.config(z.locales.th());
 export class AppError extends Error {
   constructor(
     public status: number,

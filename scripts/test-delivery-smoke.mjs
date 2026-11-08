@@ -27,6 +27,9 @@ const tables = [
   "file",
   "repair_report",
   "access_link",
+  "project",
+  "audit_event",
+  "app_control",
 ];
 async function snapshot() {
   const r = {};
@@ -75,7 +78,7 @@ try {
     const p = await c.newPage();
     await p.goto(base + "/app");
     await p.locator("main h1").waitFor();
-    const ratio = await contrast(p, 'nav ul.hidden a[aria-current="page"]');
+    const ratio = await contrast(p, 'nav a[aria-current="page"]:visible');
     assert(ratio >= 4.5, "Selected menu contrast " + ratio);
     out.cases.push({
       name: account.role + " production login and selected-menu contrast",
@@ -136,9 +139,12 @@ try {
     status: "PASS",
     contrast: Number(ratio.toFixed(2)),
   });
-  assert.equal(await snapshot(), before);
+  assert(
+    (await snapshot()) === before,
+    "Business rows changed during readonly smoke",
+  );
   out.cases.push({
-    name: "All 9 business tables unchanged by final smoke check",
+    name: "All core and management records unchanged by readonly smoke",
     status: "PASS",
   });
 } catch (e) {

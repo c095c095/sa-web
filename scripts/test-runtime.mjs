@@ -165,6 +165,7 @@ try {
   });
   const project =
     "ทดสอบระบบจริง (ข้อมูลสมมติ) " + crypto.randomBytes(3).toString("hex");
+  await db.query("INSERT INTO project(project_name) VALUES(?)",[project]);
   await check("UC01 register and persist Thai house", async () => {
     unit = (
       await action(sales, "UC-01", {
