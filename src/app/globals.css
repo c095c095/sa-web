@@ -46,6 +46,7 @@
   --dur-micro: 120ms;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --container-width: 80rem;
+  --shell-header-height: 4.5rem;
 }
 @theme inline { --font-sans: var(--font-body); }
 html, body { overflow-x: clip; }

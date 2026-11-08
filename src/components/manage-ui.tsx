@@ -216,8 +216,8 @@ export function AppFrame({
       </a>
 
       {/* ── Header ── */}
-      <header className="sticky top-0 z-30 border-b border-base-300 bg-base-100">
-        <div className="page-container flex items-center gap-3 py-3.5">
+      <header className="sticky top-0 z-30 border-b border-base-300 bg-base-100 lg:h-(--shell-header-height)">
+        <div className="page-container flex items-center gap-3 py-3.5 lg:h-full lg:py-0">
           {/* Mobile hamburger */}
           <button
             ref={menuButton}
@@ -284,7 +284,7 @@ export function AppFrame({
               <li className="mt-1 border-t border-base-300 pt-1">
                 <button
                   type="button"
-                  className="text-error"
+                  className="bg-error text-error-content hover:bg-error/80"
                   onClick={async () => {
                     try {
                       const r = await fetch("/api/auth/logout", {
@@ -307,7 +307,7 @@ export function AppFrame({
         </div>
       </header>
 
-      {/* ── Layout: one menu (drawer-side). Off-canvas below lg, fixed at the left from lg up ── */}
+      {/* Off-canvas on mobile, sticky below the header on desktop. */}
       <div
         className="drawer lg:drawer-open"
         onKeyDown={(e) => {
@@ -344,8 +344,7 @@ export function AppFrame({
           </footer>
         </div>
 
-        {/* Mobile drawer sidebar */}
-        <div className="drawer-side z-40">
+        <div className="drawer-side z-40 lg:top-(--shell-header-height) lg:z-20 lg:h-[calc(100dvh-var(--shell-header-height))] lg:self-start lg:overscroll-contain">
           <button
             type="button"
             tabIndex={-1}
