@@ -138,19 +138,21 @@ async function showsNewestHouse() {
   return text.includes("บ้านเลขที่ " + newest.house_no) && picker === 0;
 }
 
-function assertDeferredToHome(url) {
+function assertDeferredToHome(url, expectedNext = "/app?screen=SCR-09") {
   assert.equal(url.pathname, "/home", "must land on the house picker");
   assert.equal(url.searchParams.get("unit"), null, "URL must not gain a unit");
-  assert.equal(url.searchParams.get("next"), "/app?screen=SCR-09", "target screen must be kept");
+  assert.equal(url.searchParams.get("next"), expectedNext, "target screen must be kept");
 }
 
 await loginForm(sales.employee_id);
 
 await check("T-01", "Deep link to a house screen without unit goes to the picker and keeps the target", async () => {
-  await page.goto(base + "/app?screen=SCR-09");
+  // Changed with Decision 1 (SCR-09 landing): a bare /app?screen=SCR-09 now goes to /tasks/SCR-09
+  // (covered by test-task-landing). A link that carries a defect keeps the picker, which this case needs.
+  await page.goto(base + "/app?screen=SCR-09&defect=12");
   await page.waitForLoadState("load");
   const url = new URL(page.url());
-  assertDeferredToHome(url);
+  assertDeferredToHome(url, "/app?screen=SCR-09&defect=12");
   assert.equal(await showsNewestHouse(), false, "house " + newest.house_no + " was selected silently");
   return { final_path: url.pathname + url.search };
 });
@@ -163,11 +165,15 @@ await check("T-02", "Sidebar link from /home (no house chosen) does not select a
     .getByRole("link", { name: "ส่งลิงก์เข้าสู่ระบบให้ลูกค้า", exact: true })
     .first()
     .click();
-  // client-side navigation: wait for the URL, not for a page load event
-  await page.waitForURL(/\/home\?next=/, { timeout: 30000 });
+  // client-side navigation: wait for the URL, not for a page load event.
+  // Changed with Decision 1 (SCR-09 landing): the menu item opens /tasks/SCR-09, which lists
+  // houses and chooses none. The invariant is the same: no house in the URL, none selected.
+  await page.waitForURL(/\/tasks\/SCR-09/, { timeout: 30000 });
   const url = new URL(page.url());
-  assertDeferredToHome(url);
-  assert.equal(await showsNewestHouse(), false, "house " + newest.house_no + " was selected silently");
+  assert.equal(url.pathname, "/tasks/SCR-09");
+  assert.equal(url.searchParams.get("unit"), null, "URL must not gain a unit");
+  const heading = await page.locator("main#main-content h1").first().innerText();
+  assert(!heading.includes("บ้านเลขที่"), "a house heading was shown: " + heading);
   return { final_path: url.pathname + url.search };
 });
 

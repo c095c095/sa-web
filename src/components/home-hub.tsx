@@ -8,25 +8,42 @@ import { journey, taskUrl } from "@/lib/journey";
 import { buildAppPath, type DeepLink } from "@/lib/deep-link";
 import { AppFrame, Panel, Back, string, thaiTime } from "./manage-ui";
 import { Search, ArrowRight } from "lucide-react";
+const statusBadgeMap: Record<string, string> = {
+  NEW: "badge-status-new",
+  WAITING_ASSIGN: "badge-status-waiting",
+  ASSIGNED: "badge-status-assigned",
+  FIXED: "badge-status-fixed",
+  REWORK: "badge-status-rework",
+  VERIFIED: "badge-status-verified",
+};
+
 export function HomeHub({
   initial,
   selected = false,
   deepLink = null,
+  active,
+  title,
+  initialTab,
 }: {
   initial: Workspace;
   selected?: boolean;
   deepLink?: DeepLink | null;
+  // Phase 2A: set when a technician menu item opens this view (/tasks/SCR-XX).
+  active?: string;
+  title?: string;
+  initialTab?: string;
 }) {
   const router = useRouter();
   const [q, setQ] = useState(""),
     [tab, setTab] = useState(
-      initial.identity.kind === "EMPLOYEE" &&
+      initialTab ??
+        (initial.identity.kind === "EMPLOYEE" &&
         initial.identity.role === "HEAD_TECHNICIAN" &&
         initial.newDefects.length
-        ? "new"
-        : initial.myJobs.length
-          ? "mine"
-          : "queue",
+          ? "new"
+          : initial.myJobs.length
+            ? "mine"
+            : "queue"),
     );
   const w = initial,
     role = w.identity.kind === "CUSTOMER" ? "CUSTOMER" : w.identity.role,
@@ -48,12 +65,14 @@ export function HomeHub({
   return (
     <AppFrame
       identity={w.identity}
+      active={active}
       title={
-        selected && unit
+        title ??
+        (selected && unit
           ? "บ้านเลขที่ " + unit.house_no
           : tech
             ? "งานของฉัน"
-            : "ทะเบียนบ้านและงานที่ต้องทำ"
+            : "ทะเบียนบ้านและงานที่ต้องทำ")
       }
     >
       <div className="flex justify-end">
@@ -107,13 +126,13 @@ export function HomeHub({
             )}
           </Panel>
           <Panel title="ความคืบหน้าของบ้าน">
-            <div className="grid gap-5 sm:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {Object.entries(defectStatuses).map(([code, label]) => {
                 const n = w.defects.filter((d) => d.status === code).length;
                 return n ? (
-                  <div key={code}>
-                    <p className="text-muted">{label}</p>
-                    <p className="text-2xl font-semibold">{n} จุด</p>
+                  <div key={code} className="stat-card">
+                    <span className="stat-card-label">{label}</span>
+                    <span className="stat-card-value">{n} <span className="text-sm font-normal text-muted">จุด</span></span>
                   </div>
                 ) : null;
               })}
@@ -122,12 +141,12 @@ export function HomeHub({
               <p className="text-muted">ยังไม่มีรายการจุดที่ต้องแก้ไขในระบบ</p>
             )}
             {w.requests[0] && (
-              <p className="mt-5">
+              <p className="mt-5 text-sm">
                 นัดตรวจ {thaiTime(w.requests[0].appointment)}
               </p>
             )}
           </Panel>
-          <details className="rounded-box border border-base-300 bg-base-100 p-5">
+          <details className="panel-surface p-5">
             <summary className="cursor-pointer font-medium">
               ดูประวัติและรายการจุด
             </summary>
@@ -135,7 +154,7 @@ export function HomeHub({
               {w.defects.map((d) => (
                 <li
                   key={string(d.defect_id)}
-                  className="flex flex-wrap justify-between gap-3 py-3"
+                  className="flex flex-wrap items-center justify-between gap-3 py-3"
                 >
                   <span>
                     {string(d.location_pin)}
@@ -144,7 +163,7 @@ export function HomeHub({
                         "รอแยกประเภท"}
                     </span>
                   </span>
-                  <span className="badge badge-outline">
+                  <span className={`badge ${statusBadgeMap[string(d.status)] ?? "badge-outline"}`}>
                     {defectStatuses[d.status as keyof typeof defectStatuses]}
                   </span>
                 </li>
@@ -226,19 +245,17 @@ export function HomeHub({
                     className="flex flex-wrap items-center justify-between gap-4 py-5"
                   >
                     <div className="min-w-0 flex-1">
-                      <h2 className="text-lg">{string(d.location_pin)}</h2>
-                      <p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h2 className="text-lg font-semibold">{string(d.location_pin)}</h2>
+                        <span className={`badge badge-sm ${statusBadgeMap[string(d.status)] ?? "badge-outline"}`}>
+                          {defectStatuses[d.status as keyof typeof defectStatuses]}
+                        </span>
+                      </div>
+                      <p className="text-sm">
                         บ้าน {string(d.house_no)} · {string(d.project_name)}
                       </p>
-                      <p className="text-sm text-muted">
-                        {categories[d.category as keyof typeof categories] ??
-                          "ยังไม่แยกประเภท"}{" "}
-                        ·{" "}
-                        {
-                          defectStatuses[
-                            d.status as keyof typeof defectStatuses
-                          ]
-                        }
+                      <p className="text-xs text-muted">
+                        หมวดหมู่: {categories[d.category as keyof typeof categories] ?? "ยังไม่แยกประเภท"}
                       </p>
                     </div>
                     <Link

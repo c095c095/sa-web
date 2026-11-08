@@ -2,7 +2,37 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { House, LogOut, Menu, ArrowLeft, UserRound } from "lucide-react";
+import { landingKind, landingPath } from "@/lib/task-landing";
+import {
+  House,
+  LogOut,
+  Menu,
+  ArrowLeft,
+  UserRound,
+  X,
+  ClipboardCheck,
+  LayoutDashboard,
+  FolderOpen,
+  Building2,
+  Users,
+  UserCog,
+  Link2,
+  History,
+  ShieldCheck,
+  Hammer,
+  CheckSquare,
+  FileText,
+  ClipboardList,
+  SendHorizontal,
+  Calendar,
+  PackageCheck,
+  UserPlus,
+  FileBadge,
+  Wrench,
+  ListChecks,
+  ScanLine,
+  ListPlus,
+} from "lucide-react";
 import {
   type SessionView,
   roleLabels,
@@ -10,6 +40,7 @@ import {
   screenRoles,
 } from "@/lib/runtime-contracts";
 import { managementSections } from "@/lib/management-contracts";
+
 export const string = (v: unknown) => String(v ?? "");
 export const thaiTime = (v: unknown) =>
   v
@@ -17,23 +48,150 @@ export const thaiTime = (v: unknown) =>
         string(v).replace(" ", "T") + (string(v).endsWith("Z") ? "" : "Z"),
       ).toLocaleString("th-TH", { timeZone: "Asia/Bangkok" })
     : "ยังไม่ระบุ";
+
+/* ── Icon map ── */
+const sectionIcons: Record<string, React.ReactNode> = {
+  overview: <LayoutDashboard size={16} aria-hidden="true" />,
+  projects: <FolderOpen size={16} aria-hidden="true" />,
+  units: <Building2 size={16} aria-hidden="true" />,
+  customers: <Users size={16} aria-hidden="true" />,
+  employees: <UserCog size={16} aria-hidden="true" />,
+  links: <Link2 size={16} aria-hidden="true" />,
+  sessions: <ShieldCheck size={16} aria-hidden="true" />,
+  audit: <History size={16} aria-hidden="true" />,
+};
+const screenIcons: Record<string, React.ReactNode> = {
+  home: <ClipboardCheck size={16} aria-hidden="true" />,
+  "SCR-01": <ListPlus size={16} aria-hidden="true" />,
+  "SCR-02": <ScanLine size={16} aria-hidden="true" />,
+  "SCR-03": <Wrench size={16} aria-hidden="true" />,
+  "SCR-04": <Hammer size={16} aria-hidden="true" />,
+  "SCR-05": <CheckSquare size={16} aria-hidden="true" />,
+  "SCR-06": <Calendar size={16} aria-hidden="true" />,
+  "SCR-07": <PackageCheck size={16} aria-hidden="true" />,
+  "SCR-08": <SendHorizontal size={16} aria-hidden="true" />,
+  "SCR-09": <UserPlus size={16} aria-hidden="true" />,
+  "SCR-10": <ClipboardList size={16} aria-hidden="true" />,
+  "SCR-11": <FileBadge size={16} aria-hidden="true" />,
+  "SCR-12": <FileText size={16} aria-hidden="true" />,
+  "SCR-13": <Building2 size={16} aria-hidden="true" />,
+  "SCR-14": <ListChecks size={16} aria-hidden="true" />,
+  "SCR-15": <ListPlus size={16} aria-hidden="true" />,
+  "SCR-16": <FileText size={16} aria-hidden="true" />,
+  "SCR-17": <ListChecks size={16} aria-hidden="true" />,
+  "SCR-18": <CheckSquare size={16} aria-hidden="true" />,
+};
+
+function SidebarNav({
+  items,
+  active,
+  admin,
+  onClick,
+}: {
+  items: { key: string; label: string; href: string }[];
+  active: string;
+  admin: boolean;
+  onClick?: () => void;
+}) {
+  return (
+    <nav aria-label="เมนูหลัก">
+      <ul className="flex flex-col gap-0.5">
+        {items.map((x) => (
+          <li key={x.key}>
+            <Link
+              href={x.href}
+              aria-current={active === x.key ? "page" : undefined}
+              className="sidebar-link"
+              onClick={onClick}
+            >
+              {admin
+                ? (sectionIcons[x.key] ?? (
+                    <FolderOpen size={16} aria-hidden="true" />
+                  ))
+                : (screenIcons[x.key] ?? (
+                    <ClipboardCheck size={16} aria-hidden="true" />
+                  ))}
+              <span className="min-w-0 truncate">{x.label}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
+
+// Phase 1C (F2): the one place that builds the employee/customer menu, so
+// /home, /app and /account show the same items. "งานของฉัน" is always first.
+// `unit` keeps the house that is already open when moving between steps.
+export function buildNav(identity: SessionView, unit?: string) {
+  const role = identity.kind === "CUSTOMER" ? "CUSTOMER" : identity.role;
+  const withUnit = unit ? "&unit=" + encodeURIComponent(unit) : "";
+  return [
+    { key: "home", href: "/home", label: "งานของฉัน" },
+    ...(screenRoles[role] ?? []).map((key) => ({
+      key,
+      label: screens[key],
+      // Phase 2A: a menu item with a landing page opens it and carries no house.
+      href: landingKind(role, key)
+        ? landingPath(key)
+        : "/app?screen=" + key + withUnit,
+    })),
+  ];
+}
+
 export function AppFrame({
   identity,
   children,
   active = "home",
   title,
   nav,
+  unit,
 }: {
   identity: SessionView;
   children: ReactNode;
   active?: string;
   title?: string;
   nav?: { href: string; label: string; key: string }[];
+  unit?: string;
 }) {
-  const router = useRouter(),
-    [error, setError] = useState("");
+  const router = useRouter();
+  const [error, setError] = useState("");
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [prevActive, setPrevActive] = useState(active);
+  const drawerId = useId();
+  const menuId = useId();
+  const menuButton = useRef<HTMLButtonElement>(null);
+  const menuPanel = useRef<HTMLDivElement>(null);
+  const wasOpen = useRef(false);
+
+  if (active !== prevActive) {
+    setPrevActive(active);
+    setDrawerOpen(false);
+  }
+
+  // Phase 1D (F7): the menu panel comes after the content in the DOM, so on open
+  // move focus into it; on close return focus to the button that opened it.
+  useEffect(() => {
+    if (drawerOpen) {
+      wasOpen.current = true;
+      // The panel is still visibility:hidden while it slides in, and hidden
+      // elements cannot take focus, so retry until focus lands inside it.
+      let tries = 0;
+      const t = window.setInterval(() => {
+        const panel = menuPanel.current;
+        panel?.querySelector<HTMLElement>("a")?.focus();
+        if (panel?.contains(document.activeElement) || ++tries > 15)
+          window.clearInterval(t);
+      }, 50);
+      return () => window.clearInterval(t);
+    }
+    if (wasOpen.current) {
+      wasOpen.current = false;
+      menuButton.current?.focus();
+    }
+  }, [drawerOpen]);
+
   const admin = identity.kind === "EMPLOYEE" && identity.role === "ADMIN";
-  const role = identity.kind === "CUSTOMER" ? "CUSTOMER" : identity.role;
   const items =
     nav ??
     (admin
@@ -42,87 +200,94 @@ export function AppFrame({
           label,
           href: "/admin?section=" + key,
         }))
-      : [
-          { key: "home", href: "/home", label: "งานของฉัน" },
-          ...(screenRoles[role] ?? []).map((key) => ({
-            key,
-            label: screens[key],
-            href: "/app?screen=" + key,
-          })),
-        ]);
+      : buildNav(identity, unit));
   const initial = identity.fullName.trim().slice(0, 2) || "ผ";
-  const links = (
-    <ul className="menu w-full gap-1">
-      {items.map((x) => (
-        <li key={x.key}>
-          <Link
-            href={x.href}
-            aria-current={active === x.key ? "page" : undefined}
-            className={
-              active === x.key
-                ? "bg-base-300 text-base-content font-medium"
-                : ""
-            }
-          >
-            {x.label}
-          </Link>
-        </li>
-      ))}
-    </ul>
-  );
+  const roleName =
+    identity.kind === "CUSTOMER"
+      ? "ลูกค้า / บริษัทตรวจนอก"
+      : roleLabels[identity.role];
+
   return (
     <>
       <a className="skip-link" href="#main-content">
         ข้ามไปเนื้อหา
       </a>
-      <header className="border-b border-base-300 bg-base-100">
-        <div className="page-container flex flex-wrap items-center gap-4 py-5">
+
+      {/* ── Header ── */}
+      <header className="sticky top-0 z-30 border-b border-base-300 bg-base-100">
+        <div className="page-container flex items-center gap-3 py-3.5">
+          {/* Mobile hamburger */}
+          <button
+            ref={menuButton}
+            type="button"
+            className="btn btn-ghost btn-sm lg:hidden"
+            aria-label="เปิดเมนู"
+            aria-expanded={drawerOpen}
+            aria-controls={menuId}
+            onClick={() => setDrawerOpen(true)}
+          >
+            <Menu size={20} aria-hidden="true" />
+          </button>
+
           <Link
             href={admin ? "/admin" : "/home"}
-            className="flex items-center gap-3 font-semibold"
+            className="flex items-center gap-2.5 font-semibold text-base-content"
           >
-            <House size={24} aria-hidden="true" />
-            ระบบตรวจและส่งมอบบ้าน
+            <House size={22} aria-hidden="true" />
+            <span className="hidden sm:block">ระบบตรวจและส่งมอบบ้าน</span>
+            <span className="sm:hidden">ตรวจบ้าน</span>
           </Link>
+
+          {/* User menu */}
           <details className="dropdown dropdown-end ml-auto">
-            <summary className="btn btn-ghost list-none gap-2" aria-label="เมนูบัญชี">
+            <summary
+              className="btn btn-ghost list-none gap-2 pl-2 pr-1"
+              aria-label="เมนูบัญชี"
+            >
               <div className="avatar avatar-placeholder">
                 <div className="size-9 rounded-full bg-neutral text-sm text-neutral-content">
                   <span>{initial}</span>
                 </div>
               </div>
-              <span className="hidden text-left sm:block">
-                <span className="block text-sm">{identity.fullName}</span>
-                <span className="block text-xs text-muted">
-                  {identity.kind === "CUSTOMER"
-                    ? "ลูกค้า / บริษัทตรวจนอก"
-                    : roleLabels[identity.role]}
+              <span className="hidden flex-col text-left sm:flex">
+                <span className="text-sm font-medium leading-tight">
+                  {identity.fullName}
                 </span>
+                <span className="text-xs text-muted">{roleName}</span>
               </span>
             </summary>
-            <ul className="menu dropdown-content z-10 mt-3 w-60 rounded-box border border-base-300 bg-base-100 p-2 shadow">
-              <li className="menu-title pointer-events-none">
-                <span className="flex items-center gap-3 normal-case">
-                  <UserRound size={18} aria-hidden="true" />
-                  <span>
-                    <span className="block">{identity.fullName}</span>
-                    <span className="block text-xs font-normal text-muted">
-                      {identity.kind === "CUSTOMER"
-                        ? "ลูกค้า / บริษัทตรวจนอก"
-                        : roleLabels[identity.role]}
-                    </span>
-                  </span>
-                </span>
+            <ul className="menu dropdown-content z-50 mt-2 w-64 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg">
+              {/* Identity block */}
+              <li className="pointer-events-none mb-1">
+                <div className="flex items-center gap-3 rounded-field bg-base-200 px-3 py-2.5">
+                  <div className="avatar avatar-placeholder shrink-0">
+                    <div className="size-9 rounded-full bg-neutral text-sm text-neutral-content">
+                      <span>{initial}</span>
+                    </div>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-base-content">
+                      {identity.fullName}
+                    </p>
+                    <p className="text-xs text-muted">{roleName}</p>
+                  </div>
+                </div>
               </li>
               <li>
-                <Link href="/account">บัญชีของฉัน</Link>
+                <Link href="/account">
+                  <UserRound size={16} aria-hidden="true" />
+                  บัญชีของฉัน
+                </Link>
               </li>
-              <li>
+              <li className="mt-1 border-t border-base-300 pt-1">
                 <button
                   type="button"
+                  className="text-error"
                   onClick={async () => {
                     try {
-                      const r = await fetch("/api/auth/logout", { method: "POST" });
+                      const r = await fetch("/api/auth/logout", {
+                        method: "POST",
+                      });
                       if (!r.ok) throw Error();
                       router.replace("/login");
                       router.refresh();
@@ -131,7 +296,7 @@ export function AppFrame({
                     }
                   }}
                 >
-                  <LogOut size={18} aria-hidden="true" />
+                  <LogOut size={16} aria-hidden="true" />
                   ออกจากระบบ
                 </button>
               </li>
@@ -139,46 +304,97 @@ export function AppFrame({
           </details>
         </div>
       </header>
-      <div className="page-container grid w-full flex-1 gap-6 py-6 lg:grid-cols-[14rem_minmax(0,1fr)]">
-        <aside>
-          <nav aria-label="เมนูหลัก">
-            <details className="lg:hidden">
-              <summary className="flex min-h-12 cursor-pointer items-center gap-2">
-                <Menu size={18} aria-hidden="true" />
-                เมนู
-              </summary>
-              {links}
-            </details>
-            <div className="hidden lg:block">{links}</div>
-          </nav>
-        </aside>
-        <main id="main-content" className="min-w-0 space-y-6">
-          {title && <h1 className="page-heading">{title}</h1>}
-          {error && (
-            <p className="alert alert-error" role="alert">
-              {error}
-            </p>
-          )}
-          {children}
-        </main>
+
+      {/* ── Layout: one menu (drawer-side). Off-canvas below lg, fixed at the left from lg up ── */}
+      <div
+        className="drawer lg:drawer-open"
+        onKeyDown={(e) => {
+          if (e.key === "Escape" && drawerOpen) setDrawerOpen(false);
+        }}
+      >
+        <input
+          id={drawerId}
+          type="checkbox"
+          className="drawer-toggle"
+          tabIndex={-1}
+          aria-hidden="true"
+          checked={drawerOpen}
+          onChange={(e) => setDrawerOpen(e.target.checked)}
+        />
+
+        {/* Main content */}
+        <div className="drawer-content">
+          <div className="page-container w-full flex-1 py-6">
+            <main id="main-content" className="min-w-0 space-y-6">
+              {title && <h1 className="page-heading">{title}</h1>}
+              {error && (
+                <p className="alert alert-error" role="alert">
+                  {error}
+                </p>
+              )}
+              {children}
+            </main>
+          </div>
+
+          <footer className="page-container w-full border-t border-base-300 py-5 text-sm text-muted">
+            กรณีศึกษา โครงการ ANNA Townhome ราชพฤกษ์-แจ้งวัฒนะ ·
+            ข้อมูลตั้งต้นสมมติสำหรับโครงงาน
+          </footer>
+        </div>
+
+        {/* Mobile drawer sidebar */}
+        <div className="drawer-side z-40">
+          <button
+            type="button"
+            tabIndex={-1}
+            aria-label="ปิดเมนู"
+            className="drawer-overlay lg:hidden"
+            onClick={() => setDrawerOpen(false)}
+          />
+          <div
+            id={menuId}
+            ref={menuPanel}
+            className="sidebar-menu w-72 border-r border-base-300"
+          >
+            {/* Drawer header */}
+            <div className="mb-3 flex items-center justify-between pb-3 border-b border-base-300">
+              <span className="font-semibold text-base-content">เมนูหลัก</span>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm btn-circle lg:hidden"
+                aria-label="ปิดเมนู"
+                onClick={() => setDrawerOpen(false)}
+              >
+                <X size={18} aria-hidden="true" />
+              </button>
+            </div>
+            <SidebarNav
+              items={items}
+              active={active}
+              admin={admin}
+              onClick={() => setDrawerOpen(false)}
+            />
+          </div>
+        </div>
       </div>
-      <footer className="page-container w-full border-t border-base-300 py-5 text-sm text-muted">
-        กรณีศึกษา โครงการ ANNA Townhome ราชพฤกษ์-แจ้งวัฒนะ ·
-        ข้อมูลตั้งต้นสมมติสำหรับโครงงาน
-      </footer>
     </>
   );
 }
 export function Panel({
   title,
+  action,
   children,
 }: {
   title: string;
+  action?: ReactNode;
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-box border border-base-300 bg-base-100 p-5 sm:p-7">
-      <h2 className="mb-5 text-xl">{title}</h2>
+    <section className="panel-surface p-5 sm:p-7">
+      <div className="mb-5 flex items-center justify-between gap-4">
+        <h2 className="text-xl font-semibold">{title}</h2>
+        {action && <div className="shrink-0">{action}</div>}
+      </div>
       {children}
     </section>
   );
@@ -312,7 +528,15 @@ export function MutationForm({
   const router = useRouter(),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
-    [message, setMessage] = useState("");
+    [toast, setToast] = useState("");
+
+  /* Auto-dismiss toast */
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(""), 3500);
+    return () => clearTimeout(t);
+  }, [toast]);
+
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget,
@@ -325,7 +549,7 @@ export function MutationForm({
       if (fd.has(key)) data[key] = fd.get(key) === "true";
     if (fd.has("defect_ids")) data.defect_ids = fd.getAll("defect_ids");
     setError("");
-    setMessage("");
+    setToast("");
     setBusy(true);
     try {
       const result = await sendAction(endpoint, data);
@@ -334,7 +558,7 @@ export function MutationForm({
         router.refresh();
         return;
       }
-      setMessage(string(result.message));
+      setToast(string(result.message));
       if (reset) form.reset();
       onDone?.(result);
       router.refresh();
@@ -351,34 +575,43 @@ export function MutationForm({
     }
   }
   return (
-    <form onSubmit={submit} className="space-y-5">
-      <fieldset disabled={busy} className="space-y-5">
-        {children}
-        {error && (
-          <p role="alert" className="alert alert-error">
-            {error}
-          </p>
-        )}
-        {message && (
-          <p role="status" className="alert alert-success">
-            {message}
-          </p>
-        )}
-        <button type="submit" className={`btn ${primary ? "btn-primary" : ""}`}>
-          {busy ? (
-            <>
-              <span
-                className="loading loading-spinner loading-sm"
-                aria-hidden="true"
-              />
-              กำลังบันทึก
-            </>
-          ) : (
-            label
+    <>
+      {/* Toast notification */}
+      {toast && (
+        <div
+          className="toast toast-end toast-top toast-notice z-50"
+          role="status"
+          aria-live="polite"
+        >
+          <div className="alert alert-success shadow-lg">
+            <span>{toast}</span>
+          </div>
+        </div>
+      )}
+      <form onSubmit={submit} className="space-y-5">
+        <fieldset disabled={busy} className="space-y-5">
+          {children}
+          {error && (
+            <p role="alert" className="alert alert-error">
+              {error}
+            </p>
           )}
-        </button>
-      </fieldset>
-    </form>
+          <button type="submit" className={`btn ${primary ? "btn-primary" : ""}`}>
+            {busy ? (
+              <>
+                <span
+                  className="loading loading-spinner loading-sm"
+                  aria-hidden="true"
+                />
+                กำลังบันทึก
+              </>
+            ) : (
+              label
+            )}
+          </button>
+        </fieldset>
+      </form>
+    </>
   );
 }
 export function Dialog({

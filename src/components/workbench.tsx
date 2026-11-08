@@ -15,7 +15,6 @@ import {
   type Workspace,
   type DataRow,
   screens,
-  screenRoles,
   unitStates,
 } from "@/lib/runtime-contracts";
 import { categories, defectStatuses } from "@/lib/domain";
@@ -190,8 +189,8 @@ function Check({
 }
 function Panel({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="rounded-box border border-base-300 bg-base-100 p-5 sm:p-7">
-      <h2 className="mb-5 text-xl">{title}</h2>
+    <section className="panel-surface p-5 sm:p-7">
+      <h2 className="mb-5 text-xl font-semibold">{title}</h2>
       {children}
     </section>
   );
@@ -446,6 +445,23 @@ function Files({
     </div>
   ) : null;
 }
+const statusBadgeConfig: Record<string, string> = {
+  NEW: "badge-status-new",
+  WAITING_ASSIGN: "badge-status-waiting",
+  ASSIGNED: "badge-status-assigned",
+  FIXED: "badge-status-fixed",
+  REWORK: "badge-status-rework",
+  VERIFIED: "badge-status-verified",
+};
+function DefectStatusBadge({ status }: { status: unknown }) {
+  const code = str(status);
+  const badgeClass = statusBadgeConfig[code] ?? "badge-outline";
+  return (
+    <span className={`badge ${badgeClass} font-medium`}>
+      {label(defectStatuses, code)}
+    </span>
+  );
+}
 function Defects({
   items,
   select = false,
@@ -458,7 +474,7 @@ function Defects({
   return items.length ? (
     <ul className="divide-y divide-base-300">
       {items.map((d) => (
-        <li key={str(d.defect_id)} className="py-5">
+        <li key={str(d.defect_id)} className="py-4">
           <div className="flex flex-wrap items-start gap-3">
             {select && (
               <input
@@ -471,38 +487,38 @@ function Defects({
               />
             )}
             <div className="min-w-0 flex-1">
-              <p className="font-medium">
-                {str(d.location_pin)}
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-semibold">{str(d.location_pin)}</p>
                 {d.house_no && (
-                  <span className="ml-2 text-sm text-muted">
+                  <span className="badge badge-sm badge-outline">
                     บ้าน {str(d.house_no)}
                   </span>
                 )}
-              </p>
-              <p className="text-sm text-muted">
-                {str(d.defect_id)} ·{" "}
+                {Number(d.rework_count) > 0 && (
+                  <span className="badge badge-sm badge-warning">
+                    แก้รอบที่ {str(d.rework_count)}
+                  </span>
+                )}
+              </div>
+              <p className="mt-1 text-sm text-muted">
+                <span className="font-mono text-xs">{str(d.defect_id)}</span> ·{" "}
                 {label(categories, d.category) || "รอแยกประเภท"}
                 {d.target_date
                   ? " · เป้าหมาย " + str(d.target_date).slice(0, 10)
                   : ""}
               </p>
             </div>
-            <span
-              className={`badge ${d.status === "VERIFIED" ? "badge-success" : d.status === "REWORK" ? "badge-warning" : "badge-outline"}`}
-            >
-              {label(defectStatuses, d.status)}
-            </span>
+            <DefectStatusBadge status={d.status} />
           </div>
-          <details className="mt-3">
-            <summary className="cursor-pointer py-2 underline underline-offset-4">
-              รายละเอียดและรูป
+          <details className="mt-3 rounded-field bg-base-200/50 p-3">
+            <summary className="cursor-pointer font-medium text-sm text-muted hover:text-base-content">
+              ดูรายละเอียดและรูปประกอบ
             </summary>
-            <p className="whitespace-pre-wrap break-words">
+            <p className="mt-2 whitespace-pre-wrap break-words text-sm">
               {str(d.description) || "ไม่มีรายละเอียดเพิ่มเติม"}
             </p>
-            <p className="text-sm text-muted">
-              ช่าง {str(d.technician_id) || "ยังไม่มีผู้รับงาน"} · ส่งกลับแก้{" "}
-              {str(d.rework_count) || "0"} ครั้ง
+            <p className="mt-2 text-xs text-muted">
+              ช่างผู้รับงาน: {str(d.technician_id) || "ยังไม่มีผู้รับงาน"}
             </p>
             <Files files={files} defectId={str(d.defect_id)} />
           </details>
@@ -531,7 +547,6 @@ export function Workbench({
     [completed, setCompleted] = useState(false);
   const router = useRouter();
   const identity = w.identity,
-    role = identity.kind === "CUSTOMER" ? "CUSTOMER" : identity.role,
     unit = w.unit,
     unitId = str(unit?.unit_id),
     qc = w.rounds.find(
@@ -1432,11 +1447,7 @@ export function Workbench({
       <AppFrame
         identity={identity}
         active={screen}
-        nav={(screenRoles[role] ?? []).map((key) => ({
-          key,
-          label: screens[key],
-          href: "/app?screen=" + key + "&unit=" + unitId,
-        }))}
+        unit={unitId}
       >
         <Back href={unitId ? "/home?unit=" + unitId : "/home"}>
           {unit
@@ -1460,18 +1471,57 @@ export function Workbench({
           </button>
         </div>
         {unit && (
-          <section className="border-y border-base-300 py-4">
-            <p className="text-lg font-semibold">
-              บ้านเลขที่ {str(unit.house_no)}{" "}
-              <span className="ml-2 text-sm font-normal">
-                {unitStates[str(unit.status)]}
-              </span>
-            </p>
-            <p>{str(unit.project_name)}</p>
-            <p className="mt-2 text-sm text-muted">
+          <section className="panel-surface p-5 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-lg font-semibold">
+                  บ้านเลขที่ {str(unit.house_no)}{" "}
+                  <span className="ml-2 badge badge-outline font-normal">
+                    {unitStates[str(unit.status)]}
+                  </span>
+                </p>
+                <p className="text-sm text-muted">{str(unit.project_name)}</p>
+              </div>
+            </div>
+            <p className="text-sm text-muted border-t border-base-300 pt-3">
               {flow.actions.find((a) => a.screen === screen)?.hint ??
                 flow.waiting}
             </p>
+            {w.defects.length > 0 && (
+              <div className="grid grid-cols-2 gap-3 pt-1 sm:grid-cols-4">
+                <div className="stat-card">
+                  <span className="stat-card-label">จุดที่พบทั้งหมด</span>
+                  <span className="stat-card-value">{w.defects.length}</span>
+                </div>
+                <div className="stat-card">
+                  <span className="stat-card-label">รอช่างรับ / ซ่อม</span>
+                  <span className="stat-card-value text-warning">
+                    {
+                      w.defects.filter((d) =>
+                        [
+                          "NEW",
+                          "WAITING_ASSIGN",
+                          "ASSIGNED",
+                          "REWORK",
+                        ].includes(str(d.status)),
+                      ).length
+                    }
+                  </span>
+                </div>
+                <div className="stat-card">
+                  <span className="stat-card-label">ซ่อมเสร็จรอตรวจ</span>
+                  <span className="stat-card-value text-info">
+                    {w.defects.filter((d) => d.status === "FIXED").length}
+                  </span>
+                </div>
+                <div className="stat-card">
+                  <span className="stat-card-label">ตรวจผ่านแล้ว</span>
+                  <span className="stat-card-value text-success">
+                    {w.defects.filter((d) => d.status === "VERIFIED").length}
+                  </span>
+                </div>
+              </div>
+            )}
           </section>
         )}
         {loadError && (

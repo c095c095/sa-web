@@ -127,14 +127,35 @@ try {
     },
   );
   await check("AUTH-03 inactive and wrong passwords denied", async () => {
+    // Failed logins are counted in the server process for 15 minutes and only a
+    // successful login clears them (src/server/auth.ts). An inactive account can
+    // never log in, so trying the fixture's EMP0011 every run added one failure per
+    // run and the sixth run on one server got 429. Use an inactive account that
+    // exists only for this run (a real inactive row, same code path) and remove it
+    // afterwards. The fixture account is still checked, without a login attempt.
     assert.equal(
-      (
-        await http("/api/auth/login", {
-          data: { employee_id: "EMP0011", password: fixture.password },
-        })
-      ).status,
-      401,
+      (await row("SELECT is_active FROM employee WHERE employee_id='EMP0011'"))
+        .is_active,
+      0,
+      "fixture account EMP0011 must stay inactive",
     );
+    const inactive = "TST" + crypto.randomBytes(4).toString("hex").toUpperCase();
+    await db.query(
+      "INSERT INTO employee(employee_id,full_name,phone_number,role,password_hash,is_active) SELECT ?, 'บัญชีทดสอบปิดใช้งาน', '0800000098', 'SALES', password_hash, 0 FROM employee WHERE employee_id='EMP0002'",
+      [inactive],
+    );
+    try {
+      assert.equal(
+        (
+          await http("/api/auth/login", {
+            data: { employee_id: inactive, password: fixture.password },
+          })
+        ).status,
+        401,
+      );
+    } finally {
+      await db.query("DELETE FROM employee WHERE employee_id=?", [inactive]);
+    }
     assert.equal(
       (
         await http("/api/auth/login", {
@@ -313,10 +334,35 @@ try {
         data: { defect_ids: [defect] },
       }),
     ]);
-    assert.deepEqual(results.map((r) => r.status).sort(), [200, 409]);
-    const winner = (
-      await row("SELECT technician_id FROM defect WHERE defect_id=?", [defect])
-    ).technician_id;
+    // The loser's status depends on who loses (src/server/auth.ts scopedDefect):
+    //  - a technician cannot see a job another person already took -> 404
+    //  - the head technician has no such filter, sees the job and fails the
+    //    state check -> 409
+    // So the expected pair follows the winner, which the database tells us.
+    const [techResult, headResult] = results;
+    const final = await row(
+      "SELECT technician_id, status, assigned_date FROM defect WHERE defect_id=?",
+      [defect],
+    );
+    assert.equal(
+      results.filter((r) => r.status === 200).length,
+      1,
+      "exactly one claim may succeed: " + results.map((r) => r.status),
+    );
+    assert.equal(final.status, "ASSIGNED", "defect must end ASSIGNED");
+    assert(final.assigned_date, "assigned_date must be set by the winner");
+    assert(
+      ["EMP0005", "EMP0008"].includes(final.technician_id),
+      "winner must be one of the two claimants: " + final.technician_id,
+    );
+    if (final.technician_id === "EMP0005") {
+      assert.equal(techResult.status, 200, "technician won in the database");
+      assert.equal(headResult.status, 409, "head sees the job and loses with 409");
+    } else {
+      assert.equal(headResult.status, 200, "head won in the database");
+      assert.equal(techResult.status, 404, "technician cannot see the job and loses with 404");
+    }
+    const winner = final.technician_id;
     tech = winner === "EMP0005" ? tech : head;
   });
   await check("UC04 requires fresh photo and completes repair", async () => {
@@ -809,11 +855,18 @@ try {
     },
   );
   await check("AUTH-07 wrong password throttled", async () => {
+    // The limiter keeps its counters in the server process (src/server/auth.ts),
+    // keyed by employee id, for 15 minutes. A fixed account would stay locked
+    // for the next test run on the same server and turn its first wrong
+    // attempt into 429. Use an identity that exists only for this run. The
+    // limiter does not depend on the account existing (an unknown id is
+    // counted the same way), and no production code or fixture is touched.
+    const probe = "TST" + crypto.randomBytes(4).toString("hex").toUpperCase();
     for (let i = 0; i < 5; i++)
       assert.equal(
         (
           await http("/api/auth/login", {
-            data: { employee_id: "EMP0010", password: "bad" },
+            data: { employee_id: probe, password: "bad" },
           })
         ).status,
         401,
@@ -821,7 +874,7 @@ try {
     assert.equal(
       (
         await http("/api/auth/login", {
-          data: { employee_id: "EMP0010", password: "bad" },
+          data: { employee_id: probe, password: "bad" },
         })
       ).status,
       429,

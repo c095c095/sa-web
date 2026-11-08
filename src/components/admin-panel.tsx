@@ -833,7 +833,7 @@ export function AdminPanel({
             ].map(([label, n, key]) => (
               <Link
                 key={string(key)}
-                className="rounded-box border border-base-300 bg-base-100 p-5"
+                className="stat-card hover:bg-base-200 transition-colors"
                 href={
                   "/admin?section=" +
                   key +
@@ -844,8 +844,8 @@ export function AdminPanel({
                       : "")
                 }
               >
-                <p className="text-muted">{label}</p>
-                <p className="mt-2 text-2xl font-semibold">{string(n)}</p>
+                <span className="stat-card-label">{label}</span>
+                <span className="stat-card-value">{string(n)}</span>
               </Link>
             ))}
           </div>
@@ -983,7 +983,7 @@ export function AdminPanel({
             </Link>
           </form>
           <div className="hidden overflow-x-auto rounded-box border border-base-300 bg-base-100 md:block">
-            <table className="table">
+            <table className="table table-zebra">
               <thead>
                 <tr>
                   <th scope="col">รายการ</th>

@@ -1,5 +1,6 @@
 /* Hallmark · shape: app screen · genre: modern-minimal · theme: Furrow (approved) · scope: app · signature: a home's defect register and work queue · v2.0.0 */
 /* Critique: warm ruled lists carry fieldwork; Thai typography and semantic daisyUI tokens replace the English display face; no map, grain or decorative metrics. */
+/* Sprint UI-1: sidebar fix, data presentation, production polish — 2026-11-08 */
 @import "tailwindcss";
 @plugin "daisyui" { themes: false; logs: false; }
 @plugin "daisyui/theme" {
@@ -81,8 +82,37 @@ button, a, input, select, textarea, summary { -webkit-tap-highlight-color: trans
 .helper { min-height: 1.65em; font-size: 0.875rem; color: var(--color-muted); }
 .field-label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
 .nav-link { padding: 1rem 0.25rem; border-bottom: 2px solid transparent; min-height: 3.5rem; display: inline-flex; align-items: center; gap: 0.5rem; white-space: nowrap; }
-.nav-link[aria-current="page"] { border-bottom-color: var(--color-base-content); }
-.nav-link:hover { background: var(--color-base-200); }
+.nav-link[aria-current="page"] { border-bottom-color: var(--color-base-content); font-weight: 600; }
+.nav-link:hover { color: var(--color-base-content); }
+
+/* ── Sidebar nav (AppFrame / manage-ui) ── */
+.sidebar-link { display: flex; align-items: center; gap: 0.625rem; padding: 0.5rem 0.75rem; border-radius: var(--radius-field); font-size: 0.9375rem; color: var(--color-muted); transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out); min-height: 2.75rem; border-left: 2px solid transparent; }
+.sidebar-link:hover { background: var(--color-base-200); color: var(--color-base-content); }
+.sidebar-link[aria-current="page"] { background: var(--color-base-200); color: var(--color-base-content); font-weight: 600; border-left-color: var(--color-primary); }
+.sidebar-link:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+
+/* ── Status badge variants ── */
+.badge-status-new { background: var(--color-base-300); color: var(--color-base-content); }
+.badge-status-waiting { background: var(--color-warning); color: var(--color-warning-content); }
+.badge-status-assigned { background: var(--color-info); color: var(--color-info-content); }
+.badge-status-fixed { background: var(--color-accent); color: var(--color-accent-content); }
+.badge-status-rework { background: var(--color-error); color: var(--color-error-content); }
+.badge-status-verified { background: var(--color-success); color: var(--color-success-content); }
+
+/* ── Stats bar ── */
+.stat-card { display: flex; flex-direction: column; gap: 0.25rem; padding: 0.875rem 1rem; background: var(--color-base-100); border: 1px solid var(--color-base-300); border-radius: var(--radius-box); min-width: 0; }
+.stat-card-value { font-size: 1.5rem; font-weight: 600; line-height: 1.2; }
+.stat-card-label { font-size: 0.8125rem; color: var(--color-muted); }
+
+/* ── Panel hierarchy ── */
+.panel-surface { background: var(--color-base-100); border: 1px solid var(--color-base-300); border-radius: var(--radius-box); }
+.panel-inset { background: var(--color-base-200); border-radius: var(--radius-field); }
+
+/* ── Toast notification ── */
+.toast-notice { pointer-events: none; }
+
+/* ── Drawer mobile overlay ── */
+.drawer-side .sidebar-menu { background: var(--color-base-100); min-height: 100%; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 0.25rem; }
 .skip-link { position: fixed; top: 0.5rem; left: 0.5rem; z-index: 600; transform: translateY(-200%); background: var(--color-base-content); color: var(--color-base-100); padding: 0.75rem; }
 .skip-link:focus { transform: translateY(0); }
 ::selection { background: var(--color-accent); color: var(--color-accent-content); }
